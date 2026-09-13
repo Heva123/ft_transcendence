@@ -1,0 +1,109 @@
+.community-page {
+  max-width: 1050px;
+}
+
+.community-header {
+  display: flex;
+  gap: var(--space-16);
+  padding: var(--space-20);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-cyan);
+}
+
+.community-header__mark {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border);
+}
+
+.community-header h1 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 36px;
+}
+
+.community-header p {
+  margin: var(--space-8) 0;
+}
+
+.community-tabs {
+  display: flex;
+  gap: var(--space-8);
+  margin: var(--space-16) 0;
+}
+
+.community-tabs button {
+  min-height: 40px;
+  padding: 0 var(--space-16);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.community-tabs .active {
+  background: var(--color-pink);
+}
+
+.community-layout {
+  display: grid;
+  grid-template-columns: 1fr 250px;
+  gap: var(--space-16);
+}
+
+.community-post-button {
+  min-height: 44px;
+  margin-bottom: var(--space-16);
+  padding: 0 var(--space-20);
+  border: 0;
+  background: var(--color-plum);
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.community-feed {
+  min-width: 0;
+}
+
+.conversations-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-16);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.conversations-panel h2 {
+  margin: 0 0 var(--space-8);
+  font-family: var(--font-heading);
+}
+
+.conversations-panel button {
+  min-height: 40px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.conversations-panel .leave-community {
+  margin-top: var(--space-12);
+  border: 0;
+  color: var(--color-plum);
+  text-align: left;
+}
+
+.channel-room__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.channel-room__header button {
+  min-height: 40px;
+  padding: 0 var(--space-16);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
