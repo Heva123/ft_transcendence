@@ -1,0 +1,35 @@
+:root {
+  --color-plum: #8a335d;
+  --color-yellow: #f2c255;
+  --color-pink: #f0afce;
+  --color-cyan: #a3e5f0;
+  --color-teal: #3a7f8a;
+
+  --color-background: #f5efe3;
+  --color-surface: #fffdf8;
+  --color-ink: #30232d;
+  --color-border: #30232d;
+
+  --font-heading: 'Handjet', sans-serif;
+  --font-subheading: 'Handjet', sans-serif;
+  --font-body: 'IBM Plex Mono', monospace;
+
+   --radius-control: 4px;
+   --radius-panel: 8px;
+   --radius-mobile: 12px;
+
+   --space-4: 4px;
+   --space-6: 6px;
+   --space-8: 8px;
+   --space-12: 12px;
+   --space-16: 16px;
+   --space-18: 18px;
+   --space-20: 20px;
+   --space-24: 24px;
+   --space-28: 28px;
+   --space-32: 32px;
+   --space-36: 36px;
+   --space-40: 40px;
+   --space-48: 48px;
+   --space-60: 60px;
+}
