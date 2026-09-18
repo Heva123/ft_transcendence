@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(uuid())
+  email           String    @unique
+  username        String    @unique
+  passwordHash    String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  memberships     Member[]
+  createdGroups   Group[]   @relation("GroupCreator")
+  createdProjects Project[] @relation("ProjectCreator")
+  createdTasks    Task[]    @relation("TaskCreator")
+  assignedTasks   Task[]    @relation("TaskAssignee")
+
+  @@map("users")
+}
+
+enum GroupRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Group {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  createdBy User      @relation("GroupCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  members   Member[]
+  projects  Project[]
+
+  @@index([createdById])
+  @@map("groups")
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+  CANCELLED
+}
+
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  groupId     String
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  group     Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  createdBy User   @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  tasks     Task[]
+
+  @@index([groupId])
+  @@index([createdById])
+  @@map("projects")
+}
+
+model Task {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  status      TaskStatus   @default(TODO)
+  priority    TaskPriority @default(MEDIUM)
+  dueDate     DateTime?
+  projectId   String
+  createdById String
+  assigneeId  String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy User    @relation("TaskCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  assignee  User?   @relation("TaskAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+
+  @@index([projectId])
+  @@index([createdById])
+  @@index([assigneeId])
+  @@index([status])
+  @@map("tasks")
+}
+
+model Member {
+  id       String    @id @default(uuid())
+  userId   String
+  groupId  String
+  role     GroupRole @default(MEMBER)
+  joinedAt DateTime  @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@index([groupId])
+  @@map("members")
+}
