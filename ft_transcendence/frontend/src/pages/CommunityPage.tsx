@@ -21,7 +21,7 @@ function CommunityPage() {
   communityId = Number(routeId)
   community = mockCommunities.find((item) => item.id === communityId)
   channels = mockChannels.filter((item) => item.communityId === communityId)
-  posts = mockPosts.filter((item) => item.community === community?.name)
+  posts = mockPosts.filter((item) => item.community?.id === communityId)
 
   if (!community)
     return <h1>Community not found.</h1>

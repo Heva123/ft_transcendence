@@ -1,9 +1,21 @@
+export type Author = {
+  id: number
+  username: string
+  avatarUrl: string | null
+}
+
+export type CommunitySummary = {
+  id: number
+  name: string
+}
+
 export type Post = {
   id: number
-  author: string
   content: string
+  author: Author
+  community: CommunitySummary | null
   createdAt: string
-  likes: number
-  comments: number
-  community: string | null
+  likesCount: number
+  commentsCount: number
+  likedByMe: boolean
 }
