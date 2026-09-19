@@ -27,12 +27,12 @@ function PostHeader({ post }: { post: Post }) {
     <header className="post-card__header">
       <div className="post-card__identity">
         <div className="post-card__avatar">
-          {post.author.slice(0, 2).toUpperCase()}
+          {post.author.username.slice(0, 2).toUpperCase()}
         </div>
         <div>
-          <strong>{post.author}</strong>
+          <strong>{post.author.username}</strong>
           <p>
-            {post.community ? post.community : 'Global feed'} · {post.createdAt}
+            {post.community ? post.community.name : 'Global feed'} · {post.createdAt}
           </p>
         </div>
       </div>
@@ -60,9 +60,9 @@ function PostCard({ post, commentsCount }: PostCardProps) {
   let likedState: BoolState
   let displayedComments: number
 
-  likesState = useState(post.likes)
-  likedState = useState(false)
-  displayedComments = commentsCount ?? post.comments
+  likesState = useState(post.likesCount)
+  likedState = useState(post.likedByMe)
+  displayedComments = commentsCount ?? post.commentsCount
 
   function handleLike() {
     likesState[1](likedState[0] ? likesState[0] - 1 : likesState[0] + 1)

@@ -1,6 +1,7 @@
 import {
   useState,
   type Dispatch,
+  type FormEvent,
   type SetStateAction,
 } from 'react'
 import { useParams } from 'react-router-dom'
@@ -22,32 +23,38 @@ type ReplyFormProps = {
   replyState: ReplyState
 }
 
-function buildReply(postId: number, text: string) {
+function buildReply(postId: number, content: string) {
   let reply: Reply
 
   reply = {
     id: Date.now(),
     postId: postId,
-    author: 'Afnan',
-    text: text,
+    parentId: null,
+    content: content,
+    author: {
+      id: 5,
+      username: 'Afnan',
+      avatarUrl: null,
+    },
     createdAt: 'now',
   }
+
   return reply
 }
 
 function ReplyForm({ postId, replyState }: ReplyFormProps) {
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     let form: FormData
-    let text: string
+    let content: string
 
     event.preventDefault()
     form = new FormData(event.currentTarget)
-    text = String(form.get('reply')).trim()
+    content = String(form.get('reply')).trim()
 
-    if (!text)
+    if (!content)
       return
 
-    replyState[1]([...replyState[0], buildReply(postId, text)])
+    replyState[1]([...replyState[0], buildReply(postId, content)])
     event.currentTarget.reset()
   }
 

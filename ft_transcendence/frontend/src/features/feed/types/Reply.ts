@@ -1,7 +1,10 @@
+import type { Author } from './Post'
+
 export type Reply = {
   id: number
   postId: number
-  author: string
-  text: string
+  parentId: number | null
+  content: string
+  author: Author
   createdAt: string
 }

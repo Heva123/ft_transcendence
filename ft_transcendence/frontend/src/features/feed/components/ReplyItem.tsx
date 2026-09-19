@@ -8,14 +8,14 @@ function ReplyItem({ reply }: ReplyItemProps) {
   return (
     <article className="reply-item">
       <div className="reply-avatar">
-        {reply.author.slice(0, 2).toUpperCase()}
+        {reply.author.username.slice(0, 2).toUpperCase()}
       </div>
 
       <div>
         <p className="reply-meta">
-          <strong>{reply.author}</strong> · {reply.createdAt}
+          <strong>{reply.author.username}</strong> · {reply.createdAt}
         </p>
-        <p>{reply.text}</p>
+        <p>{reply.content}</p>
       </div>
     </article>
   )

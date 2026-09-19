@@ -2,6 +2,7 @@ import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { mockCommunities } from '../features/chat/data/mockCommunities'
 import { addMockPost } from '../features/feed/data/mockPosts'
+import type { CommunitySummary } from '../features/feed/types/Post'
 import './CreatePostPage.css'
 
 function CreatePostPage() {
@@ -19,15 +20,16 @@ function CreatePostPage() {
     let form: FormData
     let idea: string
     let target: string
-    let community: string | null
+    let community: CommunitySummary | null
 
     event.preventDefault()
     form = new FormData(event.currentTarget)
     idea = String(form.get('idea')).trim()
     target = String(form.get('target'))
+
     community = mockCommunities.find(
       (item) => item.id === Number(target),
-    )?.name ?? null
+    ) ?? null
 
     if (!idea)
       return
