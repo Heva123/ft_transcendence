@@ -8,13 +8,13 @@ import './CreatePostPage.css'
 function CreatePostPage() {
   let navigate: ReturnType<typeof useNavigate>
   let params: URLSearchParams
-  let communityId: number
+  let communityId: string
   let defaultTarget: string
 
   navigate = useNavigate()
   params = new URLSearchParams(window.location.search)
-  communityId = Number(params.get('community'))
-  defaultTarget = communityId ? String(communityId) : 'global'
+  communityId = params.get('community') ?? ''
+  defaultTarget = communityId || 'global'
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     let form: FormData
@@ -28,7 +28,7 @@ function CreatePostPage() {
     target = String(form.get('target'))
 
     community = mockCommunities.find(
-      (item) => item.id === Number(target),
+      (item) => item.id === target,
     ) ?? null
 
     if (!idea)

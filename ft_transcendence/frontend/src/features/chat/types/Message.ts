@@ -1,6 +1,6 @@
 export type Message = {
-  id: number
-  channelId: number
+  id: string
+  channelId: string
   sender: string
   text: string
   createdAt: string

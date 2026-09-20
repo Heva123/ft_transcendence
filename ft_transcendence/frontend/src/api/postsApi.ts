@@ -41,7 +41,7 @@ async function apiRequest<T>(
 
 export async function getPosts(
   token: string,
-  communityId: number | null = null,
+  communityId: string | null = null,
 ) {
   let path: string
 
@@ -55,7 +55,7 @@ export async function getPosts(
 export async function createPost(
   token: string,
   content: string,
-  communityId: number | null,
+  communityId: string | null,
 ) {
   return apiRequest<Post>('/posts', token, {
     method: 'POST',
@@ -65,7 +65,7 @@ export async function createPost(
 
 export async function getPost(
   token: string,
-  postId: number,
+  postId: string,
 ) {
   return apiRequest<PostDetailsResponse>(
     `/posts/${postId}`,
@@ -75,9 +75,9 @@ export async function getPost(
 
 export async function addComment(
   token: string,
-  postId: number,
+  postId: string,
   content: string,
-  parentId: number | null = null,
+  parentId: string | null = null,
 ) {
   return apiRequest<Reply>(
     `/posts/${postId}/comments`,
@@ -91,7 +91,7 @@ export async function addComment(
 
 export async function toggleLike(
   token: string,
-  postId: number,
+  postId: string,
 ) {
   return apiRequest<LikeResponse>(
     `/posts/${postId}/likes`,

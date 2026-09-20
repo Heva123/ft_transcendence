@@ -3,7 +3,7 @@ import MessageItem from './MessageItem'
 
 type MessageListProps = {
   messages: Message[]
-  selectedChannelId: number
+  selectedChannelId: string
 }
 
 function MessageList({ messages, selectedChannelId }: MessageListProps) {

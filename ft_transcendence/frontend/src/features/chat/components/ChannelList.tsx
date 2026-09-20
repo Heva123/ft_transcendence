@@ -2,9 +2,9 @@ import { mockChannels } from '../data/mockChannels'
 import './Chat.css'
 
 type ChannelListProps = {
-  selectedCommunityId: number
-  selectedChannelId: number
-  onSelectChannel: (channelId: number) => void
+  selectedCommunityId: string
+  selectedChannelId: string
+  onSelectChannel: (channelId: string) => void
 }
 
 function ChannelList({

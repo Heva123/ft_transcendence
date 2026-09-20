@@ -1,5 +1,5 @@
 export type Channel = {
-  id: number
-  communityId: number
+  id: string
+  communityId: string
   name: string
 }

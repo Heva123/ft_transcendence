@@ -6,7 +6,7 @@ import MessageList from './MessageList'
 import './Chat.css'
 
 type ChatAreaProps = {
-  selectedChannelId: number
+  selectedChannelId: string
 }
 
 function ChatArea({ selectedChannelId }: ChatAreaProps) {
@@ -14,7 +14,7 @@ function ChatArea({ selectedChannelId }: ChatAreaProps) {
 
   function handleSendMessage(text: string) {
     const newMessage: Message = {
-      id: messages.length + 1,
+      id: Date.now().toString(),
       channelId: selectedChannelId,
       sender: 'Afnan',
       text: text,
