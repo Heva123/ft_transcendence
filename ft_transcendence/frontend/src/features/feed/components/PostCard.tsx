@@ -15,7 +15,7 @@ type NumberState = [number, Dispatch<SetStateAction<number>>]
 type BoolState = [boolean, Dispatch<SetStateAction<boolean>>]
 
 type PostActionsProps = {
-  postId: number
+  postId: string
   comments: number
   likes: number
   liked: boolean

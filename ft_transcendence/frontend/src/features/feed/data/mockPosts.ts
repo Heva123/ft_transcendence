@@ -2,9 +2,9 @@ import type { CommunitySummary, Post } from '../types/Post'
 
 export const mockPosts: Post[] = [
   {
-    id: 1,
+    id: '1',
     author: {
-      id: 5,
+      id: '5',
       username: 'Afnan',
       avatarUrl: null,
     },
@@ -16,9 +16,9 @@ export const mockPosts: Post[] = [
     community: null,
   },
   {
-    id: 2,
+    id: '2',
     author: {
-      id: 7,
+      id: '7',
       username: 'Noor',
       avatarUrl: null,
     },
@@ -28,7 +28,7 @@ export const mockPosts: Post[] = [
     commentsCount: 2,
     likedByMe: false,
     community: {
-      id: 1,
+      id: '1',
       name: 'Web Builders',
     },
   },
@@ -41,9 +41,9 @@ export function addMockPost(
   let newPost: Post
 
   newPost = {
-    id: Date.now(),
+    id: Date.now().toString(),
     author: {
-      id: 5,
+      id: '5',
       username: 'Afnan',
       avatarUrl: null,
     },

@@ -2,11 +2,11 @@ import type { Reply } from '../types/Reply'
 
 export const mockReplies: Reply[] = [
   {
-    id: 1,
-    postId: 1,
+    id: '1',
+    postId: '1',
     parentId: null,
     author: {
-      id: 8,
+      id: '8',
       username: 'Heba',
       avatarUrl: null,
     },

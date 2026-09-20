@@ -19,20 +19,20 @@ type ReplyState = [
 ]
 
 type ReplyFormProps = {
-  postId: number
+  postId: string
   replyState: ReplyState
 }
 
-function buildReply(postId: number, content: string) {
+function buildReply(postId: string, content: string) {
   let reply: Reply
 
   reply = {
-    id: Date.now(),
+    id: Date.now().toString(),
     postId: postId,
     parentId: null,
     content: content,
     author: {
-      id: 5,
+      id: '5',
       username: 'Afnan',
       avatarUrl: null,
     },
@@ -68,12 +68,12 @@ function ReplyForm({ postId, replyState }: ReplyFormProps) {
 }
 
 function PostPage() {
-  let postId: number
+  let postId: string
   let post: Post | undefined
   let replyState: ReplyState
   let replyCount: number
 
-  postId = Number(useParams().postId)
+  postId = useParams().postId ?? ''
   post = mockPosts.find((item) => item.id === postId)
   replyState = useState<Reply[]>(
     mockReplies.filter((item) => item.postId === postId),

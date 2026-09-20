@@ -1,8 +1,8 @@
 import { mockCommunities } from '../data/mockCommunities'
 
 type CommunityListProps = {
-  selectedCommunityId: number
-  onSelectCommunity: (communityId: number) => void
+  selectedCommunityId: string
+  onSelectCommunity: (communityId: string) => void
 }
 
 function CommunityList({

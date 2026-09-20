@@ -34,13 +34,13 @@ function ChannelWorkspace({ channel, channels, communityName }: ChannelWorkspace
 
 function ChannelPage() {
   let routeId: string | undefined
-  let channelId: number
+  let channelId: string
   let channel: Channel | undefined
   let community: Community | undefined
   let channels: Channel[]
 
   routeId = useParams().channelId
-  channelId = Number(routeId)
+  channelId = routeId ?? ''
   channel = mockChannels.find((item) => item.id === channelId)
   community = mockCommunities.find((item) => item.id === channel?.communityId)
   channels = mockChannels.filter((item) => item.communityId === channel?.communityId)

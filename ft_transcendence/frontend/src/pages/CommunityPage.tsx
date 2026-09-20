@@ -14,11 +14,11 @@ function CommunityPage() {
   let community: Community | undefined
   let channels: Channel[]
   let posts: Post[]
-  let communityId: number
+  let communityId: string
   let routeId: string | undefined
 
   routeId = useParams().communityId
-  communityId = Number(routeId)
+  communityId = routeId ?? ''
   community = mockCommunities.find((item) => item.id === communityId)
   channels = mockChannels.filter((item) => item.communityId === communityId)
   posts = mockPosts.filter((item) => item.community?.id === communityId)
