@@ -21,7 +21,7 @@ export class TasksService {
   async create(userId: string, projectId: string, dto: CreateTaskDto) {
     const project = await this.getProject(projectId);
     if (dto.assigneeId)
-      await this.ensureGroupMember(dto.assigneeId, project.groupId);
+      await this.ensureCommunityMember(dto.assigneeId, project.communityId);
     return this.prisma.task.create({
       data: {
         title: dto.title,
@@ -96,11 +96,14 @@ export class TasksService {
   async update(taskId: string, dto: UpdateTaskDto) {
     const task = await this.prisma.task.findUnique({
       where: { id: taskId },
-      select: { project: { select: { groupId: true } } },
+      select: { project: { select: { communityId: true } } },
     });
     if (!task) throw new NotFoundException("Task not found");
     if (dto.assigneeId)
-      await this.ensureGroupMember(dto.assigneeId, task.project.groupId);
+      await this.ensureCommunityMember(
+        dto.assigneeId,
+        task.project.communityId,
+      );
     const data: Prisma.TaskUpdateInput = {
       title: dto.title,
       description: dto.description,
@@ -140,20 +143,20 @@ export class TasksService {
   private async getProject(projectId: string) {
     const project = await this.prisma.project.findUnique({
       where: { id: projectId },
-      select: { groupId: true },
+      select: { communityId: true },
     });
     if (!project) throw new NotFoundException("Project not found");
     return project;
   }
 
-  private async ensureGroupMember(userId: string, groupId: string) {
-    const member = await this.prisma.member.findUnique({
-      where: { userId_groupId: { userId, groupId } },
+  private async ensureCommunityMember(userId: string, communityId: string) {
+    const communityMember = await this.prisma.communityMember.findUnique({
+      where: { userId_communityId: { userId, communityId } },
       select: { id: true },
     });
-    if (!member)
+    if (!communityMember)
       throw new BadRequestException(
-        "Assignee must be a member of the project group",
+        "Assignee must be a member of the project community",
       );
   }
 }

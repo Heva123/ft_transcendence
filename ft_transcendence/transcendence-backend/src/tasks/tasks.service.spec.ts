@@ -6,7 +6,7 @@ import { TasksService } from "./tasks.service";
 describe("TasksService", () => {
   const prisma = {
     project: { findUnique: jest.fn() },
-    member: { findUnique: jest.fn() },
+    communityMember: { findUnique: jest.fn() },
     task: {
       create: jest.fn(),
       findMany: jest.fn(),
@@ -22,7 +22,9 @@ describe("TasksService", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     service = new TasksService(prisma as unknown as PrismaService);
-    prisma.project.findUnique.mockResolvedValue({ groupId: "group-id" });
+    prisma.project.findUnique.mockResolvedValue({
+      communityId: "community-id",
+    });
   });
 
   it("paginates tasks and returns metadata", async () => {
@@ -89,24 +91,29 @@ describe("TasksService", () => {
     );
   });
 
-  it("accepts an assignee who belongs to the project group", async () => {
-    prisma.member.findUnique.mockResolvedValue({ id: "membership-id" });
+  it("accepts an assignee who belongs to the project community", async () => {
+    prisma.communityMember.findUnique.mockResolvedValue({
+      id: "communityMembership-id",
+    });
     prisma.task.create.mockResolvedValue({ id: "task-id" });
     await service.create("user-id", "project-id", {
       title: "Build API",
       assigneeId: "assignee-id",
     });
-    expect(prisma.member.findUnique).toHaveBeenCalledWith(
+    expect(prisma.communityMember.findUnique).toHaveBeenCalledWith(
       expect.objectContaining({
         where: {
-          userId_groupId: { userId: "assignee-id", groupId: "group-id" },
+          userId_communityId: {
+            userId: "assignee-id",
+            communityId: "community-id",
+          },
         },
       }),
     );
   });
 
-  it("rejects an assignee outside the project group", async () => {
-    prisma.member.findUnique.mockResolvedValue(null);
+  it("rejects an assignee outside the project community", async () => {
+    prisma.communityMember.findUnique.mockResolvedValue(null);
     await expect(
       service.create("user-id", "project-id", {
         title: "Build API",

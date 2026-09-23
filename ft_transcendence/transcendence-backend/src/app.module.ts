@@ -4,12 +4,13 @@ import { AppController } from "./app.controller";
 import { PrismaModule } from "./prisma/prisma.module";
 import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
-import { GroupsModule } from "./groups/groups.module";
-import { MembersModule } from "./members/members.module";
+import { CommunitiesModule } from "./communities/communities.module";
+import { CommunityMembersModule } from "./community-members/community-members.module";
 import { PermissionsModule } from "./permissions/permissions.module";
 import { RolesModule } from "./roles/roles.module";
 import { ProjectsModule } from "./projects/projects.module";
 import { TasksModule } from "./tasks/tasks.module";
+import { ChannelsModule } from "./channels/channels.module";
 
 @Module({
   imports: [
@@ -19,12 +20,13 @@ import { TasksModule } from "./tasks/tasks.module";
     PrismaModule,
     AuthModule,
     UsersModule,
-    GroupsModule,
-    MembersModule,
+    CommunitiesModule,
+    CommunityMembersModule,
     PermissionsModule,
     RolesModule,
     ProjectsModule,
     TasksModule,
+    ChannelsModule,
   ],
   controllers: [AppController],
 })

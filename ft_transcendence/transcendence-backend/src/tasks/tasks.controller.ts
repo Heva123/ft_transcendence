@@ -16,7 +16,7 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { AuthUser } from "../common/types/auth-user.type";
 import { RequirePermissions } from "../permissions/decorators/require-permissions.decorator";
-import { GroupPermissionGuard } from "../permissions/guards/group-permission.guard";
+import { CommunityPermissionGuard } from "../permissions/guards/community-permission.guard";
 import { Permission } from "../permissions/permission.enum";
 import { CreateTaskDto } from "./dto/create-task.dto";
 import { TaskQueryDto } from "./dto/task-query.dto";
@@ -24,7 +24,7 @@ import { UpdateTaskDto } from "./dto/update-task.dto";
 import { UpdateTaskStatusDto } from "./dto/update-task-status.dto";
 import { TasksService } from "./tasks.service";
 
-@UseGuards(JwtAuthGuard, GroupPermissionGuard)
+@UseGuards(JwtAuthGuard, CommunityPermissionGuard)
 @Controller()
 export class TasksController {
   constructor(private readonly tasksService: TasksService) {}

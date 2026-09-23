@@ -1,17 +1,17 @@
 import { ExecutionContext, ForbiddenException } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
-import { GroupRole } from "@prisma/client";
+import { CommunityRole } from "@prisma/client";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Permission } from "../permission.enum";
-import { GroupPermissionGuard } from "./group-permission.guard";
+import { CommunityPermissionGuard } from "./community-permission.guard";
 
-describe("GroupPermissionGuard", () => {
+describe("CommunityPermissionGuard", () => {
   const reflector = { getAllAndOverride: jest.fn() };
   const prisma = {
-    group: { findUnique: jest.fn() },
-    member: { findUnique: jest.fn() },
+    community: { findUnique: jest.fn() },
+    communityMember: { findUnique: jest.fn() },
   };
-  let guard: GroupPermissionGuard;
+  let guard: CommunityPermissionGuard;
 
   const context = {
     getHandler: jest.fn(),
@@ -19,35 +19,39 @@ describe("GroupPermissionGuard", () => {
     switchToHttp: () => ({
       getRequest: () => ({
         user: { id: "user-id" },
-        params: { groupId: "group-id" },
+        params: { communityId: "community-id" },
       }),
     }),
   } as unknown as ExecutionContext;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    guard = new GroupPermissionGuard(
+    guard = new CommunityPermissionGuard(
       reflector as unknown as Reflector,
       prisma as unknown as PrismaService,
     );
     reflector.getAllAndOverride.mockReturnValue([Permission.MEMBER_ADD]);
-    prisma.group.findUnique.mockResolvedValue({ id: "group-id" });
+    prisma.community.findUnique.mockResolvedValue({ id: "community-id" });
   });
 
   it("allows a role containing the required permission", async () => {
-    prisma.member.findUnique.mockResolvedValue({ role: GroupRole.OWNER });
+    prisma.communityMember.findUnique.mockResolvedValue({
+      role: CommunityRole.OWNER,
+    });
     await expect(guard.canActivate(context)).resolves.toBe(true);
   });
 
   it("rejects a role without the required permission", async () => {
-    prisma.member.findUnique.mockResolvedValue({ role: GroupRole.MEMBER });
+    prisma.communityMember.findUnique.mockResolvedValue({
+      role: CommunityRole.MEMBER,
+    });
     await expect(guard.canActivate(context)).rejects.toBeInstanceOf(
       ForbiddenException,
     );
   });
 
-  it("rejects a user who is not a group member", async () => {
-    prisma.member.findUnique.mockResolvedValue(null);
+  it("rejects a user who is not a community communityMember", async () => {
+    prisma.communityMember.findUnique.mockResolvedValue(null);
     await expect(guard.canActivate(context)).rejects.toBeInstanceOf(
       ForbiddenException,
     );

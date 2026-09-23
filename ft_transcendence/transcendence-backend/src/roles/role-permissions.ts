@@ -1,14 +1,18 @@
-import { GroupRole } from "@prisma/client";
+import { CommunityRole } from "@prisma/client";
 import { Permission } from "../permissions/permission.enum";
 
-export const ROLE_PERMISSIONS: Record<GroupRole, readonly Permission[]> = {
-  [GroupRole.OWNER]: Object.values(Permission),
-  [GroupRole.ADMIN]: [
-    Permission.GROUP_READ,
-    Permission.GROUP_UPDATE,
+export const ROLE_PERMISSIONS: Record<CommunityRole, readonly Permission[]> = {
+  [CommunityRole.OWNER]: Object.values(Permission),
+  [CommunityRole.ADMIN]: [
+    Permission.COMMUNITY_READ,
+    Permission.COMMUNITY_UPDATE,
     Permission.MEMBER_READ,
     Permission.MEMBER_ADD,
     Permission.MEMBER_REMOVE,
+    Permission.CHANNEL_READ,
+    Permission.CHANNEL_CREATE,
+    Permission.CHANNEL_UPDATE,
+    Permission.CHANNEL_DELETE,
     Permission.PROJECT_READ,
     Permission.PROJECT_CREATE,
     Permission.PROJECT_UPDATE,
@@ -18,9 +22,22 @@ export const ROLE_PERMISSIONS: Record<GroupRole, readonly Permission[]> = {
     Permission.TASK_UPDATE,
     Permission.TASK_DELETE,
   ],
-  [GroupRole.MEMBER]: [
-    Permission.GROUP_READ,
+  [CommunityRole.MODERATOR]: [
+    Permission.COMMUNITY_READ,
     Permission.MEMBER_READ,
+    Permission.MEMBER_REMOVE,
+    Permission.CHANNEL_READ,
+    Permission.CHANNEL_CREATE,
+    Permission.CHANNEL_UPDATE,
+    Permission.PROJECT_READ,
+    Permission.TASK_READ,
+    Permission.TASK_CREATE,
+    Permission.TASK_UPDATE,
+  ],
+  [CommunityRole.MEMBER]: [
+    Permission.COMMUNITY_READ,
+    Permission.MEMBER_READ,
+    Permission.CHANNEL_READ,
     Permission.PROJECT_READ,
     Permission.TASK_READ,
     Permission.TASK_CREATE,
@@ -29,7 +46,7 @@ export const ROLE_PERMISSIONS: Record<GroupRole, readonly Permission[]> = {
 };
 
 export function roleHasPermissions(
-  role: GroupRole,
+  role: CommunityRole,
   requiredPermissions: readonly Permission[],
 ) {
   const grantedPermissions = ROLE_PERMISSIONS[role];

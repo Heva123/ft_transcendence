@@ -1,7 +1,13 @@
 import { Transform } from "class-transformer";
-import { IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import {
+  IsBoolean,
+  IsOptional,
+  IsString,
+  MaxLength,
+  MinLength,
+} from "class-validator";
 
-export class CreateGroupDto {
+export class CreateCommunityDto {
   @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
   @IsString()
   @MinLength(2)
@@ -13,4 +19,8 @@ export class CreateGroupDto {
   @IsString()
   @MaxLength(500)
   description?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  isPublic?: boolean = true;
 }

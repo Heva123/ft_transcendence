@@ -19,19 +19,23 @@ describe("ProjectsService", () => {
     service = new ProjectsService(prisma as unknown as PrismaService);
   });
 
-  it("connects a new project to its group and creator", async () => {
+  it("connects a new project to its community and creator", async () => {
     prisma.project.create.mockResolvedValue({ id: "project-id" });
-    await service.create("user-id", "group-id", { name: "API" });
+    await service.create("user-id", "community-id", { name: "API" });
     expect(prisma.project.create).toHaveBeenCalledWith({
-      data: { name: "API", groupId: "group-id", createdById: "user-id" },
+      data: {
+        name: "API",
+        communityId: "community-id",
+        createdById: "user-id",
+      },
     });
   });
 
-  it("lists only projects from the selected group", async () => {
+  it("lists only projects from the selected community", async () => {
     prisma.project.findMany.mockResolvedValue([]);
-    await service.findAll("group-id");
+    await service.findAll("community-id");
     expect(prisma.project.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({ where: { groupId: "group-id" } }),
+      expect.objectContaining({ where: { communityId: "community-id" } }),
     );
   });
 
