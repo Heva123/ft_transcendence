@@ -7,15 +7,15 @@ import { UpdateProjectDto } from "./dto/update-project.dto";
 export class ProjectsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(userId: string, groupId: string, dto: CreateProjectDto) {
+  create(userId: string, communityId: string, dto: CreateProjectDto) {
     return this.prisma.project.create({
-      data: { ...dto, groupId, createdById: userId },
+      data: { ...dto, communityId, createdById: userId },
     });
   }
 
-  findAll(groupId: string) {
+  findAll(communityId: string) {
     return this.prisma.project.findMany({
-      where: { groupId },
+      where: { communityId },
       include: { _count: { select: { tasks: true } } },
       orderBy: { createdAt: "desc" },
     });

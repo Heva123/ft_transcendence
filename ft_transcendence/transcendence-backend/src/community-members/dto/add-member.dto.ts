@@ -1,8 +1,8 @@
-import { GroupRole } from "@prisma/client";
+import { CommunityRole } from "@prisma/client";
 import { Transform } from "class-transformer";
 import { IsEmail, IsEnum, IsIn, IsOptional, MaxLength } from "class-validator";
 
-export class AddMemberDto {
+export class AddCommunityMemberDto {
   @Transform(({ value }) =>
     typeof value === "string" ? value.trim().toLowerCase() : value,
   )
@@ -11,9 +11,9 @@ export class AddMemberDto {
   email: string;
 
   @IsOptional()
-  @IsEnum(GroupRole)
-  @IsIn([GroupRole.ADMIN, GroupRole.MEMBER], {
-    message: "role must be ADMIN or MEMBER",
+  @IsEnum(CommunityRole)
+  @IsIn([CommunityRole.ADMIN, CommunityRole.MODERATOR, CommunityRole.MEMBER], {
+    message: "role must be ADMIN, MODERATOR or MEMBER",
   })
-  role?: GroupRole = GroupRole.MEMBER;
+  role?: CommunityRole = CommunityRole.MEMBER;
 }

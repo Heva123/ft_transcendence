@@ -15,31 +15,31 @@ import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { AuthUser } from "../common/types/auth-user.type";
 import { RequirePermissions } from "../permissions/decorators/require-permissions.decorator";
-import { GroupPermissionGuard } from "../permissions/guards/group-permission.guard";
+import { CommunityPermissionGuard } from "../permissions/guards/community-permission.guard";
 import { Permission } from "../permissions/permission.enum";
 import { CreateProjectDto } from "./dto/create-project.dto";
 import { UpdateProjectDto } from "./dto/update-project.dto";
 import { ProjectsService } from "./projects.service";
 
-@UseGuards(JwtAuthGuard, GroupPermissionGuard)
+@UseGuards(JwtAuthGuard, CommunityPermissionGuard)
 @Controller()
 export class ProjectsController {
   constructor(private readonly projectsService: ProjectsService) {}
 
-  @Post("groups/:groupId/projects")
+  @Post("communities/:communityId/projects")
   @RequirePermissions(Permission.PROJECT_CREATE)
   create(
     @CurrentUser() user: AuthUser,
-    @Param("groupId", ParseUUIDPipe) groupId: string,
+    @Param("communityId", ParseUUIDPipe) communityId: string,
     @Body() dto: CreateProjectDto,
   ) {
-    return this.projectsService.create(user.id, groupId, dto);
+    return this.projectsService.create(user.id, communityId, dto);
   }
 
-  @Get("groups/:groupId/projects")
+  @Get("communities/:communityId/projects")
   @RequirePermissions(Permission.PROJECT_READ)
-  findAll(@Param("groupId", ParseUUIDPipe) groupId: string) {
-    return this.projectsService.findAll(groupId);
+  findAll(@Param("communityId", ParseUUIDPipe) communityId: string) {
+    return this.projectsService.findAll(communityId);
   }
 
   @Get("projects/:projectId")

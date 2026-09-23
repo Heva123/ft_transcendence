@@ -14,35 +14,64 @@ model User {
   passwordHash    String
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
-  memberships     Member[]
-  createdGroups   Group[]   @relation("GroupCreator")
-  createdProjects Project[] @relation("ProjectCreator")
-  createdTasks    Task[]    @relation("TaskCreator")
-  assignedTasks   Task[]    @relation("TaskAssignee")
+  communityMemberships CommunityMember[]
+  createdCommunities   Community[]       @relation("CommunityCreator")
+  createdChannels      Channel[]         @relation("ChannelCreator")
+  createdProjects      Project[]         @relation("ProjectCreator")
+  createdTasks         Task[]            @relation("TaskCreator")
+  assignedTasks        Task[]            @relation("TaskAssignee")
 
   @@map("users")
 }
 
-enum GroupRole {
+enum CommunityRole {
   OWNER
   ADMIN
+  MODERATOR
   MEMBER
+
+  @@map("GroupRole")
 }
 
-model Group {
+model Community {
   id          String   @id @default(uuid())
   name        String
   description String?
+  isPublic    Boolean  @default(true)
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  createdBy User      @relation("GroupCreator", fields: [createdById], references: [id], onDelete: Restrict)
-  members   Member[]
+  createdBy User      @relation("CommunityCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  members   CommunityMember[]
   projects  Project[]
+  channels  Channel[]
 
   @@index([createdById])
   @@map("groups")
+}
+
+enum ChannelType {
+  TEXT
+}
+
+model Channel {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  type        ChannelType @default(TEXT)
+  communityId String
+  createdById String
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  createdBy  User      @relation("ChannelCreator", fields: [createdById], references: [id], onDelete: Restrict)
+
+  @@unique([communityId, name])
+  @@index([communityId])
+  @@index([createdById])
+  @@map("channels")
 }
 
 enum TaskStatus {
@@ -62,16 +91,16 @@ model Project {
   id          String   @id @default(uuid())
   name        String
   description String?
-  groupId     String
+  communityId String @map("groupId")
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  group     Group  @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  community     Community  @relation(fields: [communityId], references: [id], onDelete: Cascade)
   createdBy User   @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
   tasks     Task[]
 
-  @@index([groupId])
+  @@index([communityId])
   @@index([createdById])
   @@map("projects")
 }
@@ -100,17 +129,17 @@ model Task {
   @@map("tasks")
 }
 
-model Member {
+model CommunityMember {
   id       String    @id @default(uuid())
   userId   String
-  groupId  String
-  role     GroupRole @default(MEMBER)
+  communityId String @map("groupId")
+  role        CommunityRole @default(MEMBER)
   joinedAt DateTime  @default(now())
 
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, groupId])
-  @@index([groupId])
+  @@unique([userId, communityId])
+  @@index([communityId])
   @@map("members")
 }
