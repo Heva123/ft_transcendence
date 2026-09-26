@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PXL_LAB · Socket Test</title>
+    <style>
+      * { box-sizing: border-box; }
+      body { font-family: system-ui, Tahoma, sans-serif; background:#101827; color:#e5efff; padding:24px; max-width:760px; margin:auto; }
+      h1 { margin-bottom:8px; }
+      .muted { color:#a7b8d0; }
+      .panel { border:1px solid #375070; padding:16px; border-radius:14px; margin:14px 0; background:#18263a; }
+      button,input { font:inherit; border-radius:8px; padding:9px; }
+      button { border:0; background:#74d8ff; color:#061727; cursor:pointer; }
+      button:disabled { opacity:.5; cursor:not-allowed; }
+      input { border:1px solid #486080; background:#0e1928; color:white; width:100%; margin-bottom:8px; }
+      .log { height:250px; overflow:auto; padding:12px; background:#081321; border-radius:8px; }
+      .entry { padding:5px; border-bottom:1px solid #223349; overflow-wrap:anywhere; }
+      .note { border-right:4px solid #ffd479; padding-right:12px; }
+      .controls { display:flex; gap:8px; flex-wrap:wrap; }
+    </style>
+  </head>
+  <body>
+    <h1>PXL_LAB · Socket</h1>
+    <p class="muted">Prototype تجريبي لفهم الاتصال والأحداث والـBroadcasting، وليس الـFrontend النهائي.</p>
+    <div class="panel">
+      <p><strong>الحالة:</strong> <span id="status">Connecting...</span></p>
+      <p><strong>Socket ID:</strong> <span id="socket-id">—</span></p>
+      <div class="controls">
+        <button type="button" id="ping" disabled>Send ping</button>
+        <button type="button" id="disconnect">Disconnect</button>
+        <button type="button" id="reconnect">Reconnect</button>
+      </div>
+    </div>
+    <div class="panel">
+      <label for="message"><strong>تجربة رسالة بين تبويبين</strong></label>
+      <input id="message" maxlength="200" placeholder="اكتبي رسالة هنا..." />
+      <button id="send" type="button" disabled>Broadcast to everyone</button>
+      <p class="muted">افتحي هذه الصفحة بتبويبين، وارسلي من الأول. لازم تظهر الرسالة في الاثنين.</p>
+    </div>
+    <div class="panel">
+      <strong>Event log</strong>
+      <div id="log" class="log" role="log" aria-live="polite"></div>
+    </div>
+    <p class="note">تنبيه: لا توجد هوية مستخدم، صلاحيات، أو تخزين رسائل هنا. يبقى المشروع على localhost فقط.</p>
+    <!-- Socket.IO serves this client script automatically from the SAME local server. No CDN required. -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const statusEl = document.getElementById('status');
+      const socketIdEl = document.getElementById('socket-id');
+      const logEl = document.getElementById('log');
+      const pingBtn = document.getElementById('ping');
+      const sendBtn = document.getElementById('send');
+      const messageEl = document.getElementById('message');
+      const socket = io();
+
+      function writeLog(message) {
+        const entry = document.createElement('div');
+        entry.className = 'entry';
+        entry.textContent = `${new Date().toLocaleTimeString()} · ${message}`;
+        logEl.appendChild(entry);
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      function setConnected(connected) {
+        statusEl.textContent = connected ? 'Connected ✅' : 'Disconnected 🔴';
+        pingBtn.disabled = !connected;
+        sendBtn.disabled = !connected;
+      }
+
+      socket.on('connect', () => {
+        socketIdEl.textContent = socket.id;
+        setConnected(true);
+        writeLog(`Connected: ${socket.id}`);
+      });
+
+      socket.on('connection:ready', (data) => {
+        writeLog(`Server ready for: ${data.socketId}`);
+      });
+
+      socket.on('disconnect', (reason) => {
+        setConnected(false);
+        socketIdEl.textContent = '—';
+        writeLog(`Disconnected: ${reason}`);
+      });
+
+      socket.on('connect_error', (error) => {
+        setConnected(false);
+        writeLog(`Connection error: ${error.message}`);
+      });
+
+      socket.on('demo:pong', (data) => {
+        writeLog(`Pong received: ${JSON.stringify(data.received)}`);
+      });
+
+      socket.on('demo:message', (data) => {
+        writeLog(`Message from ${data.fromSocketId}: ${data.text}`);
+      });
+
+      socket.on('demo:error', (data) => {
+        writeLog(`Server rejected message: ${data.message}`);
+      });
+
+      pingBtn.addEventListener('click', () => {
+        socket.emit('demo:ping', { hello: 'Worod' });
+        writeLog('Ping sent to server');
+      });
+
+      sendBtn.addEventListener('click', () => {
+        socket.emit('demo:message', { text: messageEl.value });
+        messageEl.value = '';
+      });
+
+      messageEl.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' && !sendBtn.disabled) sendBtn.click();
+      });
+
+      document.getElementById('disconnect').addEventListener('click', () => socket.disconnect());
+      document.getElementById('reconnect').addEventListener('click', () => socket.connect());
+    </script>
+  </body>
+</html>

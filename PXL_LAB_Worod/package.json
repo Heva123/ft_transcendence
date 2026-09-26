@@ -1,0 +1,44 @@
+{
+  "name": "pxl-lab-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PXL_LAB backend with Socket.IO, posts, comments, replies and likes",
+  "engines": {
+    "node": ">=24.15.0"
+  },
+  "scripts": {
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "build": "nest build",
+    "db:setup": "prisma generate && prisma migrate dev --name week2_social && prisma db seed",
+    "db:seed": "prisma db seed",
+    "db:studio": "prisma studio",
+    "test:socket": "node --test scripts/socket.test.cjs",
+    "test:api": "node --test scripts/api.test.cjs",
+    "test:all": "node --test scripts/socket.test.cjs scripts/api.test.cjs"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.cjs"
+  },
+  "dependencies": {
+    "@nestjs/common": "11.1.28",
+    "@nestjs/core": "11.1.28",
+    "@nestjs/platform-express": "11.1.28",
+    "@nestjs/platform-socket.io": "11.1.28",
+    "@nestjs/websockets": "11.1.28",
+    "@prisma/client": "6.19.3",
+    "class-transformer": "0.5.1",
+    "class-validator": "0.14.2",
+    "dotenv": "16.6.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2",
+    "socket.io": "4.8.1"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "11.0.21",
+    "@types/node": "24.0.0",
+    "prisma": "6.19.3",
+    "socket.io-client": "4.8.1",
+    "typescript": "5.9.2"
+  }
+}
