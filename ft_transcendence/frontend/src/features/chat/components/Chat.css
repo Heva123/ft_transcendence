@@ -1,0 +1,91 @@
+.message-list {
+  padding: var(--space-8) 0 var(--space-16);
+}
+
+.message-date {
+  margin: 0 0 var(--space-16);
+  color: var(--color-teal);
+  font-size: 11px;
+}
+
+.message-item {
+  display: flex;
+  gap: var(--space-12);
+  margin-bottom: var(--space-16);
+}
+
+.message-avatar {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-cyan);
+  font-size: 11px;
+}
+
+.message-body {
+  flex: 1;
+}
+
+.message-meta {
+  margin: 0 0 var(--space-4);
+  font-size: 12px;
+}
+
+.message-text {
+  margin: 0;
+  font-size: 14px;
+  line-height: 23px;
+}
+
+.message-read,
+.typing-status {
+  margin: var(--space-4) 0 0;
+  color: var(--color-teal);
+  font-size: 11px;
+}
+
+.typing-status {
+  padding-top: var(--space-8);
+  border-top: 1px solid #d8ced3;
+}
+
+.message-composer {
+  margin-top: var(--space-12);
+}
+
+.message-composer label {
+  display: block;
+  margin-bottom: var(--space-6);
+  font-size: 11px;
+}
+
+.message-composer input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 var(--space-12);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.message-actions {
+  display: flex;
+  gap: var(--space-12);
+  margin-top: var(--space-12);
+}
+
+.message-actions button {
+  min-height: 40px;
+  padding: 0 var(--space-16);
+  border: 0;
+  background: transparent;
+  color: var(--color-plum);
+}
+
+.message-actions button:first-child {
+  background: var(--color-plum);
+  color: white;
+}

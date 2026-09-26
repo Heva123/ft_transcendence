@@ -1,0 +1,71 @@
+.create-post-page {
+  max-width: 760px;
+}
+
+.create-post-page header {
+  margin-bottom: var(--space-24);
+}
+
+.create-post-page header > p:first-child {
+  color: var(--color-plum);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.create-post-page h1 {
+  margin: var(--space-8) 0;
+  font-family: var(--font-heading);
+  font-size: 46px;
+}
+
+.create-post-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  padding: var(--space-24);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.create-post-form label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.create-post-form select,
+.create-post-form textarea,
+.create-post-form input {
+  padding: var(--space-12);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font: inherit;
+}
+
+.create-post-form textarea {
+  resize: vertical;
+}
+
+.attachment-note {
+  margin: 0;
+  color: var(--color-teal);
+  font-size: 11px;
+}
+
+.create-post-actions {
+  display: flex;
+  gap: var(--space-12);
+  margin-top: var(--space-8);
+}
+
+.create-post-actions button {
+  min-height: 44px;
+  padding: 0 var(--space-20);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.create-post-actions button:first-child {
+  border-color: var(--color-plum);
+  background: var(--color-plum);
+  color: white;
+}
