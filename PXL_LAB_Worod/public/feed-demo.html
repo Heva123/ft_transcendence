@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PXL_LAB - Feed Test</title>
+  <style>
+    *{box-sizing:border-box}body{max-width:850px;margin:35px auto;padding:0 20px;font-family:system-ui,Tahoma,sans-serif;background:#0d1727;color:#eef5ff;line-height:1.65}
+    a{color:#75d8ff}.panel,.post{border:1px solid #304b67;border-radius:15px;padding:17px;background:#13243a;margin:15px 0}
+    input,textarea,select{width:100%;background:#081525;border:1px solid #45617c;color:#fff;border-radius:8px;padding:10px;font:inherit;margin:4px 0 12px}
+    button{background:#79dbff;border:0;border-radius:8px;padding:9px 12px;cursor:pointer;font:inherit;color:#091528;margin:5px 5px 5px 0}button.secondary{background:#bed1e8}
+    .muted,small{color:#b8cce1}.actions{display:flex;flex-wrap:wrap;gap:4px}.error{color:#ffaaa9;white-space:pre-wrap}.notice{color:#99efbf;white-space:pre-wrap}
+    .post h3{margin:2px 0}.comment{background:#0b1b2c;padding:8px 11px;border-radius:8px;margin:6px 0}
+  </style>
+</head>
+<body>
+  <h1>PXL_LAB — Feed</h1>
+  <p class="muted">REST API test page. <a href="/demo.html">Socket test</a></p>
+  <section class="panel">
+    <label for="user">Test user</label>
+    <select id="user"><option value="demo-worod">Worod</option><option value="demo-afnan">Afnan</option></select>
+    <label for="scope">نوع المنشورات</label>
+    <select id="scope"><option value="">Global Feed</option><option value="community-web">Web Developers Community</option></select>
+    <button id="refresh">Refresh feed</button>
+  </section>
+  <section class="panel">
+    <h2>Create Post</h2><textarea id="new-post" maxlength="2000" rows="3" placeholder="اكتبي منشور..."></textarea>
+    <button id="publish">Publish</button>
+  </section>
+  <p id="notice" role="status" class="notice"></p><p id="error" role="alert" class="error"></p>
+  <section id="feed" aria-label="Posts"></section>
+<script>
+'use strict';
+const $ = (id) => document.getElementById(id);
+const state = { user: $('user').value, scope: $('scope').value };
+function element(tag, text, className) {
+  const node = document.createElement(tag);
+  if (text !== undefined) node.textContent = String(text);
+  if (className) node.className = className;
+  return node;
+}
+function button(label, handler, secondary = false) {
+  const node = element('button', label, secondary ? 'secondary' : '');
+  node.type = 'button'; node.addEventListener('click', handler); return node;
+}
+async function api(path, method='GET', body) {
+  $('error').textContent = '';
+  const res = await fetch(path, {
+    method,
+    headers: { 'x-demo-user': state.user, ...(body === undefined ? {} : { 'Content-Type':'application/json' }) },
+    ...(body === undefined ? {} : { body: JSON.stringify(body) }),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(`${res.status}: ${Array.isArray(data.message) ? data.message.join('; ') : data.message || 'Request failed'}`);
+  return data;
+}
+async function run(action) {
+  try { $('notice').textContent = ''; await action(); }
+  catch (error) { $('error').textContent = error.message; }
+}
+function flash(text) { $('notice').textContent = text; }
+async function loadComments(post, host) {
+  host.replaceChildren();
+  const comments = await api(`/posts/${encodeURIComponent(post.id)}/comments`);
+  for (const comment of comments) {
+    const item = element('div', `${comment.author.username}: ${comment.content}`, 'comment');
+    if (comment.author.id === state.user) {
+      item.append(button('Edit comment', () => run(async () => {
+        const value = prompt('Edit comment', comment.content);
+        if (value === null) return;
+        await api(`/posts/${post.id}/comments/${comment.id}`, 'PATCH', {content:value});
+        await refresh();
+      }), true));
+      item.append(button('Delete comment', () => run(async () => {
+        if (!confirm('Delete comment?')) return;
+        await api(`/posts/${post.id}/comments/${comment.id}`, 'DELETE');
+        await refresh();
+      }), true));
+    }
+    host.append(item);
+  }
+}
+async function refresh() {
+  const params = new URLSearchParams({ page:'1' });
+  if (state.scope) params.set('communityId', state.scope);
+  const data = await api(`/posts?${params.toString()}`);
+  $('feed').replaceChildren();
+  $('feed').append(element('p', `${data.posts.length} posts loaded`, 'muted'));
+  for (const post of data.posts) {
+    const box = element('article', undefined, 'post');
+    box.append(element('h3', post.author.username));
+    box.append(element('p', post.content));
+    box.append(element('small', `Likes: ${post.likesCount} • Comments: ${post.commentsCount} • ${new Date(post.createdAt).toLocaleString()}`));
+    const actions = element('div', undefined, 'actions');
+    actions.append(button(post.likedByMe ? 'Unlike' : 'Like', () => run(async () => {
+      await api(`/posts/${post.id}/likes`, 'POST'); await refresh();
+    })));
+    const commentInput = element('input'); commentInput.placeholder = 'تعليق جديد'; commentInput.maxLength = 1000;
+    actions.append(button('Add comment', () => run(async () => {
+      await api(`/posts/${post.id}/comments`, 'POST', {content:commentInput.value, parentId:null}); await refresh();
+    }), true));
+    if (post.author.id === state.user) {
+      actions.append(button('Edit post', () => run(async () => {
+        const value = prompt('Edit post', post.content); if (value === null) return;
+        await api(`/posts/${post.id}`, 'PATCH', {content:value}); await refresh();
+      }), true));
+      actions.append(button('Delete post', () => run(async () => {
+        if (!confirm('Delete post and its comments/likes?')) return;
+        await api(`/posts/${post.id}`, 'DELETE'); await refresh();
+      }), true));
+    }
+    box.append(actions);box.append(commentInput);
+    const commentsBox = element('div');box.append(commentsBox);
+    box.append(button('Show comments', () => run(() => loadComments(post, commentsBox)), true));
+    $('feed').append(box);
+  }
+}
+$('user').addEventListener('change', () => { state.user = $('user').value; run(refresh); });
+$('scope').addEventListener('change', () => { state.scope = $('scope').value; run(refresh); });
+$('refresh').addEventListener('click', () => run(refresh));
+$('publish').addEventListener('click', () => run(async () => {
+  await api('/posts', 'POST', { content: $('new-post').value, communityId: state.scope || null });
+  $('new-post').value = ''; flash('Post created and saved in PostgreSQL.'); await refresh();
+}));
+run(refresh);
+</script>
+</body></html>

@@ -1,0 +1,18 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pxl_lab_demo
+      POSTGRES_PASSWORD: local_only_password
+      POSTGRES_DB: pxl_lab_demo
+    ports:
+      - "127.0.0.1:5439:5432"
+    volumes:
+      - pxl_lab_demo_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pxl_lab_demo -d pxl_lab_demo"]
+      interval: 5s
+      timeout: 5s
+      retries: 15
+volumes:
+  pxl_lab_demo_pgdata:
