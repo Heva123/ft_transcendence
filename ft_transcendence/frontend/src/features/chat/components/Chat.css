@@ -89,3 +89,86 @@
   background: var(--color-plum);
   color: white;
 }
+.connection-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 10px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-border);
+  background: var(--color-yellow);
+}
+
+.connection-status p {
+  margin: 0;
+  font-size: 11px;
+}
+
+.connection-status button {
+  padding: 8px 16px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font: inherit;
+  font-size: 11px;
+}
+
+.message-send-error {
+  margin: 10px 0 0;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  background: var(--color-pink);
+  font-size: 11px;
+}
+
+.blocked-status {
+  padding: 10px 14px;
+  border: 1px solid var(--color-border);
+  background: var(--color-pink);
+  font-size: 11px;
+}
+
+.block-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgb(0 0 0 / 20%);
+  z-index: 20;
+}
+
+.block-modal {
+  width: min(460px, 90vw);
+  padding: 28px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.block-modal h2 {
+  margin-top: 0;
+  font-family: var(--font-heading);
+  font-size: 30px;
+}
+
+.block-modal p {
+  font-size: 12px;
+  line-height: 20px;
+}
+
+.block-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.block-modal__actions button {
+  padding: 10px 18px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.block-modal__actions button:last-child {
+  background: var(--color-plum);
+  color: white;
+}

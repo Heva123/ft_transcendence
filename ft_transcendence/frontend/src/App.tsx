@@ -8,6 +8,7 @@ import HomePage from './pages/HomePage'
 import ProfilePage from './pages/ProfilePage'
 import CreatePostPage from './pages/CreatePostPage'
 import PostPage from './pages/PostPage'
+import NotificationsPage from './pages/NotificationsPage'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/posts/new" element={<CreatePostPage />} />
         <Route path="/posts/:postId" element={<PostPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
       </Routes>
     </AppShell>
   )
