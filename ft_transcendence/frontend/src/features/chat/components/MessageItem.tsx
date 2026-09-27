@@ -23,7 +23,7 @@ function MessageItem({ message }: MessageItemProps) {
         <p className="message-text">{message.text}</p>
 
         {message.sender === 'You' && (
-          <p className="message-read">✓✓ Read by Heba and Afnan</p>
+          <p className="message-read">✓✓ Read</p>
         )}
       </div>
     </article>

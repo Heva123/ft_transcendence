@@ -1,0 +1,129 @@
+.notifications-page {
+  width: 100%;
+  max-width: 1180px;
+  box-sizing: border-box;
+}
+
+.notifications-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.notifications-heading h1 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 46px;
+  line-height: 52px;
+}
+
+.notifications-heading p {
+  margin: 8px 0 0;
+  font-size: 12px;
+}
+
+.notifications-community-badge {
+  min-width: 150px;
+  padding: 10px 24px;
+  background: var(--color-yellow);
+  font-size: 10px;
+  text-align: center;
+}
+
+.notifications-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.notifications-controls button,
+.status {
+  min-width: 140px;
+  padding: 10px 22px;
+  border: 1px solid var(--color-border);
+  font: inherit;
+  font-size: 11px;
+  text-align: center;
+}
+
+.notifications-controls button {
+  background: var(--color-surface);
+}
+
+.status.unread {
+  background: var(--color-pink);
+}
+
+.status.read {
+  background: var(--color-cyan);
+}
+
+.notifications-panel {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-sizing: border-box;
+}
+
+.notification-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 140px;
+  gap: 16px;
+  align-items: center;
+  min-height: 92px;
+  padding: 20px;
+  border-bottom: 1px solid #d8d0c7;
+  box-sizing: border-box;
+}
+
+.notification-row:last-child {
+  border-bottom: 0;
+}
+
+.notification-badge {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  font-size: 11px;
+}
+
+.notification-badge.unread {
+  background: var(--color-pink);
+}
+
+.notification-badge.read {
+  background: var(--color-cyan);
+}
+
+.notification-copy strong {
+  font-size: 14px;
+}
+
+.notification-copy p {
+  margin: 6px 0 0;
+  color: var(--color-teal);
+  font-size: 11px;
+}
+
+.notification-view {
+  padding: 10px 28px;
+  border: 1px solid var(--color-border);
+  color: var(--color-ink);
+  text-align: center;
+  text-decoration: none;
+}
+
+@media (max-width: 720px) {
+  .notification-row {
+    grid-template-columns: 42px 1fr;
+  }
+
+  .notification-view {
+    grid-column: 2;
+  }
+}

@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import { useParams } from 'react-router-dom'
 import ChannelSidebar from '../features/chat/components/ChannelSidebar'
 import ChatArea from '../features/chat/components/ChatArea'
+import MessageHistory from '../features/chat/components/MessageHistory'
 import { mockChannels } from '../features/chat/data/mockChannels'
 import { mockCommunities } from '../features/chat/data/mockCommunities'
+import { usePresence } from '../features/presence/hooks/usePresence'
 import type { Channel } from '../features/chat/types/Channel'
 import type { Community } from '../features/chat/types/Community'
 import './ChannelPage.css'
@@ -13,20 +16,37 @@ type ChannelWorkspaceProps = {
   communityName: string
 }
 
-function ChannelWorkspace({ channel, channels, communityName }: ChannelWorkspaceProps) {
+function ChannelWorkspace({
+  channel,
+  channels,
+  communityName,
+}: ChannelWorkspaceProps) {
+  const onlineUsers = usePresence()
+  const [showHistory, setShowHistory] = useState(false)
+
   return (
     <section className="channel-page">
-      <ChannelSidebar channels={channels} communityName={communityName} />
+      <ChannelSidebar
+        channels={channels}
+        communityName={communityName}
+        onlineUsers={onlineUsers}
+      />
       <div className="channel-room">
-         <header className="channel-room__header">
-         <div>
+        <header className="channel-room__header">
+          <div>
             <h1># {channel.name}</h1>
-            <p>{communityName} · 3 online</p>
-         </div>
-
-         <button type="button">Earlier messages</button>
-         </header>
-        <ChatArea selectedChannelId={channel.id} />
+            <p>{communityName} · {onlineUsers.length} online</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowHistory((current) => !current)}
+          >
+            {showHistory ? 'Current messages' : 'Earlier messages'}
+          </button>
+        </header>
+        {showHistory
+          ? <MessageHistory channelId={channel.id} />
+          : <ChatArea selectedChannelId={channel.id} />}
       </div>
     </section>
   )
@@ -47,8 +67,13 @@ function ChannelPage() {
 
   if (!channel || !community)
     return <h1>Channel not found.</h1>
-
-  return <ChannelWorkspace channel={channel} channels={channels} communityName={community.name} />
+  return (
+    <ChannelWorkspace
+      channel={channel}
+      channels={channels}
+      communityName={community.name}
+    />
+  )
 }
 
 export default ChannelPage

@@ -1,39 +1,74 @@
 import { useState } from 'react'
 
 type MessageInputProps = {
-  onSendMessage: (text: string) => void
+  onSendMessage: (text: string) => boolean
+  onTypingChange: (typing: boolean) => void
+  sendFailed: boolean
+  blockedUser: boolean
+  onBlockToggle: () => void
 }
 
-function MessageInput({ onSendMessage }: MessageInputProps) {
+function MessageInput({
+  onSendMessage,
+  onTypingChange,
+  sendFailed,
+  blockedUser,
+  onBlockToggle,
+}: MessageInputProps) {
   const [text, setText] = useState('')
 
-  function handleSubmit(event: React.FormEvent) {
-    event.preventDefault()
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const nextText = event.target.value
 
+    if (text.trim() === '' && nextText.trim() !== '')
+      onTypingChange(true)
+    if (text.trim() !== '' && nextText.trim() === '')
+      onTypingChange(false)
+    setText(nextText)
+  }
+
+  function handleSubmit(event: React.FormEvent) {
+    let sent: boolean
+
+    event.preventDefault()
     if (text.trim() === '')
       return
-
-    onSendMessage(text)
+    sent = onSendMessage(text)
+    if (!sent)
+      return
+    onTypingChange(false)
     setText('')
   }
 
   return (
-    <form className="message-composer" onSubmit={handleSubmit}>
-      <label htmlFor="message-input">Message</label>
+    <>
+      {sendFailed && (
+        <p className="message-send-error">
+          Message not sent. Your draft is saved below.
+        </p>
+      )}
 
-      <input
-        id="message-input"
-        value={text}
-        onChange={(event) => setText(event.target.value)}
-        placeholder="Write a message..."
-      />
+      <form className="message-composer" onSubmit={handleSubmit}>
+        <label htmlFor="message-input">Message</label>
 
-      <div className="message-actions">
-        <button type="submit">Send message</button>
-        <button type="button">Attach image</button>
-        <button type="button">Block user</button>
-      </div>
-    </form>
+        <input
+          id="message-input"
+          value={text}
+          onChange={handleChange}
+          placeholder="Write a message..."
+        />
+
+        <div className="message-actions">
+          <button type="submit">
+            {sendFailed ? 'Retry send' : 'Send message'}
+          </button>
+          <button type="button">Attach image</button>
+          <button type="button" onClick={onBlockToggle}>
+            {blockedUser ? 'Unblock user' : 'Block user'}
+          </button>
+        </div>
+      </form>
+    </>
   )
 }
 

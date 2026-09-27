@@ -27,6 +27,19 @@ function Sidebar() {
         <NavLink className={navClass} to="/communities/1">Web Builders</NavLink>
         <NavLink className={navClass} to="/communities/2">Systems Circle</NavLink>
       </nav>
+
+      <div className="sidebar__spacer" />
+
+      <aside className="sidebar-promo">
+        <strong>⚡ Better, together.</strong>
+        <p>Your next great idea could start with a hello.</p>
+        <span>Explore →</span>
+      </aside>
+
+      <nav className="sidebar__footer">
+        <NavLink to="/settings">Settings</NavLink>
+        <button type="button">Log out</button>
+      </nav>
     </aside>
   )
 }
