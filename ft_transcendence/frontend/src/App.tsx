@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { UserContext, type User } from "./UserContext";
 
+import CommunityMembersPage from "./pages/CommunityMembersPage";
 import CommunitiesPage from "./pages/CommunitiesPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
@@ -15,6 +16,7 @@ type Page =
   | "dashboard"
   | "profile"
   | "communities"
+  | "members"
   | "terms"
   | "privacy";
 
@@ -30,6 +32,7 @@ function getPageFromHash(): Page {
   if (hash === "#/dashboard") return "dashboard";
   if (hash === "#/profile") return "profile";
   if (hash === "#/communities") return "communities";
+  if (hash === "#/members") return "members";
   if (hash === "#/terms") return "terms";
   if (hash === "#/privacy") return "privacy";
 
@@ -41,6 +44,10 @@ function App() {
 
   const [session, setSession] =
     useState<LoginResponse | null>(null);
+
+  const [selectedMembersGroupId, setSelectedMembersGroupId] =
+    useState<string | null>(null);
+
 
   useEffect(() => {
     function handleHashChange() {
@@ -57,33 +64,40 @@ function App() {
     };
   }, []);
 
+
   function navigate(nextPage: Page) {
     window.location.hash = `/${nextPage}`;
     setPage(nextPage);
   }
 
+
   useEffect(() => {
     const isPrivatePage =
       page === "dashboard" ||
       page === "profile" ||
-      page === "communities";
+      page === "communities" ||
+      page === "members";
 
     if (isPrivatePage && !session) {
       navigate("login");
     }
   }, [page, session]);
 
+
   function handleLoginSuccess(data: LoginResponse) {
     setSession(data);
     navigate("dashboard");
   }
+
 
   function handleLogout() {
     setSession(null);
     navigate("login");
   }
 
+
   function renderPage() {
+
     if (page === "terms") {
       return (
         <LegalPage
@@ -93,6 +107,7 @@ function App() {
       );
     }
 
+
     if (page === "privacy") {
       return (
         <LegalPage
@@ -101,6 +116,7 @@ function App() {
         />
       );
     }
+
 
     if (page === "profile" && session) {
       return (
@@ -121,13 +137,43 @@ function App() {
       );
     }
 
+    if (page === "members" && session && selectedMembersGroupId) {
+      return (
+        <CommunityMembersPage
+          groupId={selectedMembersGroupId}
+          token={session.accessToken}
+          onBack={() => navigate("communities")}
+        />
+      );
+    }
+
     if (page === "communities" && session) {
       return (
         <CommunitiesPage
           token={session.accessToken}
+          onOpenMembers={(groupId) => {
+            setSelectedMembersGroupId(groupId);
+            navigate("members");
+          }}
         />
       );
     }
+
+
+    if (
+      page === "members" &&
+      session &&
+      selectedMembersGroupId
+    ) {
+      return (
+        <CommunityMembersPage
+          groupId={selectedMembersGroupId}
+          token={session.accessToken}
+          onBack={() => navigate("communities")}
+        />
+      );
+    }
+
 
     if (page === "dashboard" && session) {
       return (
@@ -137,6 +183,7 @@ function App() {
       );
     }
 
+
     if (page === "register") {
       return (
         <RegisterPage
@@ -145,6 +192,7 @@ function App() {
       );
     }
 
+
     return (
       <LoginPage
         onCreateAccount={() => navigate("register")}
@@ -152,6 +200,7 @@ function App() {
       />
     );
   }
+
 
   return (
     <UserContext.Provider value={session?.user ?? null}>

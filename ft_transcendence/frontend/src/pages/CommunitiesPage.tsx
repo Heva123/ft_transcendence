@@ -27,9 +27,13 @@ type CreatedGroup = {
 
 type CommunitiesPageProps = {
   token: string;
+  onOpenMembers: (groupId: string) => void;
 };
 
-function CommunitiesPage({ token }: CommunitiesPageProps) {
+function CommunitiesPage({
+  token,
+  onOpenMembers,
+}: CommunitiesPageProps) {
   const [groups, setGroups] = useState<Group[]>([]);
   const [selectedGroupId, setSelectedGroupId] =
   useState<string | null>(null);
@@ -55,7 +59,7 @@ function CommunitiesPage({ token }: CommunitiesPageProps) {
 
       try {
         const response = await fetch(
-          "http://localhost:3000/api/groups",
+          "http://localhost:3000/api/communities",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -71,7 +75,12 @@ function CommunitiesPage({ token }: CommunitiesPageProps) {
         }
 
         if (!response.ok) {
-          throw new Error("Could not load communities.");
+          const errorData = await response.text();
+          console.log("COMMUNITIES API ERROR:", response.status, errorData);
+
+          throw new Error(
+            `Could not load communities. (${response.status})`
+          );
         }
 
         const data: Group[] = await response.json();
@@ -131,7 +140,7 @@ function CommunitiesPage({ token }: CommunitiesPageProps) {
 
     try {
       const response = await fetch(
-        "http://localhost:3000/api/groups",
+        "http://localhost:3000/api/communities",
         {
           method: "POST",
           headers: {
@@ -160,8 +169,11 @@ function CommunitiesPage({ token }: CommunitiesPageProps) {
       }
 
       if (!response.ok) {
+        const errorData = await response.text();
+        console.log("CREATE COMMUNITY API ERROR:", response.status, errorData);
+
         setCreateError(
-          "Could not create the community. Please try again."
+          `Could not create the community. (${response.status})`
         );
         return;
       }
@@ -213,9 +225,10 @@ function CommunitiesPage({ token }: CommunitiesPageProps) {
 if (selectedGroupId) {
   return (
     <CommunityDetailsPage
-      groupId={selectedGroupId}
-      token={token}
-      onBack={() => setSelectedGroupId(null)}
+  groupId={selectedGroupId}
+  token={token}
+  onBack={() => setSelectedGroupId(null)}
+  onOpenMembers={onOpenMembers}
     />
   );
 }

@@ -18,12 +18,14 @@ type CommunityDetailsPageProps = {
   groupId: string;
   token: string;
   onBack: () => void;
+  onOpenMembers: (groupId: string) => void;
 };
 
 function CommunityDetailsPage({
   groupId,
   token,
   onBack,
+  onOpenMembers,
 }: CommunityDetailsPageProps) {
   const [group, setGroup] = useState<GroupDetails | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -39,7 +41,7 @@ function CommunityDetailsPage({
 
       try {
         const response = await fetch(
-          `http://localhost:3000/api/groups/${groupId}`,
+          `http://localhost:3000/api/communities/${groupId}`,
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -105,9 +107,9 @@ function CommunityDetailsPage({
         ← Back to Communities
       </button>
 
-      <p className="small-label">COMMUNITY DETAILS</p>
-
-      <h2>Community Details</h2>
+      <p className="small-label">
+        COMMUNITY DETAILS
+      </p>
 
       {isLoading && (
         <p className="message" role="status">
@@ -122,19 +124,52 @@ function CommunityDetailsPage({
       )}
 
       {!isLoading && !error && group && (
-        <div className="dashboard-card">
-          <h3>{group.name}</h3>
+        <>
+          <div className="dashboard-card">
+            <h2>{group.name}</h2>
 
-          <p>
-            {group.description || "No description yet."}
-          </p>
+            <p>
+              {group.description || "No description yet."}
+            </p>
 
-          <h3>Members</h3>
-          <p>{group._count.members}</p>
+            <h3>Members</h3>
 
-          <h3>Your role</h3>
-          <p>{group.members[0]?.role || "Unknown"}</p>
-        </div>
+            <p>
+              👥 {group._count.members}
+            </p>
+
+            <h3>Your role</h3>
+
+            <p>
+              {group.members[0]?.role || "Unknown"}
+            </p>
+
+            <div className="community-actions">
+              <button
+                type="button"
+                className="text-link"
+                onClick={() => onOpenMembers(group.id)}
+              >
+                Members
+              </button>
+
+              <button
+                type="button"
+                className="text-link"
+              >
+                Settings
+              </button>
+            </div>
+          </div>
+
+          <div className="dashboard-card">
+            <h3>Channels</h3>
+
+            <p># general</p>
+            <p># projects</p>
+            <p># random</p>
+          </div>
+        </>
       )}
     </AppLayout>
   );
