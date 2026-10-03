@@ -1,0 +1,64 @@
+.channel-page {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: var(--space-16);
+  max-width: 1050px;
+}
+
+.channel-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-16);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.channel-sidebar h2,
+.channel-room__header h1 {
+  margin: 0;
+  font-family: var(--font-heading);
+}
+
+.channel-sidebar__community,
+.channel-sidebar__online {
+  margin: var(--space-8) 0;
+  font-size: 11px;
+}
+
+.channel-link,
+.channel-sidebar button {
+  min-height: 40px;
+  padding: var(--space-8) var(--space-12);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.channel-link.active {
+  background: var(--color-plum);
+  color: white;
+}
+
+.channel-room {
+  padding: var(--space-20);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.channel-room__header {
+  padding-bottom: var(--space-16);
+  margin-bottom: var(--space-16);
+  border-bottom: 1px solid #d8ced3;
+}
+
+.channel-room__header h1 {
+  font-size: 30px;
+}
+
+.channel-room__header p {
+  margin: var(--space-4) 0 0;
+  color: var(--color-teal);
+  font-size: 11px;
+}

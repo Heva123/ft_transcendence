@@ -1,0 +1,78 @@
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-16);
+}
+
+.post-card {
+  padding: var(--space-16);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+}
+
+.post-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-12);
+}
+
+.post-card__identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+
+.post-card__avatar {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-pink);
+  font-size: 11px;
+}
+
+.post-card__identity strong {
+  font-size: 14px;
+}
+
+.post-card__identity p {
+  margin: var(--space-4) 0 0;
+  color: var(--color-teal);
+  font-size: 11px;
+}
+
+.post-card__menu {
+  border: 0;
+  background: transparent;
+}
+
+.post-card__content {
+  margin: var(--space-16) 0;
+  font-size: 14px;
+  line-height: 23px;
+}
+
+.post-card__actions {
+  display: flex;
+  gap: var(--space-24);
+  padding-top: var(--space-12);
+  border-top: 1px solid #d8ced3;
+  color: var(--color-plum);
+  font-size: 12px;
+}
+
+.post-card__replies {
+  color: var(--color-plum);
+  text-decoration: none;
+}
+
+.post-card__like {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-plum);
+}
