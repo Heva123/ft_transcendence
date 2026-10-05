@@ -2,10 +2,12 @@ function Sidebar() {
   const hash = window.location.hash;
 
   const currentPage =
-    hash === "#/profile"
-      ? "profile"
-      : hash === "#/communities"
-        ? "communities"
+  hash === "#/profile"
+    ? "profile"
+    : hash === "#/communities"
+      ? "communities"
+      : hash === "#/discover"
+        ? "discover"
         : "dashboard";
 
   return (
@@ -45,6 +47,24 @@ function Sidebar() {
               My Profile
             </a>
           </li>
+          
+      <li>
+        <a
+          href="#/discover"
+          className={
+            currentPage === "discover"
+              ? "sidebar-item active"
+              : "sidebar-item"
+          }
+          aria-current={
+            currentPage === "discover"
+              ? "page"
+              : undefined
+          }
+        >
+          Discover
+        </a>
+      </li>
 
           <li>
             <a

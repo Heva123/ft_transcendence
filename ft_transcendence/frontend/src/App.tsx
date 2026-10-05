@@ -4,6 +4,7 @@ import { UserContext, type User } from "./UserContext";
 
 import CommunityMembersPage from "./pages/CommunityMembersPage";
 import CommunitiesPage from "./pages/CommunitiesPage";
+import DiscoverCommunitiesPage from "./pages/DiscoverCommunitiesPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import DashboardPage from "./pages/DashboardPage";
@@ -16,6 +17,7 @@ type Page =
   | "dashboard"
   | "profile"
   | "communities"
+  | "discover"
   | "members"
   | "terms"
   | "privacy";
@@ -32,6 +34,7 @@ function getPageFromHash(): Page {
   if (hash === "#/dashboard") return "dashboard";
   if (hash === "#/profile") return "profile";
   if (hash === "#/communities") return "communities";
+  if (hash === "#/discover") return "discover";
   if (hash === "#/members") return "members";
   if (hash === "#/terms") return "terms";
   if (hash === "#/privacy") return "privacy";
@@ -39,22 +42,50 @@ function getPageFromHash(): Page {
   return "login";
 }
 
+function loadStoredSession(): LoginResponse | null {
+  const storedSession =
+    sessionStorage.getItem("transcendence-session");
+
+  if (!storedSession) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(storedSession);
+  } catch {
+    sessionStorage.removeItem(
+      "transcendence-session"
+    );
+
+    return null;
+  }
+}
+
 function App() {
-  const [page, setPage] = useState<Page>(getPageFromHash);
+  const [page, setPage] =
+    useState<Page>(getPageFromHash);
 
   const [session, setSession] =
-    useState<LoginResponse | null>(null);
+    useState<LoginResponse | null>(
+      loadStoredSession
+    );
 
-  const [selectedMembersGroupId, setSelectedMembersGroupId] =
-    useState<string | null>(null);
-
+  const [
+  selectedMembersGroupId,
+  setSelectedMembersGroupId,
+  ] = useState<string | null>(() =>
+    sessionStorage.getItem("selected-community-id")
+  );
 
   useEffect(() => {
     function handleHashChange() {
       setPage(getPageFromHash());
     }
 
-    window.addEventListener("hashchange", handleHashChange);
+    window.addEventListener(
+      "hashchange",
+      handleHashChange
+    );
 
     return () => {
       window.removeEventListener(
@@ -64,40 +95,59 @@ function App() {
     };
   }, []);
 
-
   function navigate(nextPage: Page) {
     window.location.hash = `/${nextPage}`;
     setPage(nextPage);
   }
 
 
-  useEffect(() => {
-    const isPrivatePage =
-      page === "dashboard" ||
-      page === "profile" ||
-      page === "communities" ||
-      page === "members";
 
-    if (isPrivatePage && !session) {
-      navigate("login");
-    }
-  }, [page, session]);
-
-
-  function handleLoginSuccess(data: LoginResponse) {
+  function handleLoginSuccess(
+    data: LoginResponse
+  ) {
     setSession(data);
+
+    sessionStorage.setItem(
+      "transcendence-session",
+      JSON.stringify(data)
+    );
+
     navigate("dashboard");
   }
 
-
   function handleLogout() {
     setSession(null);
+
+    sessionStorage.removeItem(
+      "transcendence-session"
+    );
+
     navigate("login");
   }
 
+  function handleUserUpdated(
+    updatedUser: User
+  ) {
+    setSession((currentSession) => {
+      if (!currentSession) {
+        return null;
+      }
+
+      const updatedSession = {
+        ...currentSession,
+        user: updatedUser,
+      };
+
+      sessionStorage.setItem(
+        "transcendence-session",
+        JSON.stringify(updatedSession)
+      );
+
+      return updatedSession;
+    });
+  }
 
   function renderPage() {
-
     if (page === "terms") {
       return (
         <LegalPage
@@ -106,7 +156,6 @@ function App() {
         />
       );
     }
-
 
     if (page === "privacy") {
       return (
@@ -117,48 +166,15 @@ function App() {
       );
     }
 
-
     if (page === "profile" && session) {
       return (
         <ProfilePage
           user={session.user}
           token={session.accessToken}
-          onUserUpdated={(updatedUser) => {
-            setSession((currentSession) =>
-              currentSession
-                ? {
-                    ...currentSession,
-                    user: updatedUser,
-                  }
-                : null
-            );
-          }}
+          onUserUpdated={handleUserUpdated}
         />
       );
     }
-
-    if (page === "members" && session && selectedMembersGroupId) {
-      return (
-        <CommunityMembersPage
-          groupId={selectedMembersGroupId}
-          token={session.accessToken}
-          onBack={() => navigate("communities")}
-        />
-      );
-    }
-
-    if (page === "communities" && session) {
-      return (
-        <CommunitiesPage
-          token={session.accessToken}
-          onOpenMembers={(groupId) => {
-            setSelectedMembersGroupId(groupId);
-            navigate("members");
-          }}
-        />
-      );
-    }
-
 
     if (
       page === "members" &&
@@ -169,11 +185,44 @@ function App() {
         <CommunityMembersPage
           groupId={selectedMembersGroupId}
           token={session.accessToken}
-          onBack={() => navigate("communities")}
+          onBack={() => {
+            sessionStorage.removeItem(
+              "selected-community-id"
+            );
+
+            setSelectedMembersGroupId(null);
+
+            navigate("communities");
+          }}
         />
       );
     }
 
+    if (page === "discover" && session) {
+      return (
+        <DiscoverCommunitiesPage
+          token={session.accessToken}
+        />
+      );
+    }
+
+    if (page === "communities" && session) {
+      return (
+        <CommunitiesPage
+          token={session.accessToken}
+          onOpenMembers={(groupId) => {
+            setSelectedMembersGroupId(groupId);
+
+            sessionStorage.setItem(
+              "selected-community-id",
+              groupId
+            );
+
+            navigate("members");
+          }}
+        />
+      );
+    }
 
     if (page === "dashboard" && session) {
       return (
@@ -183,27 +232,32 @@ function App() {
       );
     }
 
-
     if (page === "register") {
       return (
         <RegisterPage
-          onSignIn={() => navigate("login")}
+          onSignIn={() =>
+            navigate("login")
+          }
         />
       );
     }
 
-
     return (
       <LoginPage
-        onCreateAccount={() => navigate("register")}
-        onLoginSuccess={handleLoginSuccess}
+        onCreateAccount={() =>
+          navigate("register")
+        }
+        onLoginSuccess={
+          handleLoginSuccess
+        }
       />
     );
   }
 
-
   return (
-    <UserContext.Provider value={session?.user ?? null}>
+    <UserContext.Provider
+      value={session?.user ?? null}
+    >
       {renderPage()}
     </UserContext.Provider>
   );

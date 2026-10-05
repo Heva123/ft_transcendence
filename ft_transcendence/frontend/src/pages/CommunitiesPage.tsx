@@ -223,12 +223,25 @@ function CommunitiesPage({
     setDescription("");
   }
 if (selectedGroupId) {
-  return (
-    <CommunityDetailsPage
-  groupId={selectedGroupId}
-  token={token}
-  onBack={() => setSelectedGroupId(null)}
-  onOpenMembers={onOpenMembers}
+      return (
+        <CommunityDetailsPage
+      groupId={selectedGroupId}
+      token={token}
+      onBack={() => setSelectedGroupId(null)}
+      onOpenMembers={onOpenMembers}
+      onLeave={(groupId) => {
+        setGroups((currentGroups) =>
+          currentGroups.filter(
+            (group) => group.id !== groupId
+          )
+        );
+
+        setSelectedGroupId(null);
+
+        setMessage(
+          "You left the community successfully."
+        );
+      }}
     />
   );
 }
