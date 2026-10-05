@@ -11,6 +11,7 @@ import { RolesModule } from "./roles/roles.module";
 import { ProjectsModule } from "./projects/projects.module";
 import { TasksModule } from "./tasks/tasks.module";
 import { ChannelsModule } from "./channels/channels.module";
+import { MessagesModule } from "./messages/messages.module";
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ChannelsModule } from "./channels/channels.module";
     ProjectsModule,
     TasksModule,
     ChannelsModule,
+    MessagesModule,
   ],
   controllers: [AppController],
 })

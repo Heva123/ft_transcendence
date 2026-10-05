@@ -8,18 +8,19 @@ datasource db {
 }
 
 model User {
-  id              String    @id @default(uuid())
-  email           String    @unique
-  username        String    @unique
-  passwordHash    String
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                   String            @id @default(uuid())
+  email                String            @unique
+  username             String            @unique
+  passwordHash         String
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
   communityMemberships CommunityMember[]
   createdCommunities   Community[]       @relation("CommunityCreator")
   createdChannels      Channel[]         @relation("ChannelCreator")
   createdProjects      Project[]         @relation("ProjectCreator")
   createdTasks         Task[]            @relation("TaskCreator")
   assignedTasks        Task[]            @relation("TaskAssignee")
+  messages             Message[]
 
   @@map("users")
 }
@@ -42,7 +43,7 @@ model Community {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  createdBy User      @relation("CommunityCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdBy User              @relation("CommunityCreator", fields: [createdById], references: [id], onDelete: Restrict)
   members   CommunityMember[]
   projects  Project[]
   channels  Channel[]
@@ -66,7 +67,8 @@ model Channel {
   updatedAt   DateTime    @updatedAt
 
   community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  createdBy  User      @relation("ChannelCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  createdBy User      @relation("ChannelCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  messages  Message[]
 
   @@unique([communityId, name])
   @@index([communityId])
@@ -91,13 +93,13 @@ model Project {
   id          String   @id @default(uuid())
   name        String
   description String?
-  communityId String @map("groupId")
+  communityId String   @map("groupId")
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  community     Community  @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  createdBy User   @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  createdBy User      @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
   tasks     Task[]
 
   @@index([communityId])
@@ -130,16 +132,28 @@ model Task {
 }
 
 model CommunityMember {
-  id       String    @id @default(uuid())
-  userId   String
-  communityId String @map("groupId")
+  id          String        @id @default(uuid())
+  userId      String
+  communityId String        @map("groupId")
   role        CommunityRole @default(MEMBER)
-  joinedAt DateTime  @default(now())
+  joinedAt    DateTime      @default(now())
 
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
 
   @@unique([userId, communityId])
   @@index([communityId])
   @@map("members")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  channelId String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author  User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
 }
