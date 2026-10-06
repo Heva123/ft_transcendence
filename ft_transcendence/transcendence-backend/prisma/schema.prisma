@@ -24,6 +24,8 @@ model User {
   posts                Post[]
   comments             Comment[]
   likes                Like[]
+  reportsFiled         Report[]          @relation("ReportReporter")
+  reportsReviewed      Report[]          @relation("ReportReviewer")
 
   @@map("users")
 }
@@ -51,6 +53,7 @@ model Community {
   projects  Project[]
   channels  Channel[]
   posts     Post[]
+  reports   Report[]
 
   @@index([createdById])
   @@map("groups")
@@ -174,6 +177,7 @@ model Post {
   community Community? @relation(fields: [communityId], references: [id], onDelete: Restrict)
   comments  Comment[]
   likes     Like[]
+  reports   Report[]
 
   @@index([authorId])
   @@index([communityId, createdAt])
@@ -193,6 +197,7 @@ model Comment {
   author  User      @relation(fields: [authorId], references: [id], onDelete: Restrict)
   parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies Comment[] @relation("CommentReplies")
+  reports Report[]
 
   @@index([postId, createdAt])
   @@index([authorId])
@@ -211,4 +216,42 @@ model Like {
   @@id([postId, userId])
   @@index([userId])
   @@map("likes")
+}
+
+enum ReportTargetType {
+  POST
+  COMMENT
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+model Report {
+  id           String           @id @default(uuid())
+  reporterId   String
+  communityId  String
+  targetType   ReportTargetType
+  postId       String?
+  commentId    String?
+  reason       String           @db.VarChar(500)
+  status       ReportStatus     @default(OPEN)
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  reporter   User      @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reviewedBy User?     @relation("ReportReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  community  Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  post       Post?     @relation(fields: [postId], references: [id], onDelete: SetNull)
+  comment    Comment?  @relation(fields: [commentId], references: [id], onDelete: SetNull)
+
+  @@index([communityId, status, createdAt])
+  @@index([reporterId])
+  @@index([postId])
+  @@index([commentId])
+  @@map("reports")
 }
