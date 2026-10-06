@@ -8,12 +8,16 @@ import {
   ReportTargetType,
 } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import { CreateReportDto } from "./dto/create-report.dto";
 import { ReviewReportDto } from "./dto/review-report.dto";
 
 @Injectable()
 export class ReportsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
 
   async create(
     reporterId: string,
@@ -104,6 +108,7 @@ export class ReportsService {
       select: {
         id: true,
         status: true,
+        reporterId: true,
       },
     });
 
@@ -115,7 +120,7 @@ export class ReportsService {
       throw new BadRequestException("Report has already been reviewed");
     }
 
-    return this.prisma.report.update({
+    const updatedReport = await this.prisma.report.update({
       where: { id: reportId },
       data: {
         status: dto.status,
@@ -124,6 +129,17 @@ export class ReportsService {
       },
       include: this.includeRelations(),
     });
+
+    await this.notificationsService.create(
+      report.reporterId,
+      {
+        type: "REPORT_REVIEWED",
+        title: "Report reviewed",
+        message: `Your report was ${dto.status.toLowerCase()}.`,
+      },
+    );
+
+    return updatedReport;
   }
 
   private includeRelations() {
