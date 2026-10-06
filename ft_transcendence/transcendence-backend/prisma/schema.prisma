@@ -14,6 +14,7 @@ model User {
   passwordHash         String
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
+  lastSeenAt           DateTime?
   communityMemberships CommunityMember[]
   createdCommunities   Community[]       @relation("CommunityCreator")
   createdChannels      Channel[]         @relation("ChannelCreator")
@@ -26,6 +27,7 @@ model User {
   likes                Like[]
   reportsFiled         Report[]          @relation("ReportReporter")
   reportsReviewed      Report[]          @relation("ReportReviewer")
+  notifications        Notification[]
 
   @@map("users")
 }
@@ -254,4 +256,20 @@ model Report {
   @@index([postId])
   @@index([commentId])
   @@map("reports")
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String    @db.VarChar(50)
+  title     String    @db.VarChar(150)
+  message   String    @db.VarChar(500)
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+  @@map("notifications")
 }

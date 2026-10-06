@@ -14,6 +14,7 @@ import { ChannelsModule } from "./channels/channels.module";
 import { MessagesModule } from "./messages/messages.module";
 import { PostsModule } from "./posts/posts.module";
 import { ReportsModule } from "./reports/reports.module";
+import { NotificationsModule } from "./notifications/notifications.module";
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ReportsModule } from "./reports/reports.module";
     MessagesModule,
     PostsModule,
     ReportsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
 })

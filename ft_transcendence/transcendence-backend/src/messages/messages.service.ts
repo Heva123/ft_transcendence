@@ -10,7 +10,7 @@ import { CreateMessageDto } from "./dto/create-message.dto";
 export class MessagesService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private async requireChannelMember(channelId: string, userId: string) {
+  async requireChannelMember(channelId: string, userId: string) {
     const channel = await this.prisma.channel.findUnique({
       where: { id: channelId },
       select: {
