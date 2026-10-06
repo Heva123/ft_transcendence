@@ -21,6 +21,8 @@ export const ROLE_PERMISSIONS: Record<CommunityRole, readonly Permission[]> = {
     Permission.TASK_CREATE,
     Permission.TASK_UPDATE,
     Permission.TASK_DELETE,
+    Permission.REPORT_READ,
+    Permission.REPORT_MODERATE,
   ],
   [CommunityRole.MODERATOR]: [
     Permission.COMMUNITY_READ,
@@ -33,6 +35,8 @@ export const ROLE_PERMISSIONS: Record<CommunityRole, readonly Permission[]> = {
     Permission.TASK_READ,
     Permission.TASK_CREATE,
     Permission.TASK_UPDATE,
+    Permission.REPORT_READ,
+    Permission.REPORT_MODERATE,
   ],
   [CommunityRole.MEMBER]: [
     Permission.COMMUNITY_READ,
