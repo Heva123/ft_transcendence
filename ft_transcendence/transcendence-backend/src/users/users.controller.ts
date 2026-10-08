@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Patch, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { AuthUser } from "../common/types/auth-user.type";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
@@ -13,6 +23,27 @@ export class UsersController {
   @Get("me")
   getMe(@CurrentUser() user: AuthUser) {
     return user;
+  }
+
+  @Get("blocked")
+  findBlockedUsers(@CurrentUser() user: AuthUser) {
+    return this.usersService.findBlockedUsers(user.id);
+  }
+
+  @Post(":userId/block")
+  blockUser(
+    @CurrentUser() user: AuthUser,
+    @Param("userId", ParseUUIDPipe) userId: string,
+  ) {
+    return this.usersService.blockUser(user.id, userId);
+  }
+
+  @Delete(":userId/block")
+  unblockUser(
+    @CurrentUser() user: AuthUser,
+    @Param("userId", ParseUUIDPipe) userId: string,
+  ) {
+    return this.usersService.unblockUser(user.id, userId);
   }
 
   @Patch("me")

@@ -187,7 +187,13 @@ export class ChatGateway
         { content },
       );
 
-      this.server.to(room).emit("message:new", message);
+      await this.emitToAllowedUsers(
+        room,
+        userId,
+        "message:new",
+        message,
+        true,
+      );
     } catch (error) {
       client.emit("message:error", {
         message:
@@ -195,6 +201,187 @@ export class ChatGateway
             ? error.message
             : "Unable to send message",
       });
+    }
+  }
+
+  @SubscribeMessage("message:read")
+  async handleMessageRead(
+    @ConnectedSocket() client: Socket,
+    @MessageBody()
+    data: {
+      channelId?: string;
+      messageId?: string;
+    },
+  ) {
+    const userId = client.data.userId as string | undefined;
+    const channelId = data?.channelId;
+    const messageId = data?.messageId;
+
+    if (!userId) {
+      client.emit("auth:error", {
+        message: "Authentication required",
+      });
+      return;
+    }
+
+    if (!channelId || !messageId) {
+      client.emit("message:error", {
+        message: "channelId and messageId are required",
+      });
+      return;
+    }
+
+    const room = `channel:${channelId}`;
+
+    if (!client.rooms.has(room)) {
+      client.emit("message:error", {
+        message: "Join the channel before reading messages",
+      });
+      return;
+    }
+
+    try {
+      const receipt = await this.messagesService.markRead(
+        channelId,
+        messageId,
+        userId,
+      );
+
+      await this.emitToAllowedUsers(
+        room,
+        userId,
+        "message:read",
+        receipt,
+      );
+    } catch (error) {
+      client.emit("message:error", {
+        message:
+          error instanceof Error
+            ? error.message
+            : "Unable to mark message as read",
+      });
+    }
+  }
+
+  @SubscribeMessage("typing:start")
+  async handleTypingStart(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { channelId?: string },
+  ) {
+    const userId = client.data.userId as string | undefined;
+    const username = client.data.username as string | undefined;
+    const channelId = data?.channelId;
+
+    if (!userId) {
+      client.emit("auth:error", {
+        message: "Authentication required",
+      });
+      return;
+    }
+
+    if (!channelId) {
+      client.emit("typing:error", {
+        message: "channelId is required",
+      });
+      return;
+    }
+
+    const room = `channel:${channelId}`;
+
+    if (!client.rooms.has(room)) {
+      client.emit("typing:error", {
+        message: "Join the channel before sending typing events",
+      });
+      return;
+    }
+
+    await this.emitToAllowedUsers(
+      room,
+      userId,
+      "typing:start",
+      {
+        channelId,
+        userId,
+        username,
+      },
+    );
+  }
+
+  @SubscribeMessage("typing:stop")
+  async handleTypingStop(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { channelId?: string },
+  ) {
+    const userId = client.data.userId as string | undefined;
+    const username = client.data.username as string | undefined;
+    const channelId = data?.channelId;
+
+    if (!userId) {
+      client.emit("auth:error", {
+        message: "Authentication required",
+      });
+      return;
+    }
+
+    if (!channelId) {
+      client.emit("typing:error", {
+        message: "channelId is required",
+      });
+      return;
+    }
+
+    const room = `channel:${channelId}`;
+
+    if (!client.rooms.has(room)) {
+      client.emit("typing:error", {
+        message: "Join the channel before sending typing events",
+      });
+      return;
+    }
+
+    await this.emitToAllowedUsers(
+      room,
+      userId,
+      "typing:stop",
+      {
+        channelId,
+        userId,
+        username,
+      },
+    );
+  }
+
+  private async emitToAllowedUsers(
+    room: string,
+    actorId: string,
+    event: string,
+    payload: unknown,
+    includeActor = false,
+  ) {
+    const blockedUserIds = new Set(
+      await this.messagesService.getBlockedUserIds(actorId),
+    );
+
+    const sockets = await this.server.in(room).fetchSockets();
+
+    for (const socket of sockets) {
+      const recipientId = socket.data.userId as string | undefined;
+
+      if (!recipientId) {
+        continue;
+      }
+
+      if (recipientId === actorId) {
+        if (includeActor) {
+          socket.emit(event, payload);
+        }
+
+        continue;
+      }
+
+      if (!blockedUserIds.has(recipientId)) {
+        socket.emit(event, payload);
+      }
     }
   }
 

@@ -1,4 +1,9 @@
-import { ConflictException, Injectable } from "@nestjs/common";
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { UpdateUserDto } from "./dto/update-user.dto";
@@ -19,6 +24,82 @@ export class UsersService {
     return this.prisma.user.findUnique({
       where: { id },
       select: SAFE_USER_SELECT,
+    });
+  }
+
+  async blockUser(blockerId: string, blockedId: string) {
+    if (blockerId === blockedId) {
+      throw new BadRequestException("You cannot block yourself");
+    }
+
+    const blockedUser = await this.prisma.user.findUnique({
+      where: { id: blockedId },
+      select: {
+        id: true,
+        username: true,
+      },
+    });
+
+    if (!blockedUser) {
+      throw new NotFoundException("User not found");
+    }
+
+    const block = await this.prisma.block.upsert({
+      where: {
+        blockerId_blockedId: {
+          blockerId,
+          blockedId,
+        },
+      },
+      update: {},
+      create: {
+        blockerId,
+        blockedId,
+      },
+      select: {
+        blockerId: true,
+        blockedId: true,
+        createdAt: true,
+      },
+    });
+
+    return {
+      ...block,
+      blockedUser,
+    };
+  }
+
+  async unblockUser(blockerId: string, blockedId: string) {
+    await this.prisma.block.deleteMany({
+      where: {
+        blockerId,
+        blockedId,
+      },
+    });
+
+    return {
+      blockedId,
+      blocked: false,
+    };
+  }
+
+  async findBlockedUsers(blockerId: string) {
+    return this.prisma.block.findMany({
+      where: {
+        blockerId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        createdAt: true,
+        blocked: {
+          select: {
+            id: true,
+            username: true,
+          },
+        },
+      },
     });
   }
 

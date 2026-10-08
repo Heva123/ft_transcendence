@@ -15,6 +15,7 @@ model User {
   createdAt            DateTime          @default(now())
   updatedAt            DateTime          @updatedAt
   lastSeenAt           DateTime?
+  avatarPath           String?
   communityMemberships CommunityMember[]
   createdCommunities   Community[]       @relation("CommunityCreator")
   createdChannels      Channel[]         @relation("ChannelCreator")
@@ -22,12 +23,15 @@ model User {
   createdTasks         Task[]            @relation("TaskCreator")
   assignedTasks        Task[]            @relation("TaskAssignee")
   messages             Message[]
+  messageReads         MessageRead[]
   posts                Post[]
   comments             Comment[]
   likes                Like[]
   reportsFiled         Report[]          @relation("ReportReporter")
   reportsReviewed      Report[]          @relation("ReportReviewer")
   notifications        Notification[]
+  blocksInitiated      Block[]           @relation("Blocker")
+  blocksReceived       Block[]           @relation("Blocked")
 
   @@map("users")
 }
@@ -163,8 +167,22 @@ model Message {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  author  User    @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  channel Channel       @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author  User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reads   MessageRead[]
+}
+
+model MessageRead {
+  messageId String
+  userId    String
+  readAt    DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([messageId, userId])
+  @@index([userId, readAt])
+  @@map("message_reads")
 }
 
 model Post {
@@ -172,6 +190,7 @@ model Post {
   authorId    String
   communityId String?
   content     String   @db.VarChar(2000)
+  imagePath   String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -272,4 +291,17 @@ model Notification {
 
   @@index([userId, isRead, createdAt])
   @@map("notifications")
+}
+
+model Block {
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+
+  blocker User @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId])
+  @@map("blocks")
 }
