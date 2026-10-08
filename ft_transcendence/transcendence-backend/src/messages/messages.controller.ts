@@ -26,6 +26,17 @@ export class MessagesController {
     return this.messagesService.findAll(channelId, user.id);
   }
 
+  @Get("unread-count")
+  getUnreadCount(
+    @CurrentUser() user: AuthUser,
+    @Param("channelId", ParseUUIDPipe) channelId: string,
+  ) {
+    return this.messagesService.getUnreadCount(
+      channelId,
+      user.id,
+    );
+  }
+
   @Post()
   create(
     @CurrentUser() user: AuthUser,
