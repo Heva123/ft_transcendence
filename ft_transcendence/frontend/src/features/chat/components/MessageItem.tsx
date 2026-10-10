@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import type { Message } from '../types/Message'
 
 type MessageItemProps = {
@@ -17,10 +18,21 @@ function MessageItem({ message }: MessageItemProps) {
 
       <div className="message-body">
         <p className="message-meta">
-          <strong>{message.sender}</strong> · {message.createdAt}
+          {message.sender === 'You'
+            ? <strong>You</strong>
+            : <Link to={`/profile/${message.senderId}`}>{message.sender}</Link>}
+          {' '}· {message.createdAt}
         </p>
 
-        <p className="message-text">{message.text}</p>
+        {message.text && <p className="message-text">{message.text}</p>}
+
+        {message.attachment && (
+          <div className="message-attachment">
+            <img src={message.attachment.url}
+              alt={message.attachment.name} />
+            <span>{message.attachment.name}</span>
+          </div>
+        )}
 
         {message.sender === 'You' && (
           <p className="message-read">✓✓ Read</p>

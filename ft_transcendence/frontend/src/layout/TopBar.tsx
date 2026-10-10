@@ -1,16 +1,13 @@
 import { Link } from 'react-router-dom'
 import './layout.css'
+import SearchBox from '../features/search/components/SearchBox'
 
 function TopBar() {
   return (
     <header className="topbar">
       <div className="topbar__logo">PXL_LAB</div>
 
-      <input
-        className="topbar__search"
-        type="search"
-        placeholder="Search people, communities, posts..."
-      />
+      <SearchBox />
 
       <Link className="topbar__notification" to="/notifications">
         <svg width="20" height="20" viewBox="0 0 24 24"

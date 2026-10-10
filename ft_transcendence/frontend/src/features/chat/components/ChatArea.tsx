@@ -23,7 +23,7 @@ function ChatArea({ selectedChannelId }: ChatAreaProps) {
   const typingUser = useChatSocket(selectedChannelId, setMessages)
   const socketStatus = useSocketStatus()
 
-  function handleSendMessage(text: string) {
+  function handleSendMessage(text: string, file: File | null) {
     let message: Message
 
     if (socketStatus === 'reconnecting') {
@@ -31,6 +31,10 @@ function ChatArea({ selectedChannelId }: ChatAreaProps) {
       return false
     }
     if (socket.connected) {
+      if (file) {
+        setSendFailed(true)
+        return false
+      }
       sendMessage({ channelId: selectedChannelId, text })
       setSendFailed(false)
       return true
@@ -38,11 +42,19 @@ function ChatArea({ selectedChannelId }: ChatAreaProps) {
     message = {
       id: Date.now().toString(),
       channelId: selectedChannelId,
+      senderId: 'me',
       sender: 'You',
       text,
       createdAt: 'now',
+      attachment: file ? {
+        name: file.name,
+        url: URL.createObjectURL(file),
+        type: file.type,
+        size: file.size,
+      } : undefined,
     }
     setMessages((current) => [...current, message])
+    setSendFailed(false)
     return true
   }
 
