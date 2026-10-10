@@ -5,6 +5,8 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { CurrentUser } from "../common/decorators/current-user.decorator";
+import { AuthUser } from "../common/types/auth-user.type";
 import { SearchService } from "./search.service";
 
 @UseGuards(JwtAuthGuard)
@@ -14,6 +16,7 @@ export class SearchController {
 
   @Get()
   search(
+    @CurrentUser() user: AuthUser,
     @Query("q") q = "",
     @Query("type") type = "all",
     @Query("page") page = "1",
@@ -22,6 +25,7 @@ export class SearchController {
     @Query("communityId") communityId?: string,
   ) {
     return this.searchService.search(
+      user.id,
       q,
       type,
       Number(page) || 1,

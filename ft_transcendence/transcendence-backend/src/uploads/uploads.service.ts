@@ -125,21 +125,43 @@ export class UploadsService {
     });
 
     if (!post) {
+      const uploadedPath = resolve(filePath);
+
+      if (existsSync(uploadedPath)) {
+        unlinkSync(uploadedPath);
+      }
+
       throw new NotFoundException("Post not found");
     }
 
     if (post.authorId !== userId) {
+      const uploadedPath = resolve(filePath);
+
+      if (existsSync(uploadedPath)) {
+        unlinkSync(uploadedPath);
+      }
+
       throw new ForbiddenException(
         "Only the author may upload a post image",
       );
     }
 
-    await this.prisma.post.update({
-      where: { id: postId },
-      data: {
-        imagePath: filePath,
-      },
-    });
+    try {
+      await this.prisma.post.update({
+        where: { id: postId },
+        data: {
+          imagePath: filePath,
+        },
+      });
+    } catch (error) {
+      const uploadedPath = resolve(filePath);
+
+      if (existsSync(uploadedPath)) {
+        unlinkSync(uploadedPath);
+      }
+
+      throw error;
+    }
 
     if (
       post.imagePath &&
