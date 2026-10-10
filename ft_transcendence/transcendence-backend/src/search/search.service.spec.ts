@@ -39,19 +39,20 @@ describe("SearchService", () => {
 
   it("rejects an empty search query", async () => {
     await expect(
-      service.search("   "),
+      service.search("user-1", "   "),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it("rejects an invalid search type", async () => {
     await expect(
-      service.search("test", "invalid"),
+      service.search("user-1", "test", "invalid"),
     ).rejects.toBeInstanceOf(BadRequestException);
   });
 
   it("rejects an invalid sort order", async () => {
     await expect(
       service.search(
+        "user-1",
         "test",
         "posts",
         1,
@@ -82,6 +83,7 @@ describe("SearchService", () => {
     prisma.post.count.mockResolvedValue(2);
 
     const result = await service.search(
+      "user-1",
       "hello",
       "posts",
       1,
@@ -109,6 +111,22 @@ describe("SearchService", () => {
             mode: "insensitive",
           },
           communityId: "community-1",
+          OR: [
+            {
+              communityId: null,
+            },
+            {
+              community: {
+                is: {
+                  members: {
+                    some: {
+                      userId: "user-1",
+                    },
+                  },
+                },
+              },
+            },
+          ],
         },
         skip: 0,
         take: 1,

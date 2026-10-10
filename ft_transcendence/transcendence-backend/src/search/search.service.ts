@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
@@ -6,6 +7,7 @@ export class SearchService {
   constructor(private readonly prisma: PrismaService) {}
 
   async search(
+    userId: string,
     query: string,
     type = "all",
     page = 1,
@@ -76,19 +78,37 @@ export class SearchService {
     }
 
     if (type === "all" || type === "communities") {
-      const communityWhere = {
-        OR: [
+      const communityWhere: Prisma.CommunityWhereInput = {
+        AND: [
           {
-            name: {
-              contains: q,
-              mode: "insensitive" as const,
-            },
+            OR: [
+              {
+                name: {
+                  contains: q,
+                  mode: "insensitive",
+                },
+              },
+              {
+                description: {
+                  contains: q,
+                  mode: "insensitive",
+                },
+              },
+            ],
           },
           {
-            description: {
-              contains: q,
-              mode: "insensitive" as const,
-            },
+            OR: [
+              {
+                isPublic: true,
+              },
+              {
+                members: {
+                  some: {
+                    userId,
+                  },
+                },
+              },
+            ],
           },
         ],
       };
@@ -116,12 +136,28 @@ export class SearchService {
     }
 
     if (type === "all" || type === "posts") {
-      const postWhere = {
+      const postWhere: Prisma.PostWhereInput = {
         content: {
           contains: q,
-          mode: "insensitive" as const,
+          mode: "insensitive",
         },
         ...(communityId ? { communityId } : {}),
+        OR: [
+          {
+            communityId: null,
+          },
+          {
+            community: {
+              is: {
+                members: {
+                  some: {
+                    userId,
+                  },
+                },
+              },
+            },
+          },
+        ],
       };
 
       [posts, postsTotal] = await Promise.all([

@@ -74,11 +74,13 @@ describe("UploadsService", () => {
     );
   });
 
-  it("rejects uploading an image to another user's post", async () => {
+  it("rejects another user's post upload and removes the uploaded file", async () => {
     prisma.post.findUnique.mockResolvedValue({
       authorId: "other-user",
       imagePath: null,
     });
+
+    mockedExistsSync.mockReturnValue(true);
 
     await expect(
       service.savePostImage(
@@ -93,6 +95,12 @@ describe("UploadsService", () => {
     expect(
       prisma.post.update,
     ).not.toHaveBeenCalled();
+
+    expect(
+      mockedUnlinkSync,
+    ).toHaveBeenCalledWith(
+      expect.stringContaining("image.png"),
+    );
   });
 
   it("allows the author to save a post image", async () => {
