@@ -4,7 +4,7 @@ export const mockCommunities: Community[] = [
   {
     id: '1',
     name: 'Web Builders',
-    description: 'Learning the web, one project at a time. Share ideas, get feedback, and build together.',
+    description: 'Learn React and web fundamentals with a community of makers.',
     members: 128,
     activity: 'Active today',
     topic: 'PROGRAMMING',

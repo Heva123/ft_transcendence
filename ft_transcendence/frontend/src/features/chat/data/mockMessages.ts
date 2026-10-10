@@ -4,6 +4,7 @@ export const mockMessages: Message[] = [
   {
     id: '1',
     channelId: '1',
+    senderId: 'heba',
     sender: 'Heba',
     text: 'Morning! Anyone working on the profile flow today?',
     createdAt: '09:41',
@@ -11,6 +12,7 @@ export const mockMessages: Message[] = [
   {
     id: '2',
     channelId: '1',
+    senderId: 'afnan',
     sender: 'Afnan',
     text: 'Yep! I’ve got the edit form ready for a review.',
     createdAt: '09:42',
@@ -18,6 +20,7 @@ export const mockMessages: Message[] = [
   {
     id: '3',
     channelId: '1',
+    senderId: 'me',
     sender: 'You',
     text: 'Happy to help. Send it over when you’re ready.',
     createdAt: '09:43',
@@ -25,6 +28,7 @@ export const mockMessages: Message[] = [
   {
     id: '4',
     channelId: '2',
+    senderId: 'sara',
     sender: 'Sara',
     text: 'Can someone explain Props?',
     createdAt: '09:45',
