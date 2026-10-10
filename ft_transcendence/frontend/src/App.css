@@ -1,0 +1,60 @@
+:root {
+  --berry: #8a335d;
+  --yellow: #f2c255;
+  --pink: #f0afce;
+  --blue: #a3e5f0;
+  --teal: #3a7f8a;
+  --background: #fffaf5;
+  --text: #2f2f2f;
+}
+
+.app {
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--text);
+}
+
+.app-header {
+  padding: 24px 32px;
+  border-bottom: 3px solid var(--berry);
+}
+
+.app-header h1 {
+  margin: 0;
+  color: var(--berry);
+  font-size: 48px;
+  letter-spacing: 4px;
+}
+
+.app-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: calc(100vh - 100px);
+}
+
+.sidebar {
+  padding: 24px;
+  background: #fff4ca;
+  border-right: 3px solid var(--berry);
+}
+
+.main-content {
+  padding: 32px;
+  background: #fffaf5;
+}
+
+.global-button {
+  width: 100%;
+  margin-bottom: 28px;
+  padding: 14px;
+  border: 3px solid var(--berry);
+  background: var(--berry);
+  color: white;
+  font-weight: bold;
+  text-align: left;
+  box-shadow: 4px 4px 0 var(--pink);
+}
+
+.global-button:hover {
+  background: var(--teal);
+}
