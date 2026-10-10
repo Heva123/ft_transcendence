@@ -42,7 +42,13 @@ export class PostsService {
     const posts = await this.prisma.post.findMany({
       where: { communityId },
       include: {
-        author: { select: { id: true, username: true } },
+        author: {
+          select: {
+            id: true,
+            username: true,
+            avatarPath: true,
+          },
+        },
         community: { select: { id: true, name: true } },
         _count: { select: { comments: true, likes: true } },
         likes: { where: { userId }, select: { userId: true } },
@@ -59,7 +65,13 @@ export class PostsService {
     const post = await this.prisma.post.findUniqueOrThrow({
       where: { id: postId },
       include: {
-        author: { select: { id: true, username: true } },
+        author: {
+          select: {
+            id: true,
+            username: true,
+            avatarPath: true,
+          },
+        },
         community: { select: { id: true, name: true } },
         _count: { select: { comments: true, likes: true } },
         likes: { where: { userId }, select: { userId: true } },
@@ -72,7 +84,15 @@ export class PostsService {
     const post = await this.getResponse(userId, postId);
     const comments = await this.prisma.comment.findMany({
       where: { postId },
-      include: { author: { select: { id: true, username: true } } },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            avatarPath: true,
+          },
+        },
+      },
       orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
       take: 100,
     });
