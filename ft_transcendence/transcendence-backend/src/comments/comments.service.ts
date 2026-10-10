@@ -13,7 +13,15 @@ export class CommentsService {
     await this.posts.assertReadable(postId, userId);
     const comments = await this.prisma.comment.findMany({
       where: { postId },
-      include: { author: { select: { id: true, username: true } } },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            avatarPath: true,
+          },
+        },
+      },
       orderBy: [{ createdAt: 'asc' }, { id: 'asc' }],
       take: 100,
     });
@@ -34,7 +42,15 @@ export class CommentsService {
     }
     const comment = await this.prisma.comment.create({
       data: { authorId: userId, postId, content: this.validContent(dto.content), parentId },
-      include: { author: { select: { id: true, username: true } } },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            avatarPath: true,
+          },
+        },
+      },
     });
     return toReplyResponse(comment);
   }
@@ -45,7 +61,15 @@ export class CommentsService {
     const comment = await this.prisma.comment.update({
       where: { id: commentId },
       data: { content: this.validContent(dto.content) },
-      include: { author: { select: { id: true, username: true } } },
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            avatarPath: true,
+          },
+        },
+      },
     });
     return toReplyResponse(comment);
   }
