@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-
+import SettingsPage from "./pages/SettingsPage";
 import { UserContext, type User } from "./UserContext";
 
 import CommunityMembersPage from "./pages/CommunityMembersPage";
@@ -20,6 +20,7 @@ type Page =
   | "discover"
   | "members"
   | "terms"
+  | "settings"
   | "privacy";
 
 type LoginResponse = {
@@ -38,7 +39,7 @@ function getPageFromHash(): Page {
   if (hash === "#/members") return "members";
   if (hash === "#/terms") return "terms";
   if (hash === "#/privacy") return "privacy";
-
+  if (hash === "#/settings") return "settings";
   return "login";
 }
 
@@ -152,7 +153,11 @@ function App() {
       return (
         <LegalPage
           title="Terms of Service"
-          onBack={() => navigate("register")}
+          onBack={() =>
+            navigate(
+              session ? "settings" : "register"
+            )
+          }
         />
       );
     }
@@ -161,7 +166,11 @@ function App() {
       return (
         <LegalPage
           title="Privacy Policy"
-          onBack={() => navigate("register")}
+          onBack={() =>
+            navigate(
+              session ? "settings" : "register"
+            )
+          }
         />
       );
     }
@@ -223,7 +232,9 @@ function App() {
         />
       );
     }
-
+    if (page === "settings" && session) {
+        return <SettingsPage />;
+      }
     if (page === "dashboard" && session) {
       return (
         <DashboardPage

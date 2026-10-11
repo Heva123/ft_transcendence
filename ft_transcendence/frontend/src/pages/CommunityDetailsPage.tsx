@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import AppLayout from "../components/AppLayout";
+import RolesPermissionsPage from "./RolesPermissionsPage";
 
 type GroupDetails = {
   id: string;
@@ -50,6 +51,9 @@ function CommunityDetailsPage({
 
   const [error, setError] =
     useState("");
+
+  const [showRoles, setShowRoles] =
+    useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -189,6 +193,17 @@ function CommunityDetailsPage({
     }
   }
 
+  if (showRoles) {
+    return (
+      <RolesPermissionsPage
+        token={token}
+        onBack={() =>
+          setShowRoles(false)
+        }
+      />
+    );
+  }
+
   return (
     <AppLayout>
       <button
@@ -221,33 +236,51 @@ function CommunityDetailsPage({
         </p>
       )}
 
-      {!isLoading && !error && group && (
-        <>
-          <div className="dashboard-card">
-            <h2>{group.name}</h2>
+      {!isLoading &&
+        !error &&
+        group && (
+          <>
+            <section className="community-hero">
+              <div>
+                <p className="small-label">
+                  COMMUNITY
+                </p>
 
-            <p>
-              {group.description ||
-                "No description yet."}
-            </p>
+                <h2>{group.name}</h2>
 
-            <h3>Members</h3>
+                <p>
+                  {group.description ||
+                    "No description yet."}
+                </p>
 
-            <p>
-              👥 {group._count.members}
-            </p>
+                <p className="community-meta">
+                  {group._count.members} members
+                  {" · "}
+                  Your role:{" "}
+                  {group.members[0]?.role ||
+                    "Unknown"}
+                </p>
+              </div>
+            </section>
 
-            <h3>Your role</h3>
-
-            <p>
-              {group.members[0]?.role ||
-                "Unknown"}
-            </p>
-
-            <div className="community-actions">
+            <div className="community-tabs">
               <button
                 type="button"
-                className="text-link"
+                className="community-tab"
+              >
+                Community
+              </button>
+
+              <button
+                type="button"
+                className="community-tab"
+              >
+                Channels
+              </button>
+
+              <button
+                type="button"
+                className="community-tab"
                 onClick={() =>
                   onOpenMembers(group.id)
                 }
@@ -257,52 +290,74 @@ function CommunityDetailsPage({
 
               <button
                 type="button"
-                className="text-link"
+                className="community-tab"
+                onClick={() =>
+                  setShowRoles(true)
+                }
               >
-                Settings
+                Roles & permissions
               </button>
-
-              {group.members[0]?.role !==
-                "OWNER" && (
-                <button
-                  type="button"
-                  className="text-link"
-                  onClick={handleLeave}
-                  disabled={isLeaving}
-                >
-                  {isLeaving
-                    ? "Leaving..."
-                    : "Leave Community"}
-                </button>
-              )}
             </div>
-          </div>
 
-          <div className="dashboard-card">
-            <h3>Channels</h3>
+            <div className="community-content-grid">
+              <div className="community-main-card">
+                <h3>
+                  Community space
+                </h3>
 
-            {channels.length === 0 && (
-              <p>
-                No channels yet.
-              </p>
-            )}
-
-            {channels.map((channel) => (
-              <div key={channel.id}>
                 <p>
-                  # {channel.name}
+                  Welcome to {group.name}.
                 </p>
 
-                {channel.description && (
-                  <p>
-                    {channel.description}
-                  </p>
-                )}
+                <p>
+                  Share ideas, ask questions and
+                  build together.
+                </p>
               </div>
-            ))}
-          </div>
-        </>
-      )}
+
+              <aside className="community-channels-card">
+                <h3>Channels</h3>
+
+                {channels.length === 0 && (
+                  <p>No channels yet.</p>
+                )}
+
+                {channels.map(
+                  (channel) => (
+                    <div
+                      className="channel-row"
+                      key={channel.id}
+                    >
+                      <strong>
+                        # {channel.name}
+                      </strong>
+
+                      {channel.description && (
+                        <p>
+                          {channel.description}
+                        </p>
+                      )}
+                    </div>
+                  )
+                )}
+
+                {group.members[0]?.role !==
+                  "OWNER" && (
+                  <button
+                    type="button"
+                    className="community-leave"
+                    onClick={handleLeave}
+                    disabled={isLeaving}
+                  >
+                    {isLeaving
+                      ? "Leaving..."
+                      : "Leave community"}
+                  </button>
+                )}
+              </aside>
+            </div>
+          </>
+        )}
     </AppLayout>
   );
 }

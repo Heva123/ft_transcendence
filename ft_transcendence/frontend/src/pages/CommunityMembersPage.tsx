@@ -1,4 +1,8 @@
-import { useEffect, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
 
 import AppLayout from "../components/AppLayout";
 
@@ -36,19 +40,29 @@ function CommunityMembersPage({
   token,
   onBack,
 }: CommunityMembersPageProps) {
-  const [members, setMembers] = useState<Member[]>([]);
+  const [members, setMembers] =
+    useState<Member[]>([]);
+
   const [currentRole, setCurrentRole] =
     useState<Role>("MEMBER");
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] =
+    useState("");
+
   const [newMemberRole, setNewMemberRole] =
     useState<Role>("MEMBER");
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAdding, setIsAdding] = useState(false);
+  const [isLoading, setIsLoading] =
+    useState(true);
 
-  const [error, setError] = useState("");
-  const [message, setMessage] = useState("");
+  const [isAdding, setIsAdding] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [message, setMessage] =
+    useState("");
 
   useEffect(() => {
     async function loadMembers() {
@@ -74,7 +88,10 @@ function CommunityMembersPage({
           }
         );
 
-        if (!membersResponse.ok || !detailsResponse.ok) {
+        if (
+          !membersResponse.ok ||
+          !detailsResponse.ok
+        ) {
           throw new Error(
             "Could not load community members."
           );
@@ -89,7 +106,8 @@ function CommunityMembersPage({
         setMembers(membersData);
 
         setCurrentRole(
-          detailsData.members[0]?.role || "MEMBER"
+          detailsData.members[0]?.role ||
+            "MEMBER"
         );
       } catch (err) {
         setError(
@@ -110,6 +128,8 @@ function CommunityMembersPage({
   ) {
     event.preventDefault();
 
+    if (isAdding) return;
+
     setIsAdding(true);
     setError("");
     setMessage("");
@@ -120,8 +140,10 @@ function CommunityMembersPage({
         {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            "Content-Type":
+              "application/json",
+            Authorization:
+              `Bearer ${token}`,
           },
           body: JSON.stringify({
             email,
@@ -152,7 +174,9 @@ function CommunityMembersPage({
       }
 
       if (!response.ok) {
-        throw new Error("Could not add member.");
+        throw new Error(
+          "Could not add member."
+        );
       }
 
       const newMember: Member =
@@ -193,8 +217,10 @@ function CommunityMembersPage({
         {
           method: "PATCH",
           headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
+            "Content-Type":
+              "application/json",
+            Authorization:
+              `Bearer ${token}`,
           },
           body: JSON.stringify({
             role,
@@ -250,7 +276,8 @@ function CommunityMembersPage({
         {
           method: "DELETE",
           headers: {
-            Authorization: `Bearer ${token}`,
+            Authorization:
+              `Bearer ${token}`,
           },
         }
       );
@@ -270,7 +297,8 @@ function CommunityMembersPage({
 
       setMembers((currentMembers) =>
         currentMembers.filter(
-          (member) => member.id !== memberId
+          (member) =>
+            member.id !== memberId
         )
       );
 
@@ -286,7 +314,9 @@ function CommunityMembersPage({
     }
   }
 
-  function canRemoveMember(member: Member) {
+  function canRemoveMember(
+    member: Member
+  ) {
     if (member.role === "OWNER") {
       return false;
     }
@@ -327,65 +357,79 @@ function CommunityMembersPage({
       </button>
 
       <p className="small-label">
-        MEMBERS
+        COMMUNITY MEMBERS
       </p>
 
-      <h2>Community Members</h2>
+      <h2>
+        The people behind the pixels.
+      </h2>
 
-      <p>
+      <p className="members-subtitle">
         Your role: {currentRole}
       </p>
 
       {canAddMember && (
-        <div className="dashboard-card">
-          <h3>Add Member</h3>
+        <div className="members-add-card">
+          <h3>Invite a member</h3>
 
-          <form onSubmit={handleAddMember}>
-            <label htmlFor="member-email">
-              Email
-            </label>
+          <form
+            className="members-add-form"
+            onSubmit={handleAddMember}
+          >
+            <div className="members-form-field">
+              <label htmlFor="member-email">
+                Email
+              </label>
 
-            <input
-              id="member-email"
-              type="email"
-              placeholder="member@example.com"
-              value={email}
-              onChange={(event) =>
-                setEmail(event.target.value)
-              }
-              required
-            />
+              <input
+                id="member-email"
+                type="email"
+                placeholder="member@example.com"
+                value={email}
+                onChange={(event) =>
+                  setEmail(
+                    event.target.value
+                  )
+                }
+                required
+              />
+            </div>
 
-            <label htmlFor="member-role">
-              Role
-            </label>
+            <div className="members-form-field">
+              <label htmlFor="member-role">
+                Role
+              </label>
 
-            <select
-              id="member-role"
-              value={newMemberRole}
-              onChange={(event) =>
-                setNewMemberRole(
-                  event.target.value as Role
-                )
-              }
-            >
-              <option value="MEMBER">
-                MEMBER
-              </option>
-
-              <option value="MODERATOR">
-                MODERATOR
-              </option>
-
-              {currentRole === "OWNER" && (
-                <option value="ADMIN">
-                  ADMIN
+              <select
+                id="member-role"
+                value={newMemberRole}
+                onChange={(event) =>
+                  setNewMemberRole(
+                    event.target
+                      .value as Role
+                  )
+                }
+              >
+                <option value="MEMBER">
+                  MEMBER
                 </option>
-              )}
-            </select>
+
+                <option value="MODERATOR">
+                  MODERATOR
+                </option>
+
+                {currentRole ===
+                  "OWNER" && (
+                  <option value="ADMIN">
+                    ADMIN
+                  </option>
+                )}
+              </select>
+            </div>
 
             <button
               type="submit"
+              className="members-add-button"
               disabled={isAdding}
             >
               {isAdding
@@ -397,7 +441,10 @@ function CommunityMembersPage({
       )}
 
       {isLoading && (
-        <p className="message">
+        <p
+          className="message"
+          role="status"
+        >
           Loading members...
         </p>
       )}
@@ -422,61 +469,87 @@ function CommunityMembersPage({
 
       {!isLoading &&
         !error &&
-        members.map((member) => (
-          <div
-            className="dashboard-card"
-            key={member.id}
-          >
-            <h3>
-              {member.user.username}
-            </h3>
-
-            <p>
-              {member.user.email}
-            </p>
-
-            <p>
-              Role: {member.role}
-            </p>
-
-            {currentRole === "OWNER" &&
-              member.role !== "OWNER" && (
-                <select
-                  value={member.role}
-                  onChange={(event) =>
-                    handleChangeRole(
-                      member.id,
-                      event.target.value as Role
-                    )
-                  }
-                >
-                  <option value="MEMBER">
-                    MEMBER
-                  </option>
-
-                  <option value="MODERATOR">
-                    MODERATOR
-                  </option>
-
-                  <option value="ADMIN">
-                    ADMIN
-                  </option>
-                </select>
-              )}
-
-            {canRemoveMember(member) && (
-              <button
-                type="button"
-                className="text-link"
-                onClick={() =>
-                  handleRemoveMember(member.id)
-                }
+        members.length > 0 && (
+          <div className="members-list">
+            {members.map((member) => (
+              <div
+                className="member-row"
+                key={member.id}
               >
-                Remove Member
-              </button>
-            )}
+                <div className="member-person">
+                  <div className="member-avatar">
+                    {member.user.username
+                      .charAt(0)
+                      .toUpperCase()}
+                  </div>
+
+                  <div className="member-info">
+                    <strong>
+                      {member.user.username}
+                    </strong>
+
+                    <span>
+                      {member.user.email}
+                    </span>
+                  </div>
+                </div>
+
+                <span
+                  className={`member-role-badge ${member.role.toLowerCase()}`}
+                >
+                  {member.role}
+                </span>
+
+                <div className="member-actions">
+                  {currentRole ===
+                    "OWNER" &&
+                    member.role !==
+                      "OWNER" && (
+                      <select
+                        className="member-role-select"
+                        value={member.role}
+                        onChange={(event) =>
+                          handleChangeRole(
+                            member.id,
+                            event.target
+                              .value as Role
+                          )
+                        }
+                      >
+                        <option value="MEMBER">
+                          MEMBER
+                        </option>
+
+                        <option value="MODERATOR">
+                          MODERATOR
+                        </option>
+
+                        <option value="ADMIN">
+                          ADMIN
+                        </option>
+                      </select>
+                    )}
+
+                  {canRemoveMember(
+                    member
+                  ) && (
+                    <button
+                      type="button"
+                      className="member-remove"
+                      onClick={() =>
+                        handleRemoveMember(
+                          member.id
+                        )
+                      }
+                    >
+                      Remove member
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
 
       {!isLoading &&
         !error &&
@@ -485,6 +558,12 @@ function CommunityMembersPage({
             <p>No members found.</p>
           </div>
         )}
+
+      <p className="members-note">
+        Roles belong to each community
+        membership, not to the student
+        globally.
+      </p>
     </AppLayout>
   );
 }
