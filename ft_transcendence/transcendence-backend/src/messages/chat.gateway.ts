@@ -4,13 +4,16 @@ import {
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from "@nestjs/websockets";
 import { Server, Socket } from "socket.io";
+import { isUUID } from "class-validator";
 import { JwtPayload } from "../auth/types/jwt-payload.type";
 import { PrismaService } from "../prisma/prisma.service";
+import { RealtimeEventsService } from "../realtime/realtime-events.service";
 import { MessagesService } from "./messages.service";
 
 @WebSocketGateway({
@@ -19,7 +22,7 @@ import { MessagesService } from "./messages.service";
   },
 })
 export class ChatGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
 {
   private readonly userSockets = new Map<string, Set<string>>();
 
@@ -30,7 +33,12 @@ export class ChatGateway
     private readonly jwtService: JwtService,
     private readonly messagesService: MessagesService,
     private readonly prisma: PrismaService,
+    private readonly realtimeEvents: RealtimeEventsService,
   ) {}
+
+  afterInit(server: Server) {
+    this.realtimeEvents.attachServer(server);
+  }
 
   async handleConnection(client: Socket) {
     try {
@@ -84,6 +92,49 @@ export class ChatGateway
     }
   }
 
+  @SubscribeMessage("presence:get")
+  async handlePresenceGet(
+    @ConnectedSocket() client: Socket,
+  ) {
+    const userId = client.data.userId as string | undefined;
+
+    if (!userId) {
+      client.emit("auth:error", {
+        message: "Authentication required",
+      });
+      return;
+    }
+
+    const onlineUserIds = [
+      ...this.userSockets.keys(),
+    ];
+
+    if (onlineUserIds.length === 0) {
+      client.emit("presence:snapshot", []);
+      return;
+    }
+
+    const users = await this.prisma.user.findMany({
+      where: {
+        id: {
+          in: onlineUserIds,
+        },
+      },
+      select: {
+        id: true,
+        username: true,
+      },
+    });
+
+    client.emit(
+      "presence:snapshot",
+      users.map((user) => ({
+        userId: user.id,
+        username: user.username,
+      })),
+    );
+  }
+
   @SubscribeMessage("channel:join")
   async handleJoinChannel(
     @ConnectedSocket() client: Socket,
@@ -127,6 +178,36 @@ export class ChatGateway
     }
   }
 
+  @SubscribeMessage("channel:leave")
+  async handleLeaveChannel(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() data: { channelId?: string },
+  ) {
+    const userId =
+      client.data.userId as string | undefined;
+    const channelId = data?.channelId;
+
+    if (!userId) {
+      client.emit("auth:error", {
+        message: "Authentication required",
+      });
+      return;
+    }
+
+    if (!channelId) {
+      client.emit("channel:error", {
+        message: "channelId is required",
+      });
+      return;
+    }
+
+    await client.leave(`channel:${channelId}`);
+
+    client.emit("channel:left", {
+      channelId,
+    });
+  }
+
   @SubscribeMessage("message:send")
   async handleSendMessage(
     @ConnectedSocket() client: Socket,
@@ -134,6 +215,7 @@ export class ChatGateway
     data: {
       channelId?: string;
       content?: string;
+      attachmentId?: string;
     },
   ) {
     const userId = client.data.userId as string | undefined;
@@ -142,6 +224,10 @@ export class ChatGateway
       typeof data?.content === "string"
         ? data.content.trim()
         : "";
+    const attachmentId =
+      typeof data?.attachmentId === "string"
+        ? data.attachmentId
+        : undefined;
 
     if (!userId) {
       client.emit("auth:error", {
@@ -157,9 +243,21 @@ export class ChatGateway
       return;
     }
 
-    if (!content) {
+    if (!content && !attachmentId) {
       client.emit("message:error", {
-        message: "Message cannot be empty",
+        message:
+          "Message must contain text or an attachment",
+      });
+      return;
+    }
+
+    if (
+      attachmentId &&
+      !isUUID(attachmentId)
+    ) {
+      client.emit("message:error", {
+        message:
+          "attachmentId must be a valid UUID",
       });
       return;
     }
@@ -184,7 +282,10 @@ export class ChatGateway
       const message = await this.messagesService.create(
         channelId,
         userId,
-        { content },
+        {
+          content,
+          attachmentId,
+        },
       );
 
       await this.emitToAllowedUsers(

@@ -4,6 +4,7 @@ jest.mock("@nestjs/jwt", () => ({
 
 import { JwtService } from "@nestjs/jwt";
 import { PrismaService } from "../prisma/prisma.service";
+import { RealtimeEventsService } from "../realtime/realtime-events.service";
 import { ChatGateway } from "./chat.gateway";
 import { MessagesService } from "./messages.service";
 
@@ -21,8 +22,13 @@ describe("ChatGateway", () => {
 
   const prisma = {
     user: {
+      findMany: jest.fn(),
       update: jest.fn(),
     },
+  };
+
+  const realtimeEvents = {
+    attachServer: jest.fn(),
   };
 
   const server = {
@@ -55,6 +61,12 @@ describe("ChatGateway", () => {
       ) {
         this.rooms.add(room);
       }),
+      leave: jest.fn(async function (
+        this: { rooms: Set<string> },
+        room: string,
+      ) {
+        this.rooms.delete(room);
+      }),
       disconnect: jest.fn(),
     };
   }
@@ -74,6 +86,7 @@ describe("ChatGateway", () => {
       jwtService as unknown as JwtService,
       messagesService as unknown as MessagesService,
       prisma as unknown as PrismaService,
+      realtimeEvents as unknown as RealtimeEventsService,
     );
 
     gateway.server = server as never;
@@ -128,6 +141,104 @@ describe("ChatGateway", () => {
       {
         userId: "user-1",
         username: "worod",
+      },
+    );
+  });
+
+  it("returns a snapshot of currently online users", async () => {
+    const firstClient = createSocket();
+    const secondClient = createSocket();
+
+    firstClient.handshake.auth = {
+      token: "token-1",
+    };
+
+    secondClient.handshake.auth = {
+      token: "token-2",
+    };
+
+    jwtService.verifyAsync
+      .mockResolvedValueOnce({
+        sub: "user-1",
+        username: "worod",
+      })
+      .mockResolvedValueOnce({
+        sub: "user-2",
+        username: "afnan",
+      });
+
+    await gateway.handleConnection(firstClient as never);
+    await gateway.handleConnection(secondClient as never);
+
+    prisma.user.findMany.mockResolvedValue([
+      {
+        id: "user-1",
+        username: "worod",
+      },
+      {
+        id: "user-2",
+        username: "afnan",
+      },
+    ]);
+
+    await gateway.handlePresenceGet(
+      secondClient as never,
+    );
+
+    expect(prisma.user.findMany).toHaveBeenCalledWith({
+      where: {
+        id: {
+          in: ["user-1", "user-2"],
+        },
+      },
+      select: {
+        id: true,
+        username: true,
+      },
+    });
+
+    expect(secondClient.emit).toHaveBeenCalledWith(
+      "presence:snapshot",
+      [
+        {
+          userId: "user-1",
+          username: "worod",
+        },
+        {
+          userId: "user-2",
+          username: "afnan",
+        },
+      ],
+    );
+  });
+
+  it("leaves a previously joined channel room", async () => {
+    const client = createSocket(
+      "user-1",
+      "worod",
+    );
+
+    client.rooms.add("channel:channel-1");
+
+    await gateway.handleLeaveChannel(
+      client as never,
+      {
+        channelId: "channel-1",
+      },
+    );
+
+    expect(client.leave).toHaveBeenCalledWith(
+      "channel:channel-1",
+    );
+
+    expect(
+      client.rooms.has("channel:channel-1"),
+    ).toBe(false);
+
+    expect(client.emit).toHaveBeenCalledWith(
+      "channel:left",
+      {
+        channelId: "channel-1",
       },
     );
   });

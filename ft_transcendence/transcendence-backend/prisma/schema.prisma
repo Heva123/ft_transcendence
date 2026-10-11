@@ -8,30 +8,31 @@ datasource db {
 }
 
 model User {
-  id                   String            @id @default(uuid())
-  email                String            @unique
-  username             String            @unique
+  id                   String              @id @default(uuid())
+  email                String              @unique
+  username             String              @unique
   passwordHash         String
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
+  createdAt            DateTime            @default(now())
+  updatedAt            DateTime            @updatedAt
   lastSeenAt           DateTime?
   avatarPath           String?
   communityMemberships CommunityMember[]
-  createdCommunities   Community[]       @relation("CommunityCreator")
-  createdChannels      Channel[]         @relation("ChannelCreator")
-  createdProjects      Project[]         @relation("ProjectCreator")
-  createdTasks         Task[]            @relation("TaskCreator")
-  assignedTasks        Task[]            @relation("TaskAssignee")
+  createdCommunities   Community[]         @relation("CommunityCreator")
+  createdChannels      Channel[]           @relation("ChannelCreator")
+  createdProjects      Project[]           @relation("ProjectCreator")
+  createdTasks         Task[]              @relation("TaskCreator")
+  assignedTasks        Task[]              @relation("TaskAssignee")
   messages             Message[]
   messageReads         MessageRead[]
+  messageAttachments   MessageAttachment[] @relation("MessageAttachmentUploader")
   posts                Post[]
   comments             Comment[]
   likes                Like[]
-  reportsFiled         Report[]          @relation("ReportReporter")
-  reportsReviewed      Report[]          @relation("ReportReviewer")
+  reportsFiled         Report[]            @relation("ReportReporter")
+  reportsReviewed      Report[]            @relation("ReportReviewer")
   notifications        Notification[]
-  blocksInitiated      Block[]           @relation("Blocker")
-  blocksReceived       Block[]           @relation("Blocked")
+  blocksInitiated      Block[]             @relation("Blocker")
+  blocksReceived       Block[]             @relation("Blocked")
 
   @@map("users")
 }
@@ -79,9 +80,10 @@ model Channel {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  createdBy User      @relation("ChannelCreator", fields: [createdById], references: [id], onDelete: Restrict)
-  messages  Message[]
+  community   Community           @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  createdBy   User                @relation("ChannelCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  messages    Message[]
+  attachments MessageAttachment[]
 
   @@unique([communityId, name])
   @@index([communityId])
@@ -167,9 +169,30 @@ model Message {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  channel Channel       @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  author  User          @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  reads   MessageRead[]
+  channel    Channel            @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author     User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reads      MessageRead[]
+  attachment MessageAttachment?
+}
+
+model MessageAttachment {
+  id         String   @id @default(uuid())
+  channelId  String
+  uploaderId String
+  messageId  String?  @unique
+  name       String   @db.VarChar(255)
+  mimeType   String   @db.VarChar(100)
+  size       Int
+  path       String
+  createdAt  DateTime @default(now())
+
+  channel  Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  uploader User     @relation("MessageAttachmentUploader", fields: [uploaderId], references: [id], onDelete: Cascade)
+  message  Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([channelId, createdAt])
+  @@index([uploaderId])
+  @@map("message_attachments")
 }
 
 model MessageRead {

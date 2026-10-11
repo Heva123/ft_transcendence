@@ -12,13 +12,17 @@ import {
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import { AuthUser } from "../common/types/auth-user.type";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
+import { RealtimeEventsService } from "../realtime/realtime-events.service";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { UsersService } from "./users.service";
 
 @UseGuards(JwtAuthGuard)
 @Controller("users")
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly realtimeEvents: RealtimeEventsService,
+  ) {}
 
   @Get("me")
   getMe(@CurrentUser() user: AuthUser) {
@@ -39,11 +43,21 @@ export class UsersController {
   }
 
   @Delete(":userId/block")
-  unblockUser(
+  async unblockUser(
     @CurrentUser() user: AuthUser,
     @Param("userId", ParseUUIDPipe) userId: string,
   ) {
-    return this.usersService.unblockUser(user.id, userId);
+    const result = await this.usersService.unblockUser(
+      user.id,
+      userId,
+    );
+
+    this.realtimeEvents.emitUserUnblocked(
+      userId,
+      user.id,
+    );
+
+    return result;
   }
 
   @Patch("me")
