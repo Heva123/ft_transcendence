@@ -43,11 +43,19 @@ function Sidebar() {
       <aside className="sidebar-promo">
         <strong>⚡ Better, together.</strong>
         <p>Your next great idea could start with a hello.</p>
-        <span>Explore →</span>
+        <NavLink to="/communities/discover">Explore →</NavLink>
       </aside>
       <nav className="sidebar__footer">
         <NavLink to="/settings">Settings</NavLink>
-        <button type="button">Log out</button>
+        <button
+          type="button"
+          onClick={() => {
+            localStorage.removeItem('accessToken')
+            window.location.href = '/login'
+          }}
+        >
+          Log out
+        </button>
       </nav>
     </aside>
   )
