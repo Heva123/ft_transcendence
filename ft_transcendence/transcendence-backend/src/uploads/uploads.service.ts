@@ -111,6 +111,142 @@ export class UploadsService {
     };
   }
 
+  async saveChatAttachment(
+    userId: string,
+    channelId: string,
+    file: {
+      path: string;
+      originalname: string;
+      mimetype: string;
+      size: number;
+    },
+  ) {
+    const channel = await this.prisma.channel.findUnique({
+      where: { id: channelId },
+      select: {
+        communityId: true,
+      },
+    });
+
+    if (!channel) {
+      this.deleteFile(file.path);
+      throw new NotFoundException("Channel not found");
+    }
+
+    const membership =
+      await this.prisma.communityMember.findUnique({
+        where: {
+          userId_communityId: {
+            userId,
+            communityId: channel.communityId,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+    if (!membership) {
+      this.deleteFile(file.path);
+      throw new ForbiddenException(
+        "You must be a community member to upload chat attachments",
+      );
+    }
+
+    try {
+      const attachment =
+        await this.prisma.messageAttachment.create({
+          data: {
+            channelId,
+            uploaderId: userId,
+            name: file.originalname,
+            mimeType: file.mimetype,
+            size: file.size,
+            path: file.path,
+          },
+          select: {
+            id: true,
+            name: true,
+            mimeType: true,
+            size: true,
+          },
+        });
+
+      return {
+        id: attachment.id,
+        name: attachment.name,
+        url: `/api/uploads/chat/${attachment.id}`,
+        type: attachment.mimeType,
+        size: attachment.size,
+      };
+    } catch (error) {
+      this.deleteFile(file.path);
+      throw error;
+    }
+  }
+
+  async getChatAttachment(
+    userId: string,
+    attachmentId: string,
+  ) {
+    const attachment =
+      await this.prisma.messageAttachment.findUnique({
+        where: {
+          id: attachmentId,
+        },
+        select: {
+          path: true,
+          mimeType: true,
+          channel: {
+            select: {
+              communityId: true,
+            },
+          },
+        },
+      });
+
+    if (!attachment) {
+      throw new NotFoundException(
+        "Chat attachment not found",
+      );
+    }
+
+    const membership =
+      await this.prisma.communityMember.findUnique({
+        where: {
+          userId_communityId: {
+            userId,
+            communityId:
+              attachment.channel.communityId,
+          },
+        },
+        select: {
+          id: true,
+        },
+      });
+
+    if (!membership) {
+      throw new ForbiddenException(
+        "You must be a community member to access this attachment",
+      );
+    }
+
+    const path = resolve(attachment.path);
+
+    if (!existsSync(path)) {
+      throw new NotFoundException(
+        "Chat attachment file not found",
+      );
+    }
+
+    return new StreamableFile(
+      createReadStream(path),
+      {
+        type: attachment.mimeType,
+      },
+    );
+  }
+
   async savePostImage(
     userId: string,
     postId: string,
@@ -271,6 +407,16 @@ export class UploadsService {
       imagePath: null,
       deleted: true,
     };
+  }
+
+  private deleteFile(
+    filePath: string,
+  ) {
+    const path = resolve(filePath);
+
+    if (existsSync(path)) {
+      unlinkSync(path);
+    }
   }
 
   private createImageStream(

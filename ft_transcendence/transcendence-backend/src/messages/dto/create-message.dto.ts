@@ -1,10 +1,23 @@
 import { Transform } from "class-transformer";
-import { IsString, MaxLength, MinLength } from "class-validator";
+import {
+  IsOptional,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from "class-validator";
 
 export class CreateMessageDto {
-  @Transform(({ value }) => (typeof value === "string" ? value.trim() : value))
+  @Transform(({ value }) =>
+    typeof value === "string"
+      ? value.trim()
+      : value,
+  )
+  @IsOptional()
   @IsString()
-  @MinLength(1)
   @MaxLength(2000)
-  content: string;
+  content?: string;
+
+  @IsOptional()
+  @IsUUID()
+  attachmentId?: string;
 }

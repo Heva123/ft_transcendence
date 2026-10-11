@@ -17,12 +17,14 @@ import { ReportsModule } from "./reports/reports.module";
 import { NotificationsModule } from "./notifications/notifications.module";
 import { SearchModule } from "./search/search.module";
 import { UploadsModule } from "./uploads/uploads.module";
+import { RealtimeModule } from "./realtime/realtime.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    RealtimeModule,
     PrismaModule,
     AuthModule,
     UsersModule,

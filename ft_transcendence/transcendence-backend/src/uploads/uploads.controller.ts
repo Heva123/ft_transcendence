@@ -25,6 +25,9 @@ import { UploadsService } from "./uploads.service";
 
 interface UploadedImage {
   path: string;
+  originalname: string;
+  mimetype: string;
+  size: number;
 }
 
 function imageFileFilter(
@@ -150,6 +153,80 @@ export class UploadsController {
   ) {
     return this.uploadsService.deleteAvatar(
       user.id,
+    );
+  }
+
+  @Post("chat/:channelId")
+  @UseInterceptors(
+    FileInterceptor("file", {
+      storage: diskStorage({
+        destination: (
+          _request,
+          _file,
+          callback,
+        ) => {
+          const destination = join(
+            process.cwd(),
+            "uploads",
+            "chat",
+          );
+
+          mkdirSync(destination, {
+            recursive: true,
+          });
+
+          callback(null, destination);
+        },
+
+        filename: (
+          _request,
+          file,
+          callback,
+        ) => {
+          callback(
+            null,
+            `${randomUUID()}${extname(
+              file.originalname,
+            ).toLowerCase()}`,
+          );
+        },
+      }),
+
+      limits: {
+        fileSize: 5 * 1024 * 1024,
+      },
+
+      fileFilter: imageFileFilter,
+    }),
+  )
+  uploadChatAttachment(
+    @CurrentUser() user: AuthUser,
+    @Param("channelId", ParseUUIDPipe)
+    channelId: string,
+    @UploadedFile() file?: UploadedImage,
+  ) {
+    if (!file) {
+      throw new BadRequestException(
+        "Chat attachment file is required",
+      );
+    }
+
+    return this.uploadsService.saveChatAttachment(
+      user.id,
+      channelId,
+      file,
+    );
+  }
+
+  @Get("chat/:attachmentId")
+  getChatAttachment(
+    @CurrentUser() user: AuthUser,
+    @Param("attachmentId", ParseUUIDPipe)
+    attachmentId: string,
+  ) {
+    return this.uploadsService.getChatAttachment(
+      user.id,
+      attachmentId,
     );
   }
 
