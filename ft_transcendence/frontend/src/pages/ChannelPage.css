@@ -62,3 +62,27 @@
   color: var(--color-teal);
   font-size: 11px;
 }
+.channel-create-form {
+  display: grid;
+  gap: var(--space-8);
+  margin-top: var(--space-16);
+}
+
+.channel-create-form label {
+  font-size: 11px;
+}
+
+.channel-create-form input,
+.channel-create-form textarea {
+  width: 100%;
+  padding: var(--space-12);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-sizing: border-box;
+  font: inherit;
+}
+
+.channel-create-form textarea {
+  min-height: 90px;
+  resize: vertical;
+}

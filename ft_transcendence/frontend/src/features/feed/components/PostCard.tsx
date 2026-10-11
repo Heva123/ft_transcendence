@@ -4,7 +4,11 @@ import {
   type SetStateAction,
 } from 'react'
 import { Link } from 'react-router-dom'
+import ProtectedImage from '../../../components/ProtectedImage'
+import { togglePostLike } from '../api/feedApi'
+import { formatTimestamp } from '../../../utils/formatTimestamp'
 import type { Post } from '../types/Post'
+import './PostImage.css'
 
 type PostCardProps = {
   post: Post
@@ -32,7 +36,7 @@ function PostHeader({ post }: { post: Post }) {
         <div>
           <strong>{post.author.username}</strong>
           <p>
-            {post.community ? post.community.name : 'Global feed'} · {post.createdAt}
+            {post.community ? post.community.name : 'Global feed'} · {formatTimestamp(post.createdAt)}
           </p>
         </div>
       </div>
@@ -64,15 +68,26 @@ function PostCard({ post, commentsCount }: PostCardProps) {
   likedState = useState(post.likedByMe)
   displayedComments = commentsCount ?? post.commentsCount
 
-  function handleLike() {
-    likesState[1](likedState[0] ? likesState[0] - 1 : likesState[0] + 1)
-    likedState[1](!likedState[0])
+  async function handleLike() {
+    let result
+
+    result = await togglePostLike(post.id)
+    likesState[1](result.likesCount)
+    likedState[1](result.liked)
   }
 
   return (
     <article className="post-card">
       <PostHeader post={post} />
       <p className="post-card__content">{post.content}</p>
+
+      {post.imageUrl && (
+        <ProtectedImage
+          src={post.imageUrl}
+          alt="Post attachment"
+          className="post-card__image"
+        />
+      )}
       <PostActions
         postId={post.id}
         comments={displayedComments}

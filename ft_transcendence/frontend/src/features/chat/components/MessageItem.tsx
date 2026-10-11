@@ -1,12 +1,17 @@
 import { Link } from 'react-router-dom'
+import ProtectedImage from '../../../components/ProtectedImage'
 import type { Message } from '../types/Message'
 
 type MessageItemProps = {
   message: Message
+  currentUserId?: string
 }
 
-function MessageItem({ message }: MessageItemProps) {
+function MessageItem({ message, currentUserId }: MessageItemProps) {
   let initials: string
+  let isOwn: boolean
+
+  isOwn = message.senderId === currentUserId
 
   initials = message.sender === 'You'
     ? 'AF'
@@ -28,13 +33,15 @@ function MessageItem({ message }: MessageItemProps) {
 
         {message.attachment && (
           <div className="message-attachment">
-            <img src={message.attachment.url}
-              alt={message.attachment.name} />
+            <ProtectedImage
+              src={message.attachment.url}
+              alt={message.attachment.name}
+            />
             <span>{message.attachment.name}</span>
           </div>
         )}
 
-        {message.sender === 'You' && (
+        {isOwn && Boolean(message.readBy?.length) && (
           <p className="message-read">✓✓ Read</p>
         )}
       </div>

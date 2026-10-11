@@ -1,51 +1,52 @@
 import { useState } from 'react'
 import ImageAttachmentPicker from './ImageAttachmentPicker'
 
-type MessageInputProps = {
-  onSendMessage: (text: string, file: File | null) => boolean
+type Props = {
+  onSendMessage: (
+    text: string,
+    file: File | null,
+    onProgress: (value: number) => void,
+  ) => Promise<boolean>
   onTypingChange: (typing: boolean) => void
   sendFailed: boolean
   blockedUser: boolean
   onBlockToggle: () => void
 }
 
-function MessageInput({
-  onSendMessage,
-  onTypingChange,
-  sendFailed,
-  blockedUser,
-  onBlockToggle,
-}: MessageInputProps) {
+function MessageInput(props: Props) {
   const [text, setText] = useState('')
   const [file, setFile] = useState<File | null>(null)
+  const [progress, setProgress] = useState(0)
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const nextText = event.target.value
 
     if (!text.trim() && nextText.trim())
-      onTypingChange(true)
+      props.onTypingChange(true)
     if (text.trim() && !nextText.trim())
-      onTypingChange(false)
+      props.onTypingChange(false)
     setText(nextText)
   }
 
-  function handleSubmit(event: React.FormEvent) {
+  async function handleSubmit(event: React.FormEvent) {
     let sent: boolean
 
     event.preventDefault()
     if (!text.trim() && !file)
       return
-    sent = onSendMessage(text, file)
+    setProgress(0)
+    sent = await props.onSendMessage(text, file, setProgress)
     if (!sent)
       return
-    onTypingChange(false)
+    props.onTypingChange(false)
     setText('')
     setFile(null)
+    setProgress(0)
   }
 
   return (
     <>
-      {sendFailed && (
+      {props.sendFailed && (
         <p className="message-send-error">
           Message not sent. Your draft is saved below.
         </p>
@@ -58,11 +59,17 @@ function MessageInput({
 
         <div className="message-actions">
           <button type="submit">
-            {sendFailed ? 'Retry send' : 'Send message'}
+            {props.sendFailed ? 'Retry send' : 'Send message'}
           </button>
-          <ImageAttachmentPicker file={file} onFileChange={setFile} />
-          <button type="button" onClick={onBlockToggle}>
-            {blockedUser ? 'Unblock user' : 'Block user'}
+
+          <ImageAttachmentPicker
+            file={file}
+            progress={progress}
+            onFileChange={setFile}
+          />
+
+          <button type="button" onClick={props.onBlockToggle}>
+            {props.blockedUser ? 'Unblock user' : 'Block user'}
           </button>
         </div>
       </form>

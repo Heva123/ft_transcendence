@@ -3,6 +3,6 @@ export type Community = {
   name: string
   description: string
   members: number
-  activity: string
-  topic: string
+  activity?: string
+  topic?: string
 }

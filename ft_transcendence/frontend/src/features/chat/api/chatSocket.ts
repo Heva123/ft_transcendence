@@ -1,5 +1,11 @@
 import { socket } from '../../../api/socket'
+import type { ApiMessage } from './chatApi'
+import { toMessage } from './messageMapper'
 import type { Message } from '../types/Message'
+import type {
+  MessageReadEvent,
+  MessageReadPayload,
+} from '../types/SocketEvents'
 import type {
   JoinChannelPayload,
   PresencePayload,
@@ -29,7 +35,8 @@ export function stopTyping(payload: TypingPayload) {
 }
 
 export function onNewMessage(callback: (message: Message) => void) {
-  socket.on('message:new', callback)
+  socket.on('message:new', (item: ApiMessage) =>
+    callback(toMessage(item)))
 }
 
 export function onTypingStart(callback: (data: TypingEvent) => void) {
@@ -56,4 +63,77 @@ export function removeChatListeners() {
   socket.off('message:new')
   socket.off('typing:start')
   socket.off('typing:stop')
+}
+
+export function onPresenceOnline(
+  callback: (data: Omit<PresencePayload, 'online'>) => void,
+) {
+  socket.on('presence:online', callback)
+}
+
+export function offPresenceOnline(
+  callback: (data: Omit<PresencePayload, 'online'>) => void,
+) {
+  socket.off('presence:online', callback)
+}
+
+export function onPresenceOffline(
+  callback: (data: Omit<PresencePayload, 'online'>) => void,
+) {
+  socket.on('presence:offline', callback)
+}
+
+export function offPresenceOffline(
+  callback: (data: Omit<PresencePayload, 'online'>) => void,
+) {
+  socket.off('presence:offline', callback)
+}
+
+export function requestPresence() {
+  socket.emit('presence:get')
+}
+
+export function onPresenceSnapshot(
+  callback: (users: Omit<PresencePayload, 'online'>[]) => void,
+) {
+  socket.on('presence:snapshot', callback)
+}
+
+export function offPresenceSnapshot(
+  callback: (users: Omit<PresencePayload, 'online'>[]) => void,
+) {
+  socket.off('presence:snapshot', callback)
+}
+
+export function markMessageRead(payload: MessageReadPayload) {
+  socket.emit('message:read', payload)
+}
+
+export function onMessageRead(
+  callback: (data: MessageReadEvent) => void,
+) {
+  socket.on('message:read', callback)
+}
+
+export function offMessageRead(
+  callback: (data: MessageReadEvent) => void,
+) {
+  socket.off('message:read', callback)
+}
+
+
+export type UserUnblockedEvent = {
+  blockerId: string
+}
+
+export function onUserUnblocked(
+  callback: (data: UserUnblockedEvent) => void,
+) {
+  socket.on('user:unblocked', callback)
+}
+
+export function offUserUnblocked(
+  callback: (data: UserUnblockedEvent) => void,
+) {
+  socket.off('user:unblocked', callback)
 }

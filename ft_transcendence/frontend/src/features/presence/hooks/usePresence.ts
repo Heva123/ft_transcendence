@@ -1,27 +1,48 @@
 import { useEffect, useState } from 'react'
 import {
-  offPresenceUpdate,
-  onPresenceUpdate,
+  offPresenceOffline,
+  offPresenceOnline,
+  offPresenceSnapshot,
+  onPresenceOffline,
+  onPresenceOnline,
+  onPresenceSnapshot,
+  requestPresence,
 } from '../../chat/api/chatSocket'
 import type { PresencePayload } from '../../chat/types/SocketEvents'
 
+type Event = Omit<PresencePayload, 'online'>
+
 export function usePresence() {
-  const [onlineUsers, setOnlineUsers] = useState<PresencePayload[]>([])
+  const [users, setUsers] = useState<PresencePayload[]>([])
 
   useEffect(() => {
-    function handlePresence(data: PresencePayload) {
-      setOnlineUsers((current) => {
-        const others = current.filter(
-          (user) => user.userId !== data.userId,
-        )
-
-        return data.online ? [...others, data] : others
-      })
+    function snapshot(items: Event[]) {
+      setUsers(items.map((item) => ({ ...item, online: true })))
     }
 
-    onPresenceUpdate(handlePresence)
-    return () => offPresenceUpdate(handlePresence)
+    function online(data: Event) {
+      setUsers((current) => [
+        ...current.filter((item) => item.userId !== data.userId),
+        { ...data, online: true },
+      ])
+    }
+
+    function offline(data: Event) {
+      setUsers((current) =>
+        current.filter((item) => item.userId !== data.userId))
+    }
+
+    onPresenceSnapshot(snapshot)
+    onPresenceOnline(online)
+    onPresenceOffline(offline)
+    requestPresence()
+
+    return () => {
+      offPresenceSnapshot(snapshot)
+      offPresenceOnline(online)
+      offPresenceOffline(offline)
+    }
   }, [])
 
-  return onlineUsers
+  return users
 }

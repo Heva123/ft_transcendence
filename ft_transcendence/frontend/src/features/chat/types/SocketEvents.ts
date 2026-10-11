@@ -1,6 +1,7 @@
 export type SendMessagePayload = {
   channelId: string
-  text: string
+  content: string
+  attachmentId?: string
 }
 
 export type TypingPayload = {
@@ -21,4 +22,16 @@ export type PresencePayload = {
 
 export type JoinChannelPayload = {
   channelId: string
+}
+
+export type MessageReadPayload = {
+  channelId: string
+  messageId: string
+}
+
+export type MessageReadEvent = {
+  messageId: string
+  userId: string
+  username?: string
+  readAt: string
 }

@@ -12,6 +12,7 @@ export type CommunitySummary = {
 export type Post = {
   id: string
   content: string
+  imageUrl?: string | null
   author: Author
   community: CommunitySummary | null
   createdAt: string

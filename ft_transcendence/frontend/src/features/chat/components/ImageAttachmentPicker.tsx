@@ -7,35 +7,34 @@ import {
 
 type Props = {
   file: File | null
+  progress: number
   onFileChange: (file: File | null) => void
 }
 
 function validateImage(file: File) {
-  if (!['image/png', 'image/jpeg'].includes(file.type))
-    return 'Please choose a PNG or JPEG image.'
+  if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type))
+    return 'Please choose a PNG, JPEG, or WEBP image.'
   if (file.size > 5 * 1024 * 1024)
     return 'Please choose an image under 5 MB.'
   return ''
 }
 
-function ImageAttachmentPicker({ file, onFileChange }: Props) {
+function ImageAttachmentPicker(props: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [preview, setPreview] = useState('')
   const [error, setError] = useState('')
 
   useEffect(() => {
-    let url: string
+    let url = ''
 
-    if (!file) {
-      setPreview('')
-      if (inputRef.current)
-        inputRef.current.value = ''
-      return
-    }
-    url = URL.createObjectURL(file)
+    if (props.file)
+      url = URL.createObjectURL(props.file)
     setPreview(url)
-    return () => URL.revokeObjectURL(url)
-  }, [file])
+    return () => {
+      if (url)
+        URL.revokeObjectURL(url)
+    }
+  }, [props.file])
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     let selected: File | undefined
@@ -50,7 +49,7 @@ function ImageAttachmentPicker({ file, onFileChange }: Props) {
       return
     }
     setError('')
-    onFileChange(selected)
+    props.onFileChange(selected)
   }
 
   return (
@@ -61,18 +60,23 @@ function ImageAttachmentPicker({ file, onFileChange }: Props) {
       </button>
 
       <input ref={inputRef} type="file" hidden
-        accept="image/png,image/jpeg" onChange={handleChange} />
+        accept="image/png,image/jpeg,image/webp"
+        onChange={handleChange} />
 
       {error && <p className="chat-attachment__error">{error}</p>}
 
-      {file && preview && (
+      {props.file && preview && (
         <div className="chat-attachment__preview">
           <img src={preview} alt="Selected attachment preview" />
           <div>
-            <strong>{file.name}</strong>
-            <span>{Math.ceil(file.size / 1024)} KB</span>
+            <strong>{props.file.name}</strong>
+            <span>{Math.ceil(props.file.size / 1024)} KB</span>
+            {props.progress > 0 && (
+              <span>Uploading {props.progress}%</span>
+            )}
           </div>
-          <button type="button" onClick={() => onFileChange(null)}>
+          <button type="button"
+            onClick={() => props.onFileChange(null)}>
             Remove
           </button>
         </div>

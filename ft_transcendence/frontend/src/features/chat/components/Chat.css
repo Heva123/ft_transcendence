@@ -245,3 +245,21 @@
   margin-top: var(--space-6);
   font-size: 11px;
 }
+
+.block-user-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.block-user-list button {
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  text-align: left;
+  cursor: pointer;
+}
+
+.block-user-list button:hover {
+  background: var(--color-cyan);
+}
