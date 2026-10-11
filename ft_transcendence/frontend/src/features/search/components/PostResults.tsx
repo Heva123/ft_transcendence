@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
-import type { SearchSort, SearchTopic } from '../../../pages/SearchPage'
+import type { Post } from '../../feed/types/Post'
 import PostCard from '../../feed/components/PostCard'
-import { mockPosts } from '../../feed/data/mockPosts'
+import type { SearchSort, SearchTopic } from '../../../pages/SearchPage'
+import { usePagedSearch } from '../hooks/usePagedSearch'
 import SearchEmptyState from './SearchEmptyState'
+import SearchPager from './SearchPager'
 
 type Props = {
   query: string
@@ -10,49 +11,53 @@ type Props = {
   sort: SearchSort
 }
 
-function PostResults({ query, topic, sort }: Props) {
-  const [page, setPage] = useState(1)
-  const value = query.trim().toLowerCase()
-  let matches = mockPosts.filter((post) =>
-    `${post.content} ${post.author.username} ${post.community?.name ?? ''}`
-      .toLowerCase().includes(value))
+function toPost(item: {
+  id: string
+  content: string
+  createdAt: string
+  author: { id: string; username: string }
+  community: { id: string; name: string } | null
+}): Post {
+  return {
+    ...item,
+    author: { ...item.author, avatarUrl: null },
+    likesCount: 0,
+    commentsCount: 0,
+    likedByMe: false,
+  }
+}
 
-  if (topic !== 'all' && topic !== 'programming')
-    matches = []
-  if (sort === 'az')
-    matches = [...matches].sort((a, b) =>
-      a.content.localeCompare(b.content))
+function PostResults({ query, sort }: Props) {
+  let state
 
-  const pages = Math.max(1, Math.ceil(matches.length / 3))
-  const items = matches.slice((page - 1) * 3, page * 3)
+  state = usePagedSearch(
+    query,
+    'posts',
+    (data) => data.results.posts.map(toPost),
+    sort === 'az'
+      ? (a, b) => a.content.localeCompare(b.content)
+      : undefined,
+  )
 
-  useEffect(() => setPage(1), [query, topic, sort])
-
-  if (!matches.length)
+  if (state.error)
+    return <p>{state.error}</p>
+  if (state.loading)
+    return <p>Searching...</p>
+  if (!state.total)
     return <SearchEmptyState query={query}
       onClear={() => window.location.assign('/search')} />
 
   return (
     <>
-      <p className="search-page-count">Page {page} of {pages}</p>
-
+      <p className="search-page-count">
+        Page {state.page} of {state.pages}
+      </p>
       <div className="post-search-results">
-        {items.map((post) => <PostCard key={post.id} post={post} />)}
+        {state.items.map((post) =>
+          <PostCard key={post.id} post={post} />)}
       </div>
-
-      <div className="search-pagination">
-        <button disabled={page === 1}
-          onClick={() => setPage(page - 1)}>Previous</button>
-        {Array.from({ length: pages }, (_, index) => (
-          <button key={index + 1}
-            className={page === index + 1 ? 'active' : ''}
-            onClick={() => setPage(index + 1)}>
-            {index + 1}
-          </button>
-        ))}
-        <button disabled={page === pages}
-          onClick={() => setPage(page + 1)}>Next</button>
-      </div>
+      <SearchPager page={state.page} pages={state.pages}
+        onChange={state.setPage} />
     </>
   )
 }

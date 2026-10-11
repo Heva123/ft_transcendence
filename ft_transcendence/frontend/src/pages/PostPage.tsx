@@ -1,61 +1,40 @@
 import {
+  useEffect,
   useState,
-  type Dispatch,
   type FormEvent,
-  type SetStateAction,
 } from 'react'
 import { useParams } from 'react-router-dom'
+import {
+  createReply,
+  getPostDetails,
+} from '../features/feed/api/feedApi'
 import PostCard from '../features/feed/components/PostCard'
 import ReplyItem from '../features/feed/components/ReplyItem'
-import { mockPosts } from '../features/feed/data/mockPosts'
-import { mockReplies } from '../features/feed/data/mockReplies'
 import type { Post } from '../features/feed/types/Post'
 import type { Reply } from '../features/feed/types/Reply'
 import './PostPage.css'
 
-type ReplyState = [
-  Reply[],
-  Dispatch<SetStateAction<Reply[]>>
-]
-
 type ReplyFormProps = {
   postId: string
-  replyState: ReplyState
+  onCreated: (reply: Reply) => void
 }
 
-function buildReply(postId: string, content: string) {
-  let reply: Reply
-
-  reply = {
-    id: Date.now().toString(),
-    postId: postId,
-    parentId: null,
-    content: content,
-    author: {
-      id: '5',
-      username: 'Afnan',
-      avatarUrl: null,
-    },
-    createdAt: 'now',
-  }
-
-  return reply
-}
-
-function ReplyForm({ postId, replyState }: ReplyFormProps) {
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+function ReplyForm({ postId, onCreated }: ReplyFormProps) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    let formElement: HTMLFormElement
     let form: FormData
     let content: string
+    let reply: Reply
 
     event.preventDefault()
-    form = new FormData(event.currentTarget)
+    formElement = event.currentTarget
+    form = new FormData(formElement)
     content = String(form.get('reply')).trim()
-
     if (!content)
       return
-
-    replyState[1]([...replyState[0], buildReply(postId, content)])
-    event.currentTarget.reset()
+    reply = await createReply(postId, content)
+    onCreated(reply)
+    formElement.reset()
   }
 
   return (
@@ -68,20 +47,24 @@ function ReplyForm({ postId, replyState }: ReplyFormProps) {
 }
 
 function PostPage() {
-  let postId: string
-  let post: Post | undefined
-  let replyState: ReplyState
-  let replyCount: number
+  const postId = useParams().postId ?? ''
+  const [post, setPost] = useState<Post | null>(null)
+  const [replies, setReplies] = useState<Reply[]>([])
+  const [error, setError] = useState('')
 
-  postId = useParams().postId ?? ''
-  post = mockPosts.find((item) => item.id === postId)
-  replyState = useState<Reply[]>(
-    mockReplies.filter((item) => item.postId === postId),
-  )
-  replyCount = replyState[0].length
+  useEffect(() => {
+    getPostDetails(postId)
+      .then((data) => {
+        setPost(data.post)
+        setReplies(data.comments)
+      })
+      .catch(() => setError('Post not found.'))
+  }, [postId])
 
+  if (error)
+    return <h1>{error}</h1>
   if (!post)
-    return <h1>Post not found.</h1>
+    return <p>Loading post...</p>
 
   return (
     <section className="post-page">
@@ -90,17 +73,21 @@ function PostPage() {
         <h1>A small idea. A big conversation.</h1>
       </header>
 
-      <PostCard post={post} commentsCount={replyCount} />
+      <PostCard post={post} commentsCount={replies.length} />
 
       <h2>
-        {replyCount} {replyCount === 1 ? 'reply' : 'replies'}
+        {replies.length} {replies.length === 1 ? 'reply' : 'replies'}
       </h2>
 
-      {replyState[0].map((reply) => (
+      {replies.map((reply) => (
         <ReplyItem key={reply.id} reply={reply} />
       ))}
 
-      <ReplyForm postId={postId} replyState={replyState} />
+      <ReplyForm
+        postId={postId}
+        onCreated={(reply) =>
+          setReplies((current) => [...current, reply])}
+      />
     </section>
   )
 }

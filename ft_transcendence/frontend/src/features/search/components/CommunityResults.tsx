@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import type { SearchSort, SearchTopic } from '../../../pages/SearchPage'
-import CommunityCard from '../../chat/components/CommunityCard'
-import { mockCommunities } from '../../chat/data/mockCommunities'
+import { usePagedSearch } from '../hooks/usePagedSearch'
 import SearchEmptyState from './SearchEmptyState'
+import SearchPager from './SearchPager'
 
 type Props = {
   query: string
@@ -10,50 +10,51 @@ type Props = {
   sort: SearchSort
 }
 
-function CommunityResults({ query, topic, sort }: Props) {
-  const [page, setPage] = useState(1)
-  const value = query.trim().toLowerCase()
-  let matches = mockCommunities.filter((item) =>
-    `${item.name} ${item.description} ${item.topic}`
-      .toLowerCase().includes(value))
+function CommunityResults({ query, sort }: Props) {
+  let state
 
-  if (topic !== 'all')
-    matches = matches.filter((item) =>
-      item.topic.toLowerCase() === topic)
-  if (sort === 'az')
-    matches = [...matches].sort((a, b) => a.name.localeCompare(b.name))
+  state = usePagedSearch(
+    query,
+    'communities',
+    (data) => data.results.communities,
+    sort === 'az'
+      ? (a, b) => a.name.localeCompare(b.name)
+      : undefined,
+  )
 
-  const pages = Math.max(1, Math.ceil(matches.length / 3))
-  const items = matches.slice((page - 1) * 3, page * 3)
-
-  useEffect(() => setPage(1), [query, topic, sort])
-
-  if (!matches.length)
+  if (state.error)
+    return <p>{state.error}</p>
+  if (state.loading)
+    return <p>Searching...</p>
+  if (!state.total)
     return <SearchEmptyState query={query}
       onClear={() => window.location.assign('/search')} />
 
   return (
     <>
-      <p className="search-page-count">Page {page} of {pages}</p>
-
+      <p className="search-page-count">
+        Page {state.page} of {state.pages}
+      </p>
       <div className="community-search-results">
-        {items.map((item) =>
-          <CommunityCard key={item.id} community={item} />)}
-      </div>
-
-      <div className="search-pagination">
-        <button disabled={page === 1}
-          onClick={() => setPage(page - 1)}>Previous</button>
-        {Array.from({ length: pages }, (_, index) => (
-          <button key={index + 1}
-            className={page === index + 1 ? 'active' : ''}
-            onClick={() => setPage(index + 1)}>
-            {index + 1}
-          </button>
+        {state.items.map((item) => (
+          <article className="community-card" key={item.id}>
+            <div className="community-card__mark">
+              {item.name.slice(0, 2).toUpperCase()}
+            </div>
+            <h2>{item.name}</h2>
+            <p className="community-card__meta">42 COMMUNITY</p>
+            <p>{item.description ?? ''}</p>
+            <footer className="community-card__footer">
+              <span>PROGRAMMING</span>
+              <Link to={`/communities/${item.id}`}>
+                View community
+              </Link>
+            </footer>
+          </article>
         ))}
-        <button disabled={page === pages}
-          onClick={() => setPage(page + 1)}>Next</button>
       </div>
+      <SearchPager page={state.page} pages={state.pages}
+        onChange={state.setPage} />
     </>
   )
 }

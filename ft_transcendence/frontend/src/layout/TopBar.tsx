@@ -1,12 +1,19 @@
 import { Link } from 'react-router-dom'
-import './layout.css'
 import SearchBox from '../features/search/components/SearchBox'
+import { useCurrentUser } from '../features/auth/hooks/useCurrentUser'
+import './layout.css'
 
 function TopBar() {
+  const user = useCurrentUser()
+  let username: string
+  let initials: string
+
+  username = user?.username ?? 'User'
+  initials = username.slice(0, 2).toUpperCase()
+
   return (
     <header className="topbar">
       <div className="topbar__logo">PXL_LAB</div>
-
       <SearchBox />
 
       <Link className="topbar__notification" to="/notifications">
@@ -18,8 +25,8 @@ function TopBar() {
       </Link>
 
       <div className="topbar__profile">
-        <span className="topbar__avatar">AF</span>
-        <span>Afnan</span>
+        <span className="topbar__avatar">{initials}</span>
+        <span>{username}</span>
         <span>▾</span>
       </div>
     </header>

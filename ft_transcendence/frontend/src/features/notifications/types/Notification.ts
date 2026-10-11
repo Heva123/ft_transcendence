@@ -1,11 +1,6 @@
-export type NotificationType =
-  | 'message'
-  | 'mention'
-  | 'community'
-
 export type Notification = {
   id: string
-  type: NotificationType
+  type: string
   title: string
   message: string
   read: boolean

@@ -1,6 +1,7 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
+import { Route, Routes } from 'react-router-dom'
 import AppShell from './layout/AppShell'
 import ChannelPage from './pages/ChannelPage'
+import ChannelsPage from './pages/ChannelsPage'
 import CommunitiesPage from './pages/CommunitiesPage'
 import CommunityPage from './pages/CommunityPage'
 import FriendsPage from './pages/FriendsPage'
@@ -18,7 +19,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/communities" element={<CommunitiesPage />} />
         <Route path="/communities/:communityId" element={<CommunityPage />} />
-        <Route path="/channels" element={<Navigate to="/channels/1" replace />} />
+        <Route path="/channels" element={<ChannelsPage />} />
         <Route path="/channels/:channelId" element={<ChannelPage />} />
         <Route path="/friends" element={<FriendsPage />} />
         <Route path="/profile" element={<ProfilePage />} />

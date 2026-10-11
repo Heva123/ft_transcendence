@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import type { FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import CommunityResults from '../features/search/components/CommunityResults'
 import PeopleResults from '../features/search/components/PeopleResults'
@@ -22,52 +21,52 @@ function getSearchHeading(tab: SearchTab) {
 }
 
 function SearchPage() {
-  const [searchParams, setSearchParams] = useSearchParams()
-  const query = searchParams.get('q') ?? ''
+  const [params, setParams] = useSearchParams()
+  const query = params.get('q') ?? ''
   const [input, setInput] = useState(query)
-  const [activeTab, setActiveTab] = useState<SearchTab>('people')
+  const [tab, setTab] = useState<SearchTab>('people')
   const [topic, setTopic] = useState<SearchTopic>('programming')
   const [sort, setSort] = useState<SearchSort>('relevant')
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function submit(event: FormEvent<HTMLFormElement>) {
     let value: string
 
     event.preventDefault()
     value = input.trim()
     if (value)
-      setSearchParams({ q: value })
+      setParams({ q: value })
   }
 
-  function handleClear() {
+  function clear() {
     setInput('')
-    setSearchParams({})
+    setParams({})
   }
 
   return (
     <main className="search-page">
       <header className="search-page__header">
         <div>
-          <h1>{getSearchHeading(activeTab)}</h1>
+          <h1>{getSearchHeading(tab)}</h1>
           <p>Search across your campus community.</p>
         </div>
         <span className="community-badge">42 COMMUNITY</span>
       </header>
 
-      <form className="search-controls" onSubmit={handleSubmit}>
+      <form className="search-controls" onSubmit={submit}>
         <input value={input}
           onChange={(event) => setInput(event.target.value)}
           placeholder="Search people, communities, posts..." />
         <button type="submit">Search</button>
-        <button type="button" onClick={handleClear}>Clear</button>
+        <button type="button" onClick={clear}>Clear</button>
       </form>
 
       <nav className="search-tabs">
-        {(['people', 'communities', 'posts', 'skills'] as SearchTab[]).map(
-          (tab) => (
-            <button key={tab}
-              className={activeTab === tab ? 'active' : ''}
-              onClick={() => setActiveTab(tab)}>
-              {tab[0].toUpperCase() + tab.slice(1)}
+        {(['people', 'communities', 'posts', 'skills'] as SearchTab[])
+          .map((item) => (
+            <button key={item}
+              className={tab === item ? 'active' : ''}
+              onClick={() => setTab(item)}>
+              {item[0].toUpperCase() + item.slice(1)}
             </button>
           ))}
       </nav>
@@ -77,7 +76,8 @@ function SearchPage() {
           <label>
             Topic:
             <select value={topic}
-              onChange={(event) => setTopic(event.target.value as SearchTopic)}>
+              onChange={(event) =>
+                setTopic(event.target.value as SearchTopic)}>
               <option value="programming">Programming</option>
               <option value="all">All topics</option>
             </select>
@@ -86,7 +86,8 @@ function SearchPage() {
           <label>
             Sort:
             <select value={sort}
-              onChange={(event) => setSort(event.target.value as SearchSort)}>
+              onChange={(event) =>
+                setSort(event.target.value as SearchSort)}>
               <option value="relevant">Relevant</option>
               <option value="az">A–Z</option>
             </select>
@@ -95,14 +96,14 @@ function SearchPage() {
       )}
 
       <section className="search-results">
-        {query && activeTab === 'people' &&
+        {query && tab === 'people' &&
           <PeopleResults query={query} topic={topic} sort={sort} />}
-        {query && activeTab === 'communities' &&
+        {query && tab === 'communities' &&
           <CommunityResults query={query} topic={topic} sort={sort} />}
-        {query && activeTab === 'posts' &&
+        {query && tab === 'posts' &&
           <PostResults query={query} topic={topic} sort={sort} />}
-        {query && activeTab === 'skills' &&
-          <SkillResults query={query} topic={topic} sort={sort} />}
+        {query && tab === 'skills' &&
+          <SkillResults query={query} />}
         {!query && <p>Enter something to search.</p>}
       </section>
     </main>

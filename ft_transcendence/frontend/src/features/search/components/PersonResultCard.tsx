@@ -1,21 +1,21 @@
 import { Link } from 'react-router-dom'
-import type { SearchPerson } from '../types/SearchPerson'
+import type { SearchUser } from '../api/searchApi'
 
 type Props = {
-  person: SearchPerson
-  badge: string
+  person: SearchUser
 }
 
-function PersonResultCard({ person, badge }: Props) {
-  const username = person.name.toLowerCase()
+function PersonResultCard({ person }: Props) {
+  let initials: string
 
+  initials = person.username.slice(0, 2).toUpperCase()
   return (
     <article className="person-result">
-      <span className="person-result__avatar">{person.initials}</span>
-      <h3>{person.name}</h3>
-      <p>{person.campus} · Open to collaboration</p>
-      <span className="person-result__skill">{badge}</span>
-      <Link to={`/profile/${username}`}>View profile</Link>
+      <span className="person-result__avatar">{initials}</span>
+      <h3>{person.username}</h3>
+      <p>42 Abu Dhabi · Community member</p>
+      <span className="person-result__skill">42 COMMUNITY</span>
+      <Link to={`/profile/${person.username}`}>View profile</Link>
     </article>
   )
 }

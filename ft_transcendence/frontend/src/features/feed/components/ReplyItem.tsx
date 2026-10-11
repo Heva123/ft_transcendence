@@ -1,3 +1,4 @@
+import { formatTimestamp } from '../../../utils/formatTimestamp'
 import type { Reply } from '../types/Reply'
 
 type ReplyItemProps = {
@@ -13,7 +14,7 @@ function ReplyItem({ reply }: ReplyItemProps) {
 
       <div>
         <p className="reply-meta">
-          <strong>{reply.author.username}</strong> · {reply.createdAt}
+          <strong>{reply.author.username}</strong> · {formatTimestamp(reply.createdAt)}
         </p>
         <p>{reply.content}</p>
       </div>

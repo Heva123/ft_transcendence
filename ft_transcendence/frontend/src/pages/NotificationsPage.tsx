@@ -1,5 +1,4 @@
 import { Link } from 'react-router-dom'
-import { mockNotifications } from '../features/notifications/data/mockNotifications'
 import { useNotifications } from '../features/notifications/hooks/useNotifications'
 import type { Notification } from '../features/notifications/types/Notification'
 import './NotificationsPage.css'
@@ -34,7 +33,7 @@ function NotificationRow({ item, onRead }: RowProps) {
 
 function NotificationsPage() {
   const { notifications, markRead, markAllRead } =
-    useNotifications(mockNotifications)
+    useNotifications()
   const unreadCount = notifications.filter((item) => !item.read).length
 
   return (

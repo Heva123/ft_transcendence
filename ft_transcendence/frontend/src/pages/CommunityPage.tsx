@@ -1,54 +1,85 @@
+import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
+import {
+  getChannels,
+  getCommunity,
+} from '../features/chat/api/chatApi'
+import { toCommunity } from '../features/chat/api/communityMapper'
 import CommunityHeader from '../features/chat/components/CommunityHeader'
 import ConversationsPanel from '../features/chat/components/ConversationsPanel'
-import { mockChannels } from '../features/chat/data/mockChannels'
-import { mockCommunities } from '../features/chat/data/mockCommunities'
 import type { Channel } from '../features/chat/types/Channel'
 import type { Community } from '../features/chat/types/Community'
+import { getCommunityFeed } from '../features/feed/api/feedApi'
 import PostCard from '../features/feed/components/PostCard'
-import { mockPosts } from '../features/feed/data/mockPosts'
 import type { Post } from '../features/feed/types/Post'
 import './CommunityPage.css'
 
-function CommunityPage() {
-  let community: Community | undefined
-  let channels: Channel[]
-  let posts: Post[]
-  let communityId: string
-  let routeId: string | undefined
+type Data = {
+  community: Community
+  channels: Channel[]
+  posts: Post[]
+}
 
-  routeId = useParams().communityId
-  communityId = routeId ?? ''
-  community = mockCommunities.find((item) => item.id === communityId)
-  channels = mockChannels.filter((item) => item.communityId === communityId)
-  posts = mockPosts.filter((item) => item.community?.id === communityId)
+async function loadData(id: string) {
+  let community
+  let channels
+  let feed
 
-  if (!community)
-    return <h1>Community not found.</h1>
+  [community, channels, feed] = await Promise.all([
+    getCommunity(id),
+    getChannels(id),
+    getCommunityFeed(id),
+  ])
+  return {
+    community: toCommunity(community),
+    channels,
+    posts: feed.posts,
+  }
+}
 
+function CommunityView({ data }: { data: Data }) {
   return (
     <section className="community-page">
-      <CommunityHeader community={community} />
+      <CommunityHeader community={data.community} />
       <nav className="community-tabs">
         <button className="active">Community feed</button>
-        <button>Channels</button><button>Members</button>
+        <button>Channels</button>
+        <button>Members</button>
         <button>Roles & permissions</button>
       </nav>
       <div className="community-layout">
         <main className="community-feed">
-          <Link
-            className="community-post-button"
-            to={`/posts/new?community=${community.id}`}
-          >
-            + Post to {community.name}
+          <Link className="community-post-button"
+            to={`/posts/new?community=${data.community.id}`}>
+            + Post to {data.community.name}
           </Link>
-          {posts.length === 0 ? <p>Your community is ready. Share the first idea.</p> :
-            posts.map((post) => <PostCard key={post.id} post={post} />)}
+          {data.posts.length
+            ? data.posts.map((post) =>
+              <PostCard key={post.id} post={post} />)
+            : <p>Your community is ready. Share the first idea.</p>}
         </main>
-        <ConversationsPanel channels={channels} />
+        <ConversationsPanel channels={data.channels} />
       </div>
     </section>
   )
+}
+
+function CommunityPage() {
+  const { communityId = '' } = useParams()
+  const [data, setData] = useState<Data | null>(null)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    loadData(communityId)
+      .then(setData)
+      .catch(() => setError('Unable to load community.'))
+  }, [communityId])
+
+  if (error)
+    return <h1>{error}</h1>
+  if (!data)
+    return <p>Loading community...</p>
+  return <CommunityView data={data} />
 }
 
 export default CommunityPage

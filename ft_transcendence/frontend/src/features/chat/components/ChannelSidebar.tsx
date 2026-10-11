@@ -6,12 +6,16 @@ type ChannelSidebarProps = {
   channels: Channel[]
   communityName: string
   onlineUsers: PresencePayload[]
+  onAddChannel: () => void
+  canCreateChannel: boolean
 }
 
 function ChannelSidebar({
   channels,
   communityName,
   onlineUsers,
+  onAddChannel,
+  canCreateChannel,
 }: ChannelSidebarProps) {
   return (
     <aside className="channel-sidebar">
@@ -27,7 +31,11 @@ function ChannelSidebar({
           # {channel.name}
         </NavLink>
       ))}
-      <button type="button">+ Add channel</button>
+      {canCreateChannel && (
+        <button type="button" onClick={onAddChannel}>
+          + Add channel
+        </button>
+      )}
       <p className="channel-sidebar__online">
         ONLINE — {onlineUsers.length}
       </p>

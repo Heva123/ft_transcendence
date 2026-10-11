@@ -1,41 +1,77 @@
-import type { FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { mockCommunities } from '../features/chat/data/mockCommunities'
-import { addMockPost } from '../features/feed/data/mockPosts'
-import type { CommunitySummary } from '../features/feed/types/Post'
+import {
+  getMyCommunities,
+  type ApiCommunity,
+} from '../features/chat/api/chatApi'
+import {
+  createPost,
+  uploadPostImage,
+} from '../features/feed/api/feedApi'
+import PostImageField from '../features/feed/components/PostImageField'
 import './CreatePostPage.css'
 
+type Values = {
+  content: string
+  target: string
+  file: File | null
+}
+
+function readValues(form: HTMLFormElement) {
+  let data: FormData
+  let file: FormDataEntryValue | null
+
+  data = new FormData(form)
+  file = data.get('image')
+  return {
+    content: String(data.get('idea')).trim(),
+    target: String(data.get('target')),
+    file: file instanceof File && file.size ? file : null,
+  }
+}
+
+async function publish(
+  values: Values,
+  onProgress: (value: number) => void,
+) {
+  let post
+
+  post = await createPost({
+    content: values.content,
+    communityId: values.target === 'global' ? null : values.target,
+  })
+  if (values.file)
+    await uploadPostImage(post.id, values.file, onProgress)
+}
+
 function CreatePostPage() {
-  let navigate: ReturnType<typeof useNavigate>
-  let params: URLSearchParams
-  let communityId: string
-  let defaultTarget: string
+  const navigate = useNavigate()
+  const [communities, setCommunities] = useState<ApiCommunity[]>([])
+  const [error, setError] = useState('')
+  const [file, setFile] = useState<File | null>(null)
+  const [progress, setProgress] = useState(0)
 
-  navigate = useNavigate()
-  params = new URLSearchParams(window.location.search)
-  communityId = params.get('community') ?? ''
-  defaultTarget = communityId || 'global'
+  useEffect(() => {
+    getMyCommunities().then(setCommunities)
+      .catch(() => setError('Unable to load communities.'))
+  }, [])
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    let form: FormData
-    let idea: string
-    let target: string
-    let community: CommunitySummary | null
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    let values: Values
 
     event.preventDefault()
-    form = new FormData(event.currentTarget)
-    idea = String(form.get('idea')).trim()
-    target = String(form.get('target'))
-
-    community = mockCommunities.find(
-      (item) => item.id === target,
-    ) ?? null
-
-    if (!idea)
+    values = readValues(event.currentTarget)
+    if (!values.content)
       return
-
-    addMockPost(idea, community)
-    navigate(community ? `/communities/${target}` : '/')
+    try {
+      setProgress(0)
+      await publish(values, setProgress)
+      if (values.file)
+        await new Promise((resolve) => setTimeout(resolve, 400))
+      navigate(values.target === 'global' ? '/' : `/communities/${values.target}`)
+    } catch {
+      setError('Unable to publish post.')
+    }
   }
 
   return (
@@ -48,45 +84,28 @@ function CreatePostPage() {
 
       <form className="create-post-form" onSubmit={handleSubmit}>
         <label htmlFor="post-target">Post to</label>
-
-        <select
-          id="post-target"
-          name="target"
-          defaultValue={defaultTarget}
-        >
+        <select id="post-target" name="target" defaultValue="global">
           <option value="global">Global feed</option>
-
-          {mockCommunities.map((community) => (
-            <option key={community.id} value={community.id}>
-              {community.name}
-            </option>
+          {communities.map((item) => (
+            <option key={item.id} value={item.id}>{item.name}</option>
           ))}
         </select>
 
         <label htmlFor="post-idea">Your idea</label>
+        <textarea id="post-idea" name="idea" rows={7}
+          placeholder="What would you like to share?" />
 
-        <textarea
-          id="post-idea"
-          name="idea"
-          rows={7}
-          placeholder="What would you like to share?"
+        <PostImageField
+          file={file}
+          progress={progress}
+          onFileChange={setFile}
         />
 
-        <label htmlFor="post-image">Attachment</label>
-
-        <input
-          id="post-image"
-          type="file"
-          accept="image/*"
-        />
-
-        <p className="attachment-note">+ Add image · optional</p>
+        {error && <p>{error}</p>}
 
         <div className="create-post-actions">
           <button type="submit">Publish post</button>
-          <button type="button" onClick={() => navigate(-1)}>
-            Cancel
-          </button>
+          <button type="button" onClick={() => navigate(-1)}>Cancel</button>
         </div>
       </form>
     </section>

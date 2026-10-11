@@ -1,36 +1,46 @@
 import type { Message } from '../types/Message'
 import MessageItem from './MessageItem'
 
-type MessageListProps = {
+type Props = {
   messages: Message[]
   selectedChannelId: string
   typingUser: string
   blockedUser: string
+  currentUserId: string
 }
 
-function MessageList({
-  messages,
-  selectedChannelId,
-  typingUser,
-  blockedUser,
-}: MessageListProps) {
-  const visibleMessages = messages.filter((message) =>
-    message.channelId === selectedChannelId
-    && message.sender !== blockedUser)
+function MessageList(props: Props) {
+  let visibleMessages: Message[]
+  let today: string
+
+  today = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'long',
+  }).toUpperCase()
+
+  visibleMessages = props.messages.filter((message) =>
+    message.channelId === props.selectedChannelId
+    && message.sender !== props.blockedUser)
 
   return (
     <section className="message-list">
-      <p className="message-date">TODAY · 8 SEPTEMBER</p>
+      <p className="message-date">TODAY · {today}</p>
+
       {visibleMessages.map((message) => (
-        <MessageItem key={message.id} message={message} />
+        <MessageItem key={message.id} message={message}
+          currentUserId={props.currentUserId} />
       ))}
-      {blockedUser && (
+
+      {props.blockedUser && (
         <p className="blocked-status">
-          {blockedUser} is blocked. Their messages are hidden for you.
+          {props.blockedUser} is blocked. Their messages are hidden for you.
         </p>
       )}
-      {typingUser && !blockedUser && (
-        <p className="typing-status">{typingUser} is typing...</p>
+
+      {props.typingUser && !props.blockedUser && (
+        <p className="typing-status">
+          {props.typingUser} is typing...
+        </p>
       )}
     </section>
   )

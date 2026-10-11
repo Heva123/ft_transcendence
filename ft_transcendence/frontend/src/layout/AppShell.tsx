@@ -1,4 +1,8 @@
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
+import {
+  connectSocket,
+  disconnectSocket,
+} from '../api/socket'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import './layout.css'
@@ -8,13 +12,21 @@ type AppShellProps = {
 }
 
 function AppShell({ children }: AppShellProps) {
+  useEffect(() => {
+    let token: string | null
+
+    token = localStorage.getItem('accessToken')
+    if (token)
+      connectSocket(token)
+
+    return disconnectSocket
+  }, [])
+
   return (
     <div className="app-shell">
       <TopBar />
-
       <div className="app-shell__body">
         <Sidebar />
-
         <main className="app-shell__main">
           {children}
         </main>
