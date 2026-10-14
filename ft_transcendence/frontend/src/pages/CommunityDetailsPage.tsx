@@ -1,194 +1,249 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
 
 import AppLayout from "../components/AppLayout";
+
+import {
+  apiRequest,
+  ApiError,
+} from "../api/apiClient";
 
 type GroupDetails = {
   id: string;
   name: string;
   description: string | null;
-  _count: {
-    members: number;
-  };
+
   members: {
     role: string;
   }[];
-};
-
-type Channel = {
-  id: string;
-  name: string;
-  description: string | null;
-  type: string;
 };
 
 type CommunityDetailsPageProps = {
   groupId: string;
   token: string;
   onBack: () => void;
-  onOpenMembers: (groupId: string) => void;
-  onOpenRoles: (groupId: string) => void;
-  onLeave: (groupId: string) => void;
+  onDeleted: () => void;
 };
 
 function CommunityDetailsPage({
   groupId,
-  token,
+  token: _token,
   onBack,
-  onOpenMembers,
-  onOpenRoles,
-  onLeave,
+  onDeleted,
 }: CommunityDetailsPageProps) {
   const [group, setGroup] =
-    useState<GroupDetails | null>(null);
+    useState<GroupDetails | null>(
+      null
+    );
 
-  const [channels, setChannels] =
-    useState<Channel[]>([]);
+  const [name, setName] =
+    useState("");
 
-  const [isLoading, setIsLoading] =
-    useState(true);
+  const [
+    description,
+    setDescription,
+  ] = useState("");
 
-  const [isLeaving, setIsLeaving] =
+  const [
+    isLoading,
+    setIsLoading,
+  ] = useState(true);
+
+  const [isSaving, setIsSaving] =
     useState(false);
+
+  const [
+    isDeleting,
+    setIsDeleting,
+  ] = useState(false);
 
   const [error, setError] =
     useState("");
 
+  const [message, setMessage] =
+    useState("");
 
   useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadDetails() {
+    async function loadCommunity() {
       setIsLoading(true);
       setError("");
-      setGroup(null);
 
       try {
-        const detailsResponse = await fetch(
-          `http://localhost:3000/api/communities/${groupId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            signal: controller.signal,
-          }
+        const data =
+          await apiRequest<GroupDetails>(
+            `/communities/${groupId}`
+          );
+
+        setGroup(data);
+        setName(data.name);
+
+        setDescription(
+          data.description || ""
         );
-
-        if (detailsResponse.status === 401) {
-          throw new Error(
-            "Your session has expired. Please sign in again."
-          );
-        }
-
-        if (detailsResponse.status === 403) {
-          throw new Error(
-            "You do not have access to this community."
-          );
-        }
-
-        if (detailsResponse.status === 404) {
-          throw new Error(
-            "Community not found."
-          );
-        }
-
-        if (!detailsResponse.ok) {
-          throw new Error(
-            "Could not load community details."
-          );
-        }
-
-        const detailsData: GroupDetails =
-          await detailsResponse.json();
-
-        const channelsResponse = await fetch(
-          `http://localhost:3000/api/communities/${groupId}/channels`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            signal: controller.signal,
-          }
-        );
-
-        if (!channelsResponse.ok) {
-          throw new Error(
-            "Could not load community channels."
-          );
-        }
-
-        const channelsData: Channel[] =
-          await channelsResponse.json();
-
-        if (!controller.signal.aborted) {
-          setGroup(detailsData);
-          setChannels(channelsData);
-        }
       } catch (err) {
-        if (!controller.signal.aborted) {
+        if (err instanceof ApiError) {
+          setError(err.message);
+        } else {
           setError(
-            err instanceof Error
-              ? err.message
-              : "Something went wrong."
+            "Could not load community."
           );
         }
       } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
     }
 
-    loadDetails();
+    loadCommunity();
+  }, [groupId]);
 
-    return () => {
-      controller.abort();
-    };
-  }, [groupId, token]);
+  const role =
+    group?.members[0]
+      ?.role || "MEMBER";
 
-  async function handleLeave() {
-    setIsLeaving(true);
+  const canEdit =
+    role === "OWNER" ||
+    role === "ADMIN";
+
+  const canDelete =
+    role === "OWNER";
+
+  async function handleSave(
+    event: FormEvent<HTMLFormElement>
+  ) {
+    event.preventDefault();
+
+    if (
+      isSaving ||
+      !canEdit
+    ) {
+      return;
+    }
+
+    const cleanName =
+      name.trim();
+
+    const cleanDescription =
+      description.trim();
+
     setError("");
+    setMessage("");
+
+    if (
+      cleanName.length < 2 ||
+      cleanName.length > 100
+    ) {
+      setError(
+        "Community name must contain 2-100 characters."
+      );
+
+      return;
+    }
+
+    if (
+      cleanDescription.length >
+      500
+    ) {
+      setError(
+        "Description cannot exceed 500 characters."
+      );
+
+      return;
+    }
+
+    setIsSaving(true);
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/communities/${groupId}/leave`,
+      const updated =
+        await apiRequest<GroupDetails>(
+          `/communities/${groupId}`,
+          {
+            method: "PATCH",
+
+            body: JSON.stringify({
+              name: cleanName,
+
+              description:
+                cleanDescription ||
+                undefined,
+            }),
+          }
+        );
+
+      setGroup((current) =>
+        current
+          ? {
+              ...current,
+              ...updated,
+            }
+          : updated
+      );
+
+      setName(updated.name);
+
+      setDescription(
+        updated.description ||
+          ""
+      );
+
+      setMessage(
+        "Community updated successfully!"
+      );
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError(
+          "Could not update community."
+        );
+      }
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (
+      !canDelete ||
+      isDeleting
+    ) {
+      return;
+    }
+
+    const confirmed =
+      window.confirm(
+        `Delete ${group?.name}?\n\nAll channels, community posts and memberships will be removed.`
+      );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setError("");
+    setMessage("");
+
+    try {
+      await apiRequest(
+        `/communities/${groupId}`,
         {
           method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
 
-      if (response.status === 403) {
-        setError(
-          "The community owner cannot leave the community."
-        );
-        return;
-      }
-
-      if (response.status === 404) {
-        setError(
-          "Community membership not found."
-        );
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          "Could not leave community."
-        );
-      }
-
-      onLeave(groupId);
+      onDeleted();
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong."
-      );
+      if (err instanceof ApiError) {
+        setError(err.message);
+      } else {
+        setError(
+          "Could not delete community."
+        );
+      }
     } finally {
-      setIsLeaving(false);
+      setIsDeleting(false);
     }
   }
 
@@ -199,11 +254,20 @@ function CommunityDetailsPage({
         className="text-link"
         onClick={onBack}
       >
-        ← Back to Communities
+        ← Back to community
       </button>
 
       <p className="small-label">
-        COMMUNITY DETAILS
+        MANAGE COMMUNITY
+      </p>
+
+      <h2>
+        Make it your own.
+      </h2>
+
+      <p className="community-form-subtitle">
+        Make a little change.
+        Keep building.
       </p>
 
       {isLoading && (
@@ -224,127 +288,116 @@ function CommunityDetailsPage({
         </p>
       )}
 
+      {message && (
+        <p
+          className="message"
+          role="status"
+        >
+          {message}
+        </p>
+      )}
+
       {!isLoading &&
-        !error &&
-        group && (
-          <>
-            <section className="community-hero">
-              <div>
-                <p className="small-label">
-                  COMMUNITY
-                </p>
+        group &&
+        !canEdit && (
+          <div className="dashboard-card">
+            <h3>
+              You don't have
+              permission here.
+            </h3>
 
-                <h2>{group.name}</h2>
+            <p>
+              Only community
+              admins and owners can
+              manage these settings.
+            </p>
+          </div>
+        )}
 
-                <p>
-                  {group.description ||
-                    "No description yet."}
-                </p>
+      {!isLoading &&
+        group &&
+        canEdit && (
+          <form
+            className="community-form-card"
+            onSubmit={
+              handleSave
+            }
+          >
+            <label
+              className="community-form-field"
+              htmlFor="manage-community-name"
+            >
+              <span>
+                Community name
+              </span>
 
-                <p className="community-meta">
-                  {group._count.members} members
-                  {" · "}
-                  Your role:{" "}
-                  {group.members[0]?.role ||
-                    "Unknown"}
-                </p>
-              </div>
-            </section>
-
-            <div className="community-tabs">
-              <button
-                type="button"
-                className="community-tab"
-              >
-                Community
-              </button>
-
-              <button
-                type="button"
-                className="community-tab"
-              >
-                Channels
-              </button>
-
-              <button
-                type="button"
-                className="community-tab"
-                onClick={() =>
-                  onOpenMembers(group.id)
-                }
-              >
-                Members
-              </button>
-
-              <button
-                type="button"
-                className="community-tab"
-                onClick={() =>
-                  onOpenRoles(group.id)
-                }
-              >
-                Roles & permissions
-              </button>
-            </div>
-
-            <div className="community-content-grid">
-              <div className="community-main-card">
-                <h3>
-                  Community space
-                </h3>
-
-                <p>
-                  Welcome to {group.name}.
-                </p>
-
-                <p>
-                  Share ideas, ask questions and
-                  build together.
-                </p>
-              </div>
-
-              <aside className="community-channels-card">
-                <h3>Channels</h3>
-
-                {channels.length === 0 && (
-                  <p>No channels yet.</p>
-                )}
-
-                {channels.map(
-                  (channel) => (
-                    <div
-                      className="channel-row"
-                      key={channel.id}
-                    >
-                      <strong>
-                        # {channel.name}
-                      </strong>
-
-                      {channel.description && (
-                        <p>
-                          {channel.description}
-                        </p>
-                      )}
-                    </div>
+              <input
+                id="manage-community-name"
+                value={name}
+                onChange={(event) =>
+                  setName(
+                    event.target.value
                   )
-                )}
+                }
+                maxLength={100}
+                required
+              />
+            </label>
 
-                {group.members[0]?.role !==
-                  "OWNER" && (
-                  <button
-                    type="button"
-                    className="community-leave"
-                    onClick={handleLeave}
-                    disabled={isLeaving}
-                  >
-                    {isLeaving
-                      ? "Leaving..."
-                      : "Leave community"}
-                  </button>
-                )}
-              </aside>
+            <label
+              className="community-form-field"
+              htmlFor="manage-community-description"
+            >
+              <span>
+                Description
+              </span>
+
+              <textarea
+                id="manage-community-description"
+                value={description}
+                onChange={(event) =>
+                  setDescription(
+                    event.target.value
+                  )
+                }
+                rows={5}
+                maxLength={500}
+              />
+            </label>
+
+            <div className="community-form-actions">
+              <button
+                type="submit"
+                className="community-primary-button"
+                disabled={
+                  isSaving ||
+                  isDeleting
+                }
+              >
+                {isSaving
+                  ? "Saving..."
+                  : "Save changes"}
+              </button>
+
+              {canDelete && (
+                <button
+                  type="button"
+                  className="community-delete-button"
+                  disabled={
+                    isDeleting ||
+                    isSaving
+                  }
+                  onClick={
+                    handleDelete
+                  }
+                >
+                  {isDeleting
+                    ? "Deleting..."
+                    : "Delete community"}
+                </button>
+              )}
             </div>
-          </>
+          </form>
         )}
     </AppLayout>
   );

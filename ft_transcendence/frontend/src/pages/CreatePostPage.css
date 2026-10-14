@@ -91,3 +91,60 @@
 .upload-progress progress {
   flex: 1;
 }
+
+/* Community navigation */
+
+.community-header-actions {
+  position: relative;
+}
+
+.community-manage-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-height: 44px;
+
+  margin-top: var(--space-12);
+  padding: 0 var(--space-20);
+
+  background: var(--color-plum);
+  color: white;
+
+  text-decoration: none;
+}
+
+.community-tab-link {
+  display: inline-flex;
+  align-items: center;
+
+  min-height: 40px;
+  padding: 0 var(--space-16);
+
+  border: 1px solid var(--color-border);
+
+  background: var(--color-surface);
+  color: var(--color-ink);
+
+  text-decoration: none;
+}
+
+.community-tab-link.active {
+  background: var(--color-pink);
+}
+
+.community-tab-link:hover {
+  background: var(--color-cyan);
+}
+
+@media (max-width: 700px) {
+  .community-tabs {
+    display: grid;
+    grid-template-columns:
+      repeat(2, 1fr);
+  }
+
+  .community-tab-link {
+    justify-content: center;
+  }
+}

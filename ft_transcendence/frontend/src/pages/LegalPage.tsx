@@ -1,3 +1,4 @@
+
 type LegalPageProps = {
   title: string;
   onBack: () => void;

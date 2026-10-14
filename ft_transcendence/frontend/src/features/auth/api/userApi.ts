@@ -6,18 +6,44 @@ export type CurrentUser = {
   username: string
 }
 
+export type BlockedUser = {
+  createdAt: string
+  blocked: {
+    id: string
+    username: string
+  }
+}
+
 export function getCurrentUser() {
-  return apiRequest<CurrentUser>('/users/me')
+  return apiRequest<CurrentUser>(
+    '/users/me',
+  )
 }
 
-export function blockUser(userId: string) {
-  return apiRequest(`/users/${userId}/block`, {
-    method: 'POST',
-  })
+export function getBlockedUsers() {
+  return apiRequest<BlockedUser[]>(
+    '/users/blocked',
+  )
 }
 
-export function unblockUser(userId: string) {
-  return apiRequest(`/users/${userId}/block`, {
-    method: 'DELETE',
-  })
+export function blockUser(
+  userId: string,
+) {
+  return apiRequest(
+    `/users/${userId}/block`,
+    {
+      method: 'POST',
+    },
+  )
+}
+
+export function unblockUser(
+  userId: string,
+) {
+  return apiRequest(
+    `/users/${userId}/block`,
+    {
+      method: 'DELETE',
+    },
+  )
 }

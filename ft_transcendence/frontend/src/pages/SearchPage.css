@@ -257,3 +257,42 @@
 .person-result > a:hover {
   background: var(--color-pink);
 }
+
+.search-results .community-card__footer button {
+  flex: 1;
+  padding: var(--space-8);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+.search-post-card {
+  padding: var(--space-20);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.search-post-card > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-12);
+  font-size: 12px;
+}
+
+.search-post-card > div span {
+  color: var(--color-teal);
+}
+
+.search-post-card p {
+  margin: var(--space-16) 0;
+  line-height: 1.6;
+}
+
+.search-post-card a {
+  display: inline-block;
+  padding: var(--space-8) var(--space-12);
+  border: 1px solid var(--color-border);
+  color: var(--color-ink);
+  text-decoration: none;
+}
