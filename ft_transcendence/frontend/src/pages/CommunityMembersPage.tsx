@@ -1,10 +1,20 @@
 import {
   useEffect,
+  useMemo,
   useState,
   type FormEvent,
 } from "react";
 
 import AppLayout from "../components/AppLayout";
+
+import {
+  apiRequest,
+  ApiError,
+} from "../api/apiClient";
+
+import {
+  usePresence,
+} from "../features/presence/hooks/usePresence";
 
 type Role =
   | "OWNER"
@@ -14,8 +24,11 @@ type Role =
 
 type Member = {
   id: string;
+
   role: Role;
+
   joinedAt: string;
+
   user: {
     id: string;
     username: string;
@@ -31,174 +44,250 @@ type CommunityDetails = {
 
 type CommunityMembersPageProps = {
   groupId: string;
+
   token: string;
+
   onBack: () => void;
 };
 
 function CommunityMembersPage({
   groupId,
-  token,
+  token: _token,
   onBack,
 }: CommunityMembersPageProps) {
-  const [members, setMembers] =
-    useState<Member[]>([]);
+  const [
+    members,
+    setMembers,
+  ] = useState<Member[]>([]);
 
-  const [currentRole, setCurrentRole] =
-    useState<Role>("MEMBER");
+  const [
+    currentRole,
+    setCurrentRole,
+  ] = useState<Role>(
+    "MEMBER"
+  );
 
-  const [email, setEmail] =
-    useState("");
+  const [
+    search,
+    setSearch,
+  ] = useState("");
 
-  const [newMemberRole, setNewMemberRole] =
-    useState<Role>("MEMBER");
+  const [
+    email,
+    setEmail,
+  ] = useState("");
 
-  const [isLoading, setIsLoading] =
-    useState(true);
+  const [
+    newMemberRole,
+    setNewMemberRole,
+  ] = useState<Role>(
+    "MEMBER"
+  );
 
-  const [isAdding, setIsAdding] =
-    useState(false);
+  const [
+    isLoading,
+    setIsLoading,
+  ] = useState(true);
 
-  const [error, setError] =
-    useState("");
+  const [
+    isAdding,
+    setIsAdding,
+  ] = useState(false);
 
-  const [message, setMessage] =
-    useState("");
+  const [
+    error,
+    setError,
+  ] = useState("");
+
+  const [
+    message,
+    setMessage,
+  ] = useState("");
+
+  const presence =
+    usePresence();
 
   useEffect(() => {
     async function loadMembers() {
       setIsLoading(true);
+
       setError("");
 
       try {
-        const membersResponse = await fetch(
-          `http://localhost:3000/api/communities/${groupId}/members`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+        const [
+          membersData,
+          detailsData,
+        ] =
+          await Promise.all([
+            apiRequest<Member[]>(
+              `/communities/${groupId}/members`
+            ),
+
+            apiRequest<CommunityDetails>(
+              `/communities/${groupId}`
+            ),
+          ]);
+
+        setMembers(
+          membersData
         );
 
-        const detailsResponse = await fetch(
-          `http://localhost:3000/api/communities/${groupId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+        setCurrentRole(
+          detailsData.members[0]
+            ?.role || "MEMBER"
         );
-
+      } catch (err) {
         if (
-          !membersResponse.ok ||
-          !detailsResponse.ok
+          err instanceof ApiError
         ) {
-          throw new Error(
+          setError(
+            err.message
+          );
+        } else {
+          setError(
             "Could not load community members."
           );
         }
-
-        const membersData: Member[] =
-          await membersResponse.json();
-
-        const detailsData: CommunityDetails =
-          await detailsResponse.json();
-
-        setMembers(membersData);
-
-        setCurrentRole(
-          detailsData.members[0]?.role ||
-            "MEMBER"
-        );
-      } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Something went wrong."
-        );
       } finally {
         setIsLoading(false);
       }
     }
 
     loadMembers();
-  }, [groupId, token]);
+  }, [groupId]);
+
+  const filteredMembers =
+    useMemo(() => {
+      const query =
+        search
+          .trim()
+          .toLowerCase();
+
+      if (!query) {
+        return members;
+      }
+
+      return members.filter(
+        (member) =>
+          member.user.username
+            .toLowerCase()
+            .includes(query) ||
+
+          member.user.email
+            .toLowerCase()
+            .includes(query) ||
+
+          member.role
+            .toLowerCase()
+            .includes(query)
+      );
+    }, [
+      members,
+      search,
+    ]);
+
+  function isOnline(
+    userId: string
+  ) {
+    return presence.some(
+      (item) =>
+        item.userId ===
+          userId &&
+        item.online
+    );
+  }
 
   async function handleAddMember(
     event: FormEvent<HTMLFormElement>
   ) {
     event.preventDefault();
 
-    if (isAdding) return;
+    if (isAdding) {
+      return;
+    }
+
+    const cleanEmail =
+      email.trim();
+
+    if (!cleanEmail) {
+      setError(
+        "Please enter an email address."
+      );
+
+      return;
+    }
 
     setIsAdding(true);
+
     setError("");
+
     setMessage("");
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/communities/${groupId}/members`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type":
-              "application/json",
-            Authorization:
-              `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            email,
-            role: newMemberRole,
-          }),
-        }
+      const newMember =
+        await apiRequest<Member>(
+          `/communities/${groupId}/members`,
+          {
+            method: "POST",
+
+            body: JSON.stringify({
+              email:
+                cleanEmail,
+
+              role:
+                newMemberRole,
+            }),
+          }
+        );
+
+      setMembers(
+        (current) => [
+          ...current,
+          newMember,
+        ]
       );
 
-      if (response.status === 404) {
-        setError(
-          "No registered user has this email."
-        );
-        return;
-      }
-
-      if (response.status === 409) {
-        setError(
-          "This user is already a member."
-        );
-        return;
-      }
-
-      if (response.status === 403) {
-        setError(
-          "You do not have permission to add this member."
-        );
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          "Could not add member."
-        );
-      }
-
-      const newMember: Member =
-        await response.json();
-
-      setMembers((currentMembers) => [
-        ...currentMembers,
-        newMember,
-      ]);
-
       setEmail("");
-      setNewMemberRole("MEMBER");
+
+      setNewMemberRole(
+        "MEMBER"
+      );
 
       setMessage(
         "Member added successfully."
       );
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong."
-      );
+      if (
+        err instanceof ApiError
+      ) {
+        if (
+          err.status === 404
+        ) {
+          setError(
+            "No registered user has this email."
+          );
+        } else if (
+          err.status === 409
+        ) {
+          setError(
+            "This user is already a member."
+          );
+        } else if (
+          err.status === 403
+        ) {
+          setError(
+            "You do not have permission to add this member."
+          );
+        } else {
+          setError(
+            err.message
+          );
+        }
+      } else {
+        setError(
+          "Could not add member."
+        );
+      }
     } finally {
       setIsAdding(false);
     }
@@ -209,58 +298,57 @@ function CommunityMembersPage({
     role: Role
   ) {
     setError("");
+
     setMessage("");
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/communities/${groupId}/members/${memberId}/role`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type":
-              "application/json",
-            Authorization:
-              `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            role,
-          }),
-        }
-      );
+      const updated =
+        await apiRequest<Member>(
+          `/communities/${groupId}/members/${memberId}/role`,
+          {
+            method: "PATCH",
 
-      if (response.status === 403) {
-        setError(
-          "You do not have permission to change this role."
+            body: JSON.stringify({
+              role,
+            }),
+          }
         );
-        return;
-      }
 
-      if (!response.ok) {
-        throw new Error(
-          "Could not change member role."
-        );
-      }
-
-      const updatedMember: Member =
-        await response.json();
-
-      setMembers((currentMembers) =>
-        currentMembers.map((member) =>
-          member.id === updatedMember.id
-            ? updatedMember
-            : member
-        )
+      setMembers(
+        (current) =>
+          current.map(
+            (member) =>
+              member.id ===
+              updated.id
+                ? updated
+                : member
+          )
       );
 
       setMessage(
         "Member role updated successfully."
       );
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong."
-      );
+      if (
+        err instanceof
+          ApiError &&
+        err.status === 403
+      ) {
+        setError(
+          "You do not have permission to change this role."
+        );
+      } else if (
+        err instanceof
+        ApiError
+      ) {
+        setError(
+          err.message
+        );
+      } else {
+        setError(
+          "Could not change member role."
+        );
+      }
     }
   }
 
@@ -268,73 +356,84 @@ function CommunityMembersPage({
     memberId: string
   ) {
     setError("");
+
     setMessage("");
 
     try {
-      const response = await fetch(
-        `http://localhost:3000/api/communities/${groupId}/members/${memberId}`,
+      await apiRequest(
+        `/communities/${groupId}/members/${memberId}`,
         {
           method: "DELETE",
-          headers: {
-            Authorization:
-              `Bearer ${token}`,
-          },
         }
       );
 
-      if (response.status === 403) {
-        setError(
-          "You do not have permission to remove this member."
-        );
-        return;
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          "Could not remove member."
-        );
-      }
-
-      setMembers((currentMembers) =>
-        currentMembers.filter(
-          (member) =>
-            member.id !== memberId
-        )
+      setMembers(
+        (current) =>
+          current.filter(
+            (member) =>
+              member.id !==
+              memberId
+          )
       );
 
       setMessage(
         "Member removed successfully."
       );
     } catch (err) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "Something went wrong."
-      );
+      if (
+        err instanceof
+          ApiError &&
+        err.status === 403
+      ) {
+        setError(
+          "You do not have permission to remove this member."
+        );
+      } else if (
+        err instanceof
+        ApiError
+      ) {
+        setError(
+          err.message
+        );
+      } else {
+        setError(
+          "Could not remove member."
+        );
+      }
     }
   }
 
   function canRemoveMember(
     member: Member
   ) {
-    if (member.role === "OWNER") {
+    if (
+      member.role ===
+      "OWNER"
+    ) {
       return false;
     }
 
-    if (currentRole === "OWNER") {
-      return true;
-    }
-
     if (
-      currentRole === "ADMIN" &&
-      member.role !== "ADMIN"
+      currentRole ===
+      "OWNER"
     ) {
       return true;
     }
 
     if (
-      currentRole === "MODERATOR" &&
-      member.role === "MEMBER"
+      currentRole ===
+        "ADMIN" &&
+      member.role !==
+        "ADMIN"
+    ) {
+      return true;
+    }
+
+    if (
+      currentRole ===
+        "MODERATOR" &&
+      member.role ===
+        "MEMBER"
     ) {
       return true;
     }
@@ -343,8 +442,10 @@ function CommunityMembersPage({
   }
 
   const canAddMember =
-    currentRole === "OWNER" ||
-    currentRole === "ADMIN";
+    currentRole ===
+      "OWNER" ||
+    currentRole ===
+      "ADMIN";
 
   return (
     <AppLayout>
@@ -365,16 +466,35 @@ function CommunityMembersPage({
       </h2>
 
       <p className="members-subtitle">
-        Your role: {currentRole}
+        Your role:{" "}
+        {currentRole}
       </p>
+
+      <div className="members-search-row">
+        <input
+          className="members-search"
+          type="search"
+          placeholder="Search members..."
+          value={search}
+          onChange={(event) =>
+            setSearch(
+              event.target.value
+            )
+          }
+        />
+      </div>
 
       {canAddMember && (
         <div className="members-add-card">
-          <h3>Invite a member</h3>
+          <h3>
+            Add a member
+          </h3>
 
           <form
             className="members-add-form"
-            onSubmit={handleAddMember}
+            onSubmit={
+              handleAddMember
+            }
           >
             <div className="members-form-field">
               <label htmlFor="member-email">
@@ -402,7 +522,9 @@ function CommunityMembersPage({
 
               <select
                 id="member-role"
-                value={newMemberRole}
+                value={
+                  newMemberRole
+                }
                 onChange={(event) =>
                   setNewMemberRole(
                     event.target
@@ -430,11 +552,13 @@ function CommunityMembersPage({
             <button
               type="submit"
               className="members-add-button"
-              disabled={isAdding}
+              disabled={
+                isAdding
+              }
             >
               {isAdding
                 ? "Adding..."
-                : "Add Member"}
+                : "Add member"}
             </button>
           </form>
         </div>
@@ -468,101 +592,142 @@ function CommunityMembersPage({
       )}
 
       {!isLoading &&
-        !error &&
-        members.length > 0 && (
+        filteredMembers.length >
+          0 && (
           <div className="members-list">
-            {members.map((member) => (
-              <div
-                className="member-row"
-                key={member.id}
-              >
-                <div className="member-person">
-                  <div className="member-avatar">
-                    {member.user.username
-                      .charAt(0)
-                      .toUpperCase()}
-                  </div>
+            {filteredMembers.map(
+              (member) => {
+                const online =
+                  isOnline(
+                    member.user.id
+                  );
 
-                  <div className="member-info">
-                    <strong>
-                      {member.user.username}
-                    </strong>
+                return (
+                  <div
+                    className="member-row"
+                    key={
+                      member.id
+                    }
+                  >
+                    <div className="member-person">
+                      <div className="member-avatar">
+                        {member.user.username
+                          .charAt(0)
+                          .toUpperCase()}
+                      </div>
 
-                    <span>
-                      {member.user.email}
-                    </span>
-                  </div>
-                </div>
+                      <div className="member-info">
+                        <strong>
+                          {
+                            member
+                              .user
+                              .username
+                          }
+                        </strong>
 
-                <span
-                  className={`member-role-badge ${member.role.toLowerCase()}`}
-                >
-                  {member.role}
-                </span>
+                        <span>
+                          @
+                          {
+                            member
+                              .user
+                              .username
+                          }{" "}
+                          ·{" "}
+                          {online
+                            ? "Online"
+                            : "Offline"}
+                        </span>
 
-                <div className="member-actions">
-                  {currentRole ===
-                    "OWNER" &&
-                    member.role !==
-                      "OWNER" && (
-                      <select
-                        className="member-role-select"
-                        value={member.role}
-                        onChange={(event) =>
-                          handleChangeRole(
-                            member.id,
-                            event.target
-                              .value as Role
-                          )
-                        }
-                      >
-                        <option value="MEMBER">
-                          MEMBER
-                        </option>
+                        <span>
+                          {
+                            member
+                              .user
+                              .email
+                          }
+                        </span>
+                      </div>
+                    </div>
 
-                        <option value="MODERATOR">
-                          MODERATOR
-                        </option>
-
-                        <option value="ADMIN">
-                          ADMIN
-                        </option>
-                      </select>
-                    )}
-
-                  {canRemoveMember(
-                    member
-                  ) && (
-                    <button
-                      type="button"
-                      className="member-remove"
-                      onClick={() =>
-                        handleRemoveMember(
-                          member.id
-                        )
-                      }
+                    <span
+                      className={`member-role-badge ${member.role.toLowerCase()}`}
                     >
-                      Remove member
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
+                      {
+                        member.role
+                      }
+                    </span>
+
+                    <div className="member-actions">
+                      {currentRole ===
+                        "OWNER" &&
+                        member.role !==
+                          "OWNER" && (
+                          <select
+                            className="member-role-select"
+                            value={
+                              member.role
+                            }
+                            onChange={(event) =>
+                              handleChangeRole(
+                                member.id,
+                                event
+                                  .target
+                                  .value as Role
+                              )
+                            }
+                          >
+                            <option value="MEMBER">
+                              MEMBER
+                            </option>
+
+                            <option value="MODERATOR">
+                              MODERATOR
+                            </option>
+
+                            <option value="ADMIN">
+                              ADMIN
+                            </option>
+                          </select>
+                        )}
+
+                      {canRemoveMember(
+                        member
+                      ) && (
+                        <button
+                          type="button"
+                          className="member-remove"
+                          onClick={() =>
+                            handleRemoveMember(
+                              member.id
+                            )
+                          }
+                        >
+                          Remove member
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+            )}
           </div>
         )}
 
       {!isLoading &&
-        !error &&
-        members.length === 0 && (
+        filteredMembers.length ===
+          0 && (
           <div className="dashboard-card">
-            <p>No members found.</p>
+            <p>
+              {search
+                ? "No members match your search."
+                : "No members found."}
+            </p>
           </div>
         )}
 
       <p className="members-note">
-        Roles belong to each community
-        membership, not to the student
-        globally.
+        Roles belong to each
+        community membership, not
+        to the student globally.
       </p>
     </AppLayout>
   );

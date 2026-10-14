@@ -8,6 +8,12 @@ import {
 import AppLayout from "../components/AppLayout";
 import Button from "../components/Button";
 import Input from "../components/Input";
+import {
+  apiBlob,
+  apiRequest,
+  ApiError,
+  uploadRequest,
+} from "../api/apiClient";
 
 type ProfileUser = {
   id: string;
@@ -21,9 +27,17 @@ type ProfilePageProps = {
   onUserUpdated: (user: ProfileUser) => void;
 };
 
+type AvatarUploadResponse = {
+  id: string;
+  username: string;
+  avatarUrl: string;
+};
+
+
+
 function ProfilePage({
   user,
-  token,
+  token: _token,
   onUserUpdated,
 }: ProfilePageProps) {
   const [isEditing, setIsEditing] =
@@ -31,6 +45,12 @@ function ProfilePage({
 
   const [isLoading, setIsLoading] =
     useState(false);
+
+  const [isUploading, setIsUploading] =
+    useState(false);
+
+  const [uploadProgress, setUploadProgress] =
+    useState(0);
 
   const [username, setUsername] =
     useState(user.username);
@@ -50,10 +70,58 @@ function ProfilePage({
   const [avatarPreview, setAvatarPreview] =
     useState<string | null>(null);
 
+  const [savedAvatarUrl, setSavedAvatarUrl] =
+    useState<string | null>(null);
+
+  const [avatarVersion, setAvatarVersion] =
+    useState(0);
+
+  // Load saved avatar from backend.
+  useEffect(() => {
+    let active = true;
+    let objectUrl = "";
+
+    async function loadAvatar() {
+      try {
+        const blob = await apiBlob(
+          `/uploads/avatar/${user.id}`
+        );
+
+        if (!active) {
+          return;
+        }
+
+        objectUrl =
+          URL.createObjectURL(blob);
+
+        setSavedAvatarUrl(objectUrl);
+      } catch {
+        if (active) {
+          setSavedAvatarUrl(null);
+        }
+      }
+    }
+
+    loadAvatar();
+
+    return () => {
+      active = false;
+
+      if (objectUrl) {
+        URL.revokeObjectURL(
+          objectUrl
+        );
+      }
+    };
+  }, [user.id, avatarVersion]);
+
+  // Clean temporary preview URLs.
   useEffect(() => {
     return () => {
       if (avatarPreview) {
-        URL.revokeObjectURL(avatarPreview);
+        URL.revokeObjectURL(
+          avatarPreview
+        );
       }
     };
   }, [avatarPreview]);
@@ -73,6 +141,7 @@ function ProfilePage({
 
     setError("");
     setMessage("");
+    setUploadProgress(0);
 
     if (!file) {
       return;
@@ -81,12 +150,18 @@ function ProfilePage({
     const allowedTypes = [
       "image/png",
       "image/jpeg",
+      "image/webp",
     ];
 
-    if (!allowedTypes.includes(file.type)) {
+    if (
+      !allowedTypes.includes(
+        file.type
+      )
+    ) {
       setError(
-        "Please choose a PNG or JPEG image."
+        "Please choose a PNG, JPEG, or WEBP image."
       );
+
       return;
     }
 
@@ -97,6 +172,7 @@ function ProfilePage({
       setError(
         "Avatar image must be smaller than 5 MB."
       );
+
       return;
     }
 
@@ -113,7 +189,7 @@ function ProfilePage({
     setAvatarPreview(preview);
 
     setMessage(
-      "Avatar selected. Backend upload will be connected later."
+      "Avatar selected. Press Upload avatar to save it."
     );
   }
 
@@ -126,142 +202,229 @@ function ProfilePage({
 
     setAvatarFile(null);
     setAvatarPreview(null);
+    setUploadProgress(0);
     setMessage("");
   }
 
-  async function handleSave(
-    event: FormEvent<HTMLFormElement>
-  ) {
-    event.preventDefault();
-
-    if (isLoading) return;
+  async function handleUploadAvatar() {
+    if (
+      !avatarFile ||
+      isUploading
+    ) {
+      return;
+    }
 
     setError("");
     setMessage("");
-
-    const cleanUsername =
-      username.trim();
-
-    const cleanEmail =
-      email.trim();
-
-    const usernamePattern =
-      /^[a-zA-Z0-9_]{3,30}$/;
-
-    const emailPattern =
-      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (
-      !usernamePattern.test(
-        cleanUsername
-      )
-    ) {
-      setError(
-        "Username must be 3-30 characters and contain only letters, numbers, or underscores."
-      );
-      return;
-    }
-
-    if (
-      !emailPattern.test(
-        cleanEmail
-      )
-    ) {
-      setError(
-        "Please enter a valid email address."
-      );
-      return;
-    }
-
-    if (
-      cleanUsername === user.username &&
-      cleanEmail === user.email
-    ) {
-      setMessage(
-        "No profile changes to save."
-      );
-
-      setIsEditing(false);
-      return;
-    }
-
-    setIsLoading(true);
+    setIsUploading(true);
+    setUploadProgress(0);
 
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/users/me",
+      await uploadRequest<AvatarUploadResponse>(
+        "/uploads/avatar",
+        avatarFile,
+        setUploadProgress
+      );
+
+      if (avatarPreview) {
+        URL.revokeObjectURL(
+          avatarPreview
+        );
+      }
+
+      setAvatarFile(null);
+      setAvatarPreview(null);
+
+      // Reload saved avatar from backend.
+      setAvatarVersion(
+        (current) => current + 1
+      );
+
+      setMessage(
+        "Avatar updated successfully!"
+      );
+    } catch {
+      setError(
+        "Could not upload avatar."
+      );
+    } finally {
+      setIsUploading(false);
+    }
+  }
+
+  async function handleDeleteAvatar() {
+  if (isUploading) {
+    return;
+  }
+
+  setError("");
+  setMessage("");
+
+  try {
+    await apiRequest(
+      "/uploads/avatar",
+      {
+        method: "DELETE",
+      }
+    );
+
+    setSavedAvatarUrl(null);
+
+    setAvatarVersion(
+      (current) => current + 1
+    );
+
+    setMessage(
+      "Avatar removed successfully."
+    );
+  } catch (err) {
+    if (
+      err instanceof ApiError &&
+      err.status === 401
+    ) {
+      setError(
+        "Your session has expired. Please sign in again."
+      );
+    } else {
+      setError(
+        "Could not remove avatar."
+      );
+    }
+  }
+}
+
+  async function handleSave(
+  event: FormEvent<HTMLFormElement>
+) {
+  event.preventDefault();
+
+  if (isLoading) {
+    return;
+  }
+
+  setError("");
+  setMessage("");
+
+  const cleanUsername =
+    username.trim();
+
+  const cleanEmail =
+    email.trim();
+
+  const usernamePattern =
+    /^[a-zA-Z0-9_]{3,30}$/;
+
+  const emailPattern =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (
+    !usernamePattern.test(
+      cleanUsername
+    )
+  ) {
+    setError(
+      "Username must be 3-30 characters and contain only letters, numbers, or underscores."
+    );
+
+    return;
+  }
+
+  if (
+    !emailPattern.test(
+      cleanEmail
+    )
+  ) {
+    setError(
+      "Please enter a valid email address."
+    );
+
+    return;
+  }
+
+  if (
+    cleanUsername ===
+      user.username &&
+    cleanEmail === user.email
+  ) {
+    setMessage(
+      "No profile changes to save."
+    );
+
+    setIsEditing(false);
+
+    return;
+  }
+
+  setIsLoading(true);
+
+  try {
+    const updatedUser =
+      await apiRequest<ProfileUser>(
+        "/users/me",
         {
           method: "PATCH",
-          headers: {
-            "Content-Type":
-              "application/json",
-            Authorization:
-              `Bearer ${token}`,
-          },
+
           body: JSON.stringify({
             username:
               cleanUsername,
+
             email:
               cleanEmail,
           }),
         }
       );
 
-      if (response.status === 401) {
+    onUserUpdated(
+      updatedUser
+    );
+
+    setUsername(
+      updatedUser.username
+    );
+
+    setEmail(
+      updatedUser.email
+    );
+
+    setIsEditing(false);
+
+    setMessage(
+      "Profile updated successfully!"
+    );
+  } catch (err) {
+    if (err instanceof ApiError) {
+      if (err.status === 401) {
         setError(
           "Your session has expired. Please sign in again."
         );
-        return;
-      }
-
-      if (response.status === 409) {
+      } else if (
+        err.status === 409
+      ) {
         setError(
           "This username or email is already in use."
         );
-        return;
-      }
-
-      if (response.status === 400) {
+      } else if (
+        err.status === 400
+      ) {
         setError(
           "Please check your username and email."
         );
-        return;
+      } else {
+        setError(err.message);
       }
-
-      if (!response.ok) {
-        setError(
-          "Could not update your profile."
-        );
-        return;
-      }
-
-      const updatedUser:
-        ProfileUser =
-        await response.json();
-
-      onUserUpdated(updatedUser);
-
-      setUsername(
-        updatedUser.username
-      );
-
-      setEmail(
-        updatedUser.email
-      );
-
-      setIsEditing(false);
-
-      setMessage(
-        "Profile updated successfully!"
-      );
-    } catch {
+    } else {
       setError(
-        "Could not connect to the server."
+        "Could not update your profile."
       );
-    } finally {
-      setIsLoading(false);
     }
+  } finally {
+    setIsLoading(false);
   }
+}
+
+  const avatarToShow =
+    avatarPreview ||
+    savedAvatarUrl;
 
   return (
     <AppLayout>
@@ -269,18 +432,21 @@ function ProfilePage({
         MY PROFILE
       </p>
 
-      <h2>A little more you.</h2>
+      <h2>
+        A little more you.
+      </h2>
 
       <p className="profile-subtitle">
-        Make a little change. Keep building.
+        Make a little change.
+        Keep building.
       </p>
 
       <section className="profile-hero">
         <div className="profile-avatar">
-          {avatarPreview ? (
+          {avatarToShow ? (
             <img
-              src={avatarPreview}
-              alt="Profile preview"
+              src={avatarToShow}
+              alt={`${user.username}'s avatar`}
             />
           ) : (
             user.username
@@ -290,13 +456,17 @@ function ProfilePage({
         </div>
 
         <div className="profile-identity">
-          <h3>{user.username}</h3>
+          <h3>
+            {user.username}
+          </h3>
 
           <p>
             @{user.username}
           </p>
 
-          <p>{user.email}</p>
+          <p>
+            {user.email}
+          </p>
         </div>
 
         <button
@@ -314,7 +484,9 @@ function ProfilePage({
 
       <div className="profile-grid">
         <section className="profile-card">
-          <h3>Profile details</h3>
+          <h3>
+            Profile details
+          </h3>
 
           {!isEditing ? (
             <>
@@ -393,7 +565,8 @@ function ProfilePage({
           </h3>
 
           <p className="profile-upload-help">
-            PNG or JPEG · maximum 5 MB
+            PNG, JPEG or WEBP ·
+            maximum 5 MB
           </p>
 
           <label
@@ -407,7 +580,7 @@ function ProfilePage({
             id="avatar-file"
             className="avatar-file-input"
             type="file"
-            accept="image/png,image/jpeg"
+            accept="image/png,image/jpeg,image/webp"
             onChange={
               handleAvatarChange
             }
@@ -428,17 +601,62 @@ function ProfilePage({
                 MB
               </p>
 
+              {isUploading && (
+                <p>
+                  Uploading...{" "}
+                  {uploadProgress}%
+                </p>
+              )}
+
+              <button
+                type="button"
+                className="profile-edit-button"
+                onClick={
+                  handleUploadAvatar
+                }
+                disabled={
+                  isUploading
+                }
+              >
+                {isUploading
+                  ? "Uploading..."
+                  : "Upload avatar"}
+              </button>
+
               <button
                 type="button"
                 className="text-link"
                 onClick={
                   removeAvatarPreview
                 }
+                disabled={
+                  isUploading
+                }
               >
-                Remove / Cancel
+                Cancel
               </button>
             </div>
           )}
+
+          {!avatarFile &&
+            savedAvatarUrl && (
+              <div className="avatar-file-info">
+                <p>
+                  Your avatar is
+                  saved.
+                </p>
+
+                <button
+                  type="button"
+                  className="text-link"
+                  onClick={
+                    handleDeleteAvatar
+                  }
+                >
+                  Remove avatar
+                </button>
+              </div>
+            )}
         </section>
       </div>
 

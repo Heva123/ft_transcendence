@@ -1,6 +1,14 @@
-import { useEffect, useState } from "react";
+import {
+  useEffect,
+  useState,
+} from "react";
 
 import AppLayout from "../components/AppLayout";
+
+import {
+  apiRequest,
+  ApiError,
+} from "../api/apiClient";
 
 type RoleData = {
   role: string;
@@ -57,6 +65,14 @@ const permissionRows = [
     label: "Delete channels",
     permission: "CHANNEL_DELETE",
   },
+  {
+    label: "Read reports",
+    permission: "REPORT_READ",
+  },
+  {
+    label: "Moderate reports",
+    permission: "REPORT_MODERATE",
+  },
 ];
 
 const roleNames = [
@@ -67,7 +83,7 @@ const roleNames = [
 ];
 
 function RolesPermissionsPage({
-  token,
+  token: _token,
   onBack,
 }: RolesPermissionsPageProps) {
   const [roles, setRoles] =
@@ -85,48 +101,37 @@ function RolesPermissionsPage({
       setError("");
 
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/roles",
-          {
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            "Could not load roles and permissions."
+        const data =
+          await apiRequest<RoleData[]>(
+            "/roles"
           );
-        }
-
-        const data: RoleData[] =
-          await response.json();
 
         setRoles(data);
       } catch (err) {
-        setError(
-          err instanceof Error
-            ? err.message
-            : "Something went wrong."
-        );
+        if (err instanceof ApiError) {
+          setError(err.message);
+        } else {
+          setError(
+            "Could not load roles and permissions."
+          );
+        }
       } finally {
         setIsLoading(false);
       }
     }
 
     loadRoles();
-  }, [token]);
+  }, []);
 
   function hasPermission(
     roleName: string,
     permission: string
   ) {
-    const role = roles.find(
-      (item) =>
-        item.role === roleName
-    );
+    const role =
+      roles.find(
+        (item) =>
+          item.role === roleName
+      );
 
     return (
       role?.permissions.includes(
@@ -154,8 +159,9 @@ function RolesPermissionsPage({
       </h2>
 
       <p className="roles-subtitle">
-        Community permissions are controlled
-        by each member's role.
+        Community permissions are
+        controlled by each member's
+        role.
       </p>
 
       {isLoading && (
@@ -229,8 +235,8 @@ function RolesPermissionsPage({
         )}
 
       <p className="roles-note">
-        These permissions are loaded from
-        the backend API.
+        These permissions are loaded
+        from the backend API.
       </p>
     </AppLayout>
   );
