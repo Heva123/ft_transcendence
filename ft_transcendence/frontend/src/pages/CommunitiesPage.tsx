@@ -5,6 +5,7 @@ import {
 } from "react";
 
 import AppLayout from "../components/AppLayout";
+import MyInvitations from "../features/invitations/components/MyInvitations";
 
 import {
   apiRequest,
@@ -363,6 +364,8 @@ function CommunitiesPage({
           + Create community
         </button>
       </div>
+
+      <MyInvitations />
 
       {message && (
         <p

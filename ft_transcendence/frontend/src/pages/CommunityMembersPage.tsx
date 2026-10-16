@@ -7,6 +7,8 @@ import {
 
 import AppLayout from "../components/AppLayout";
 import ConfirmDialog from "../components/ConfirmDialog";
+import PendingInvitesList from "../features/invitations/components/PendingInvitesList";
+import { inviteMember } from "../features/invitations/api/invitationsApi";
 
 import {
   apiRequest,
@@ -71,6 +73,10 @@ function CommunityMembersPage({
     search,
     setSearch,
   ] = useState("");
+
+  // Bumped after each invitation so the pending list reloads.
+  const [inviteVersion, setInviteVersion] =
+    useState(0);
 
   // Member waiting for "Remove this member?" confirmation (design p44).
   const [
@@ -212,12 +218,13 @@ function CommunityMembersPage({
       return;
     }
 
-    const cleanEmail =
-      email.trim();
+    // The field now holds a username (design p42 "Invite a member").
+    const cleanUsername =
+      email.trim().replace(/^@/, "");
 
-    if (!cleanEmail) {
+    if (!cleanUsername) {
       setError(
-        "Please enter an email address."
+        "Please enter a username."
       );
 
       return;
@@ -230,27 +237,17 @@ function CommunityMembersPage({
     setMessage("");
 
     try {
-      const newMember =
-        await apiRequest<Member>(
-          `/communities/${groupId}/members`,
-          {
-            method: "POST",
+      // The role picker never offers OWNER.
+      await inviteMember(
+        groupId,
+        cleanUsername,
+        newMemberRole === "OWNER"
+          ? "MEMBER"
+          : newMemberRole
+      );
 
-            body: JSON.stringify({
-              email:
-                cleanEmail,
-
-              role:
-                newMemberRole,
-            }),
-          }
-        );
-
-      setMembers(
-        (current) => [
-          ...current,
-          newMember,
-        ]
+      setInviteVersion(
+        (value) => value + 1
       );
 
       setEmail("");
@@ -260,7 +257,7 @@ function CommunityMembersPage({
       );
 
       setMessage(
-        "Member added successfully."
+        `Invitation sent. @${cleanUsername} will join after accepting.`
       );
     } catch (err) {
       if (
@@ -270,19 +267,19 @@ function CommunityMembersPage({
           err.status === 404
         ) {
           setError(
-            "No registered user has this email."
+            "No member has this username."
           );
         } else if (
           err.status === 409
         ) {
           setError(
-            "This user is already a member."
+            err.message
           );
         } else if (
           err.status === 403
         ) {
           setError(
-            "You do not have permission to add this member."
+            "You do not have permission to invite this member."
           );
         } else {
           setError(
@@ -291,7 +288,7 @@ function CommunityMembersPage({
         }
       } else {
         setError(
-          "Could not add member."
+          "Could not send the invitation."
         );
       }
     } finally {
@@ -495,7 +492,7 @@ function CommunityMembersPage({
       {canAddMember && (
         <div className="members-add-card">
           <h3>
-            Add a member
+            Invite a member
           </h3>
 
           <form
@@ -506,13 +503,13 @@ function CommunityMembersPage({
           >
             <div className="members-form-field">
               <label htmlFor="member-email">
-                Email
+                Student username
               </label>
 
               <input
                 id="member-email"
-                type="email"
-                placeholder="member@example.com"
+                type="text"
+                placeholder="afnan"
                 value={email}
                 onChange={(event) =>
                   setEmail(
@@ -565,10 +562,15 @@ function CommunityMembersPage({
               }
             >
               {isAdding
-                ? "Adding..."
-                : "Add member"}
+                ? "Sending..."
+                : "Send invitation"}
             </button>
           </form>
+
+          <PendingInvitesList
+            communityId={groupId}
+            refreshKey={inviteVersion}
+          />
         </div>
       )}
 
