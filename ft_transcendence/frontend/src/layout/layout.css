@@ -434,3 +434,13 @@
   line-height: 14px;
   text-align: center;
 }
+
+.topbar__avatar {
+  overflow: hidden;
+}
+
+.topbar__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

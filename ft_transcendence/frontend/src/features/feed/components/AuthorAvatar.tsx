@@ -1,8 +1,9 @@
 import ProtectedImage from '../../../components/ProtectedImage'
-import type { Author } from '../types/Post'
+
+type AvatarUser = { username: string; avatarUrl?: string | null }
 
 // Uploaded avatar when there is one, otherwise the initials.
-function AuthorAvatar({ author, className }: { author: Author; className: string }) {
+function AuthorAvatar({ author, className }: { author: AvatarUser; className: string }) {
   const initials = author.username.slice(0, 2).toUpperCase()
 
   return (
