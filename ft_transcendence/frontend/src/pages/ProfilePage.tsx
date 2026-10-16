@@ -6,6 +6,9 @@ import {
 } from "react";
 
 import AppLayout from "../components/AppLayout";
+import MyCornersCard from "../features/profile/components/MyCornersCard";
+import ProfileAboutCard from "../features/profile/components/ProfileAboutCard";
+import type { CurrentUser } from "../features/auth/api/userApi";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import {
@@ -15,11 +18,7 @@ import {
   uploadRequest,
 } from "../api/apiClient";
 
-type ProfileUser = {
-  id: string;
-  email: string;
-  username: string;
-};
+type ProfileUser = CurrentUser;
 
 type ProfilePageProps = {
   user: ProfileUser;
@@ -75,12 +74,21 @@ function ProfilePage({
   const [avatarVersion, setAvatarVersion] =
     useState(0);
 
+  // Only request the image when the user has one, so there is no 404 in the console.
+  const [hasAvatar, setHasAvatar] =
+    useState(Boolean(user.avatarUrl));
+
   // Load saved avatar from backend.
   useEffect(() => {
     let active = true;
     let objectUrl = "";
 
     async function loadAvatar() {
+      if (!hasAvatar) {
+        setSavedAvatarUrl(null);
+        return;
+      }
+
       try {
         const blob = await apiBlob(
           `/uploads/avatar/${user.id}`
@@ -112,7 +120,7 @@ function ProfilePage({
         );
       }
     };
-  }, [user.id, avatarVersion]);
+  }, [user.id, avatarVersion, hasAvatar]);
 
   // Clean temporary preview URLs.
   useEffect(() => {
@@ -233,6 +241,7 @@ function ProfilePage({
 
       setAvatarFile(null);
       setAvatarPreview(null);
+      setHasAvatar(true);
 
       // Reload saved avatar from backend.
       setAvatarVersion(
@@ -268,6 +277,7 @@ function ProfilePage({
     );
 
     setSavedAvatarUrl(null);
+    setHasAvatar(false);
 
     setAvatarVersion(
       (current) => current + 1
@@ -456,7 +466,7 @@ function ProfilePage({
 
         <div className="profile-identity">
           <h3>
-            {user.username}
+            {user.displayName || user.username}
           </h3>
 
           <p>
@@ -491,7 +501,7 @@ function ProfilePage({
             <>
               <p>
                 <strong>
-                  Display name
+                  Username
                 </strong>
               </p>
 
@@ -516,7 +526,7 @@ function ProfilePage({
             >
               <Input
                 id="profile-username"
-                label="Display name"
+                label="Username"
                 type="text"
                 placeholder="Enter your username"
                 value={username}
@@ -657,6 +667,14 @@ function ProfilePage({
               </div>
             )}
         </section>
+      </div>
+
+      <div className="profile-grid profile-grid--details">
+        <ProfileAboutCard
+          user={user}
+          onSaved={onUserUpdated}
+        />
+        <MyCornersCard />
       </div>
 
       {error && (

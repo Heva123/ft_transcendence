@@ -1,0 +1,74 @@
+.profile-grid--details {
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+}
+
+.profile-about__label {
+  margin: var(--space-16) 0 var(--space-4);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.profile-about__form {
+  display: grid;
+  gap: var(--space-8);
+}
+
+.profile-about__form label {
+  margin-top: var(--space-8);
+  font-size: 12px;
+}
+
+.profile-about__form input,
+.profile-about__form textarea {
+  width: 100%;
+  min-height: 42px;
+  padding: var(--space-8) var(--space-12);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.profile-about__count {
+  margin: 0;
+  color: var(--color-teal);
+  font-size: 11px;
+  text-align: right;
+}
+
+.profile-about__skill-row {
+  display: flex;
+  gap: var(--space-8);
+}
+
+.profile-about__actions {
+  display: flex;
+  gap: var(--space-12);
+  margin-top: var(--space-12);
+}
+
+.profile-about__edit {
+  margin-top: var(--space-20);
+}
+
+.skill-tag--edit {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.skill-tag--edit button {
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
+}
+
+@media (max-width: 720px) {
+  .profile-grid--details {
+    grid-template-columns: 1fr;
+  }
+}

@@ -4,6 +4,10 @@ export type CurrentUser = {
   id: string
   email: string
   username: string
+  displayName?: string | null
+  bio?: string | null
+  skills?: string[]
+  avatarUrl?: string | null
 }
 
 export type BlockedUser = {
@@ -21,7 +25,13 @@ export function getCurrentUser() {
 }
 
 export function updateCurrentUser(
-  data: { username?: string; email?: string },
+  data: {
+    username?: string
+    email?: string
+    displayName?: string
+    bio?: string
+    skills?: string[]
+  },
 ) {
   return apiRequest<CurrentUser>(
     '/users/me',

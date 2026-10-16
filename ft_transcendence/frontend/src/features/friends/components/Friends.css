@@ -1,0 +1,127 @@
+/* Friends list, requests and person rows (design p61, p67) */
+.people-list {
+  display: grid;
+  margin: var(--space-16) 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+}
+
+.person-row {
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-16);
+  border-bottom: 1px solid #e3dad3;
+}
+
+.person-row:last-child {
+  border-bottom: 0;
+}
+
+.person-row__avatar {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-pink);
+  font-size: 12px;
+}
+
+.person-row__name {
+  margin: 0;
+  font-weight: 700;
+}
+
+.person-row__meta {
+  margin: var(--space-4) 0 0;
+  color: var(--color-teal);
+  font-size: 11px;
+}
+
+.person-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  gap: var(--space-8);
+}
+
+.skill-tag {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-control);
+  background: var(--color-cyan);
+  font-size: 11px;
+}
+
+.people-button {
+  min-height: 40px;
+  padding: 0 var(--space-16);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 12px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.people-button.primary {
+  border-color: var(--color-plum);
+  background: var(--color-plum);
+  color: #fff;
+}
+
+.people-button.danger {
+  color: #9b1c1c;
+}
+
+.people-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.people-section-title {
+  margin: var(--space-24) 0 0;
+  font-family: var(--font-heading);
+  font-size: 24px;
+}
+
+.people-empty {
+  margin: 0;
+  padding: var(--space-16);
+  color: #6f6268;
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .person-row {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .person-row__actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+.skill-list,
+.corner-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.profile-bio {
+  max-width: 560px;
+  margin-top: var(--space-8);
+  line-height: 1.6;
+}
