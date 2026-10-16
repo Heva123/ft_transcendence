@@ -25,13 +25,8 @@ type DiscoverGroup = {
   };
 };
 
-type DiscoverCommunitiesPageProps = {
-  token: string;
-};
-
-function DiscoverCommunitiesPage({
-  token: _token,
-}: DiscoverCommunitiesPageProps) {
+// Requests read the token through apiClient, so no props are needed.
+function DiscoverCommunitiesPage() {
   const navigate = useNavigate();
 
   const [groups, setGroups] =

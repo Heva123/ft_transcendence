@@ -7,15 +7,13 @@ type ProtectedRouteProps = {
 }
 
 function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const [status, setStatus] = useState('checking')
+  // No token means we already know the answer, so start as invalid.
+  const [status, setStatus] = useState(() =>
+    localStorage.getItem('accessToken') ? 'checking' : 'invalid')
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken')
-
-    if (!token) {
-      setStatus('invalid')
+    if (!localStorage.getItem('accessToken'))
       return
-    }
 
     getCurrentUser()
       .then(() => setStatus('valid'))

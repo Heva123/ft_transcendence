@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import {
   type CurrentUser,
 } from '../features/auth/api/userApi'
@@ -7,13 +7,10 @@ import ProfilePage from '../pages/ProfilePage'
 
 function ProfileRoute() {
   const currentUser = useCurrentUser()
-  const [user, setUser] = useState<CurrentUser | null>(null)
+  // After an edit, the saved user wins over the one loaded at start.
+  const [edited, setEdited] = useState<CurrentUser | null>(null)
+  const user = edited ?? currentUser
   const token = localStorage.getItem('accessToken')
-
-  useEffect(() => {
-    if (currentUser)
-      setUser(currentUser)
-  }, [currentUser])
 
   if (!user || !token)
     return <p>Loading profile...</p>
@@ -22,7 +19,7 @@ function ProfileRoute() {
     <ProfilePage
       user={user}
       token={token}
-      onUserUpdated={setUser}
+      onUserUpdated={setEdited}
     />
   )
 }

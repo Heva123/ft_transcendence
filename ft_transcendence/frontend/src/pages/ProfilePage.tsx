@@ -37,7 +37,6 @@ type AvatarUploadResponse = {
 
 function ProfilePage({
   user,
-  token: _token,
   onUserUpdated,
 }: ProfilePageProps) {
   const [isEditing, setIsEditing] =
