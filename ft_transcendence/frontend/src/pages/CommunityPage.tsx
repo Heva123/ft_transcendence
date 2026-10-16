@@ -3,6 +3,8 @@ import {
   useState,
 } from "react";
 
+import ConfirmDialog from "../components/ConfirmDialog";
+
 import {
   Link,
   useNavigate,
@@ -27,19 +29,13 @@ import CommunityHeader from "../features/chat/components/CommunityHeader";
 import type { Channel } from "../features/chat/types/Channel";
 import type { Community } from "../features/chat/types/Community";
 
-import { getCommunityFeed } from "../features/feed/api/feedApi";
-
-import PostCard from "../features/feed/components/PostCard";
-import { useCurrentUser } from "../features/auth/hooks/useCurrentUser";
-
-import type { Post } from "../features/feed/types/Post";
+import Feed from "../features/feed/components/Feed";
 
 import "./CommunityPage.css";
 
 type Data = {
   community: Community;
   channels: Channel[];
-  posts: Post[];
   role: string;
 };
 
@@ -49,11 +45,9 @@ async function loadData(
   const [
     community,
     channels,
-    feed,
   ] = await Promise.all([
     getCommunity(id),
     getChannels(id),
-    getCommunityFeed(id),
   ]);
 
   return {
@@ -61,8 +55,6 @@ async function loadData(
       toCommunity(community),
 
     channels,
-
-    posts: feed.posts,
 
     role:
       community.members?.[0]
@@ -81,7 +73,6 @@ function CommunityView({
   isLeaving,
   onLeave,
 }: CommunityViewProps) {
-  const user = useCurrentUser();
   const canManage =
     data.role === "OWNER" ||
     data.role === "ADMIN";
@@ -154,23 +145,11 @@ function CommunityView({
             {data.community.name}
           </Link>
 
-          {data.posts.length ? (
-            data.posts.map(
-              (post) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  currentUserId={user?.id}
-                />
-              )
-            )
-          ) : (
-            <p>
-              Your community is
-              ready. Share the first
-              idea.
-            </p>
-          )}
+          {/* Paged feed, so posts after the first 10 also show. */}
+          <Feed
+            mode={`community:${data.community.id}`}
+            emptyText="Your community is ready. Share the first idea."
+          />
         </main>
 
         <aside className="conversations-panel">
@@ -222,37 +201,60 @@ function CommunityPage() {
   const navigate =
     useNavigate();
 
-  const [data, setData] =
-    useState<Data | null>(
-      null
-    );
+  // Results are stored with the id they belong to, so a new id shows "Loading".
+  const [loaded, setLoaded] =
+    useState<{
+      id: string;
+      data: Data | null;
+    }>({ id: "", data: null });
 
   const [error, setError] =
-    useState("");
+    useState({ id: "", message: "" });
 
   const [
     isLeaving,
     setIsLeaving,
   ] = useState(false);
 
+  const [
+    confirmLeave,
+    setConfirmLeave,
+  ] = useState(false);
+
   useEffect(() => {
-    setError("");
-    setData(null);
+    let active = true;
 
     loadData(communityId)
-      .then(setData)
+      .then((result) => {
+        if (active)
+          setLoaded({ id: communityId, data: result });
+      })
       .catch((err) => {
-        if (
-          err instanceof ApiError
-        ) {
-          setError(err.message);
-        } else {
-          setError(
-            "Unable to load community."
-          );
-        }
+        if (!active)
+          return;
+        setLoaded({ id: communityId, data: null });
+        setError({
+          id: communityId,
+          message:
+            err instanceof ApiError
+              ? err.message
+              : "Unable to load community.",
+        });
       });
+
+    return () => {
+      active = false;
+    };
   }, [communityId]);
+
+  const data =
+    loaded.id === communityId
+      ? loaded.data
+      : null;
+
+  function setLeaveError(message: string) {
+    setError({ id: communityId, message });
+  }
 
   async function handleLeave() {
     if (
@@ -262,17 +264,8 @@ function CommunityPage() {
       return;
     }
 
-    const confirmed =
-      window.confirm(
-        `Leave ${data.community.name}?\n\nYou will lose access to member conversations.`
-      );
-
-    if (!confirmed) {
-      return;
-    }
-
     setIsLeaving(true);
-    setError("");
+    setLeaveError("");
 
     try {
       await apiRequest(
@@ -286,10 +279,12 @@ function CommunityPage() {
         "/communities"
       );
     } catch (err) {
+      setConfirmLeave(false);
+
       if (err instanceof ApiError) {
-        setError(err.message);
+        setLeaveError(err.message);
       } else {
-        setError(
+        setLeaveError(
           "Could not leave community."
         );
       }
@@ -298,14 +293,14 @@ function CommunityPage() {
     }
   }
 
-  if (error) {
+  if (error.id === communityId && error.message) {
     return (
       <div>
         <p
           className="form-error"
           role="alert"
         >
-          {error}
+          {error.message}
         </p>
 
         <Link to="/communities">
@@ -324,11 +319,24 @@ function CommunityPage() {
   }
 
   return (
-    <CommunityView
-      data={data}
-      isLeaving={isLeaving}
-      onLeave={handleLeave}
-    />
+    <>
+      <CommunityView
+        data={data}
+        isLeaving={isLeaving}
+        onLeave={() => setConfirmLeave(true)}
+      />
+
+      {confirmLeave && (
+        <ConfirmDialog
+          title={`Leave ${data.community.name}?`}
+          message="You will lose access to member conversations. Owners must transfer ownership or delete the community first."
+          confirmLabel="Leave community"
+          busy={isLeaving}
+          onCancel={() => setConfirmLeave(false)}
+          onConfirm={handleLeave}
+        />
+      )}
+    </>
   );
 }
 

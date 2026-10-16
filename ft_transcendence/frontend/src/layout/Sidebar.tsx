@@ -5,6 +5,7 @@ import {
 import {
   useMyCommunities,
 } from "../features/chat/hooks/useMyCommunities";
+import LogoutButton from "../components/LogoutButton";
 
 import "./layout.css";
 
@@ -60,8 +61,10 @@ function WorkspaceNav() {
         Friends
       </NavLink>
 
+      {/* end: someone else's /profile/:username is not "My profile". */}
       <NavLink
         className={navClass}
+        end
         to="/profile"
       >
         My profile
@@ -126,19 +129,7 @@ function Sidebar() {
             Settings
           </NavLink>
 
-          <button
-            type="button"
-            onClick={() => {
-              localStorage.removeItem(
-                "accessToken"
-              );
-
-              window.location.href =
-                "/login";
-            }}
-          >
-            Log out
-          </button>
+          <LogoutButton />
         </nav>
       </aside>
 
@@ -176,6 +167,7 @@ function Sidebar() {
         </NavLink>
 
         <NavLink
+          end
           to="/profile"
           className={
             mobileNavClass

@@ -14,6 +14,7 @@ import CreatePostPage from "./pages/CreatePostPage";
 import FriendsPage from "./pages/FriendsPage";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import PostPage from "./pages/PostPage";
 import PublicProfilePage from "./pages/PublicProfilePage";
@@ -130,6 +131,11 @@ function AppRoutes() {
       <Route
         path="/settings"
         element={<SettingsPage />}
+      />
+
+      <Route
+        path="*"
+        element={<NotFoundPage />}
       />
     </Routes>
   );

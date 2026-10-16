@@ -6,6 +6,7 @@ import {
 } from "react";
 
 import AppLayout from "../components/AppLayout";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 import {
   apiRequest,
@@ -52,7 +53,6 @@ type CommunityMembersPageProps = {
 
 function CommunityMembersPage({
   groupId,
-  token: _token,
   onBack,
 }: CommunityMembersPageProps) {
   const [
@@ -71,6 +71,12 @@ function CommunityMembersPage({
     search,
     setSearch,
   ] = useState("");
+
+  // Member waiting for "Remove this member?" confirmation (design p44).
+  const [
+    pendingRemove,
+    setPendingRemove,
+  ] = useState<Member | null>(null);
 
   const [
     email,
@@ -358,6 +364,8 @@ function CommunityMembersPage({
     setError("");
 
     setMessage("");
+
+    setPendingRemove(null);
 
     try {
       await apiRequest(
@@ -696,8 +704,8 @@ function CommunityMembersPage({
                           type="button"
                           className="member-remove"
                           onClick={() =>
-                            handleRemoveMember(
-                              member.id
+                            setPendingRemove(
+                              member
                             )
                           }
                         >
@@ -729,6 +737,19 @@ function CommunityMembersPage({
         community membership, not
         to the student globally.
       </p>
+      {pendingRemove && (
+        <ConfirmDialog
+          title="Remove this member?"
+          message={`${pendingRemove.user.username} will lose access to this community’s channels and member feed.`}
+          confirmLabel="Remove member"
+          onCancel={() => setPendingRemove(null)}
+          onConfirm={() =>
+            handleRemoveMember(
+              pendingRemove.id
+            )
+          }
+        />
+      )}
     </AppLayout>
   );
 }

@@ -6,13 +6,15 @@ import type { Post } from '../types/Post'
 import PostCard from './PostCard'
 import './Feed.css'
 
-export type FeedMode = 'global' | 'communities'
+export type FeedMode = 'global' | 'communities' | `community:${string}`
 
 type Page = { posts: Post[]; hasMore: boolean }
 
 async function loadPage(mode: FeedMode, page: number): Promise<Page> {
-  if (mode === 'global') {
-    const { posts } = await getFeed(page)
+  if (mode === 'global' || mode.startsWith('community:')) {
+    const { posts } = mode === 'global'
+      ? await getFeed(page)
+      : await getCommunityFeed(mode.slice('community:'.length), page)
     return { posts, hasMore: posts.length === FEED_PAGE_SIZE }
   }
   const communities = await getMyCommunities()
@@ -31,7 +33,7 @@ type FeedState = {
   error: string
 }
 
-function Feed({ mode }: { mode: FeedMode }) {
+function Feed({ mode, emptyText }: { mode: FeedMode; emptyText?: string }) {
   const [state, setState] = useState<FeedState>({
     mode: null, posts: [], page: 1, hasMore: false, loadingMore: false, error: '',
   })
@@ -75,7 +77,7 @@ function Feed({ mode }: { mode: FeedMode }) {
 
   if (state.mode !== mode) return <p className="feed-status" role="status">Gathering your community…</p>
   if (state.error && !state.posts.length) return <p className="feed-status" role="alert">{state.error}</p>
-  if (!state.posts.length) return <p className="feed-status">Your feed is waiting for a first idea. Share one.</p>
+  if (!state.posts.length) return <p className="feed-status">{emptyText ?? 'Your feed is waiting for a first idea. Share one.'}</p>
   return <section className="feed">
     {state.posts.map((post) => <PostCard key={post.id} post={post} currentUserId={user?.id} />)}
     {state.error && <p className="feed-status" role="alert">{state.error}</p>}

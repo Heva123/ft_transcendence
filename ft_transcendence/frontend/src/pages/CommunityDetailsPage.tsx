@@ -5,6 +5,7 @@ import {
 } from "react";
 
 import AppLayout from "../components/AppLayout";
+import ConfirmDialog from "../components/ConfirmDialog";
 
 import {
   apiRequest,
@@ -30,7 +31,6 @@ type CommunityDetailsPageProps = {
 
 function CommunityDetailsPage({
   groupId,
-  token: _token,
   onBack,
   onDeleted,
 }: CommunityDetailsPageProps) {
@@ -65,6 +65,11 @@ function CommunityDetailsPage({
 
   const [message, setMessage] =
     useState("");
+
+  const [
+    confirmDelete,
+    setConfirmDelete,
+  ] = useState(false);
 
   useEffect(() => {
     async function loadCommunity() {
@@ -212,15 +217,6 @@ function CommunityDetailsPage({
       return;
     }
 
-    const confirmed =
-      window.confirm(
-        `Delete ${group?.name}?\n\nAll channels, community posts and memberships will be removed.`
-      );
-
-    if (!confirmed) {
-      return;
-    }
-
     setIsDeleting(true);
     setError("");
     setMessage("");
@@ -235,7 +231,16 @@ function CommunityDetailsPage({
 
       onDeleted();
     } catch (err) {
-      if (err instanceof ApiError) {
+      setConfirmDelete(false);
+
+      if (
+        err instanceof ApiError &&
+        err.status >= 500
+      ) {
+        setError(
+          "The server could not delete this community. Nothing was removed."
+        );
+      } else if (err instanceof ApiError) {
         setError(err.message);
       } else {
         setError(
@@ -387,8 +392,8 @@ function CommunityDetailsPage({
                     isDeleting ||
                     isSaving
                   }
-                  onClick={
-                    handleDelete
+                  onClick={() =>
+                    setConfirmDelete(true)
                   }
                 >
                   {isDeleting
@@ -399,6 +404,17 @@ function CommunityDetailsPage({
             </div>
           </form>
         )}
+
+      {confirmDelete && (
+        <ConfirmDialog
+          title={`Delete ${group?.name ?? "this community"}?`}
+          message="All channels, community posts and memberships will be removed. Owner only."
+          confirmLabel="Delete community"
+          busy={isDeleting}
+          onCancel={() => setConfirmDelete(false)}
+          onConfirm={handleDelete}
+        />
+      )}
     </AppLayout>
   );
 }
