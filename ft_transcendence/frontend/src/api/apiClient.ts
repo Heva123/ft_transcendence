@@ -1,3 +1,5 @@
+import { expireSession } from './session'
+
 const API_URL =
   import.meta.env.VITE_API_URL ||
   'http://localhost:3000/api'
@@ -103,6 +105,9 @@ export async function apiRequest<T>(
     const message =
       await getErrorMessage(response)
 
+    if (response.status === 401 && headers.has('Authorization'))
+      expireSession()
+
     throw new ApiError(
       response.status,
       message,
@@ -132,6 +137,9 @@ export async function apiBlob(
   if (!response.ok) {
     const message =
       await getErrorMessage(response)
+
+    if (response.status === 401 && headers.has('Authorization'))
+      expireSession()
 
     throw new ApiError(
       response.status,
@@ -236,6 +244,9 @@ export function uploadRequest<T>(
 
           return
         }
+
+        if (xhr.status === 401)
+          expireSession()
 
         reject(
           new ApiError(
