@@ -11,11 +11,15 @@ import {
 
 import SearchBox from "../features/search/components/SearchBox";
 import { useCurrentUser } from "../features/auth/hooks/useCurrentUser";
+import { useUnreadNotifications } from "../features/notifications/hooks/useUnreadNotifications";
 
 import "./layout.css";
 
 function TopBar() {
   const user = useCurrentUser();
+
+  const unreadCount =
+    useUnreadNotifications();
 
   const navigate = useNavigate();
 
@@ -99,7 +103,11 @@ function TopBar() {
       <Link
         className="topbar__notification"
         to="/notifications"
-        aria-label="Notifications"
+        aria-label={
+          unreadCount
+            ? `Notifications, ${unreadCount} unread`
+            : "Notifications"
+        }
       >
         <svg
           width="20"
@@ -112,6 +120,14 @@ function TopBar() {
           <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
           <path d="M10 21h4" />
         </svg>
+
+        {unreadCount > 0 && (
+          <span className="topbar__badge">
+            {unreadCount > 99
+              ? "99+"
+              : unreadCount}
+          </span>
+        )}
       </Link>
 
       <div

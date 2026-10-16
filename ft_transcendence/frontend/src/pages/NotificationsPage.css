@@ -127,3 +127,22 @@
     grid-column: 2;
   }
 }
+
+button.notification-view {
+  background: var(--color-surface);
+  font: inherit;
+  cursor: pointer;
+}
+
+.notifications-empty,
+.notifications-error {
+  margin: 0;
+  padding: var(--space-16);
+  font-size: 13px;
+}
+
+.notifications-error {
+  margin-bottom: var(--space-12);
+  border: 1px solid var(--color-border);
+  background: var(--color-pink);
+}
