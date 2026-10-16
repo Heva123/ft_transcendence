@@ -6,14 +6,12 @@ type Props = {
 }
 
 function PersonResultCard({ person }: Props) {
-  let initials: string
-
-  initials = person.username.slice(0, 2).toUpperCase()
+  const initials = person.username.slice(0, 2).toUpperCase()
   return (
     <article className="person-result">
       <span className="person-result__avatar">{initials}</span>
       <h3>{person.username}</h3>
-      <p>42 Abu Dhabi · Community member</p>
+      <p>@{person.username}</p>
       <span className="person-result__skill">42 COMMUNITY</span>
       <Link to={`/profile/${person.username}`}>View profile</Link>
     </article>

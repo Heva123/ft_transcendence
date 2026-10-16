@@ -23,6 +23,16 @@ export type SearchPost = {
 }
 
 export type SearchType = 'users' | 'communities' | 'posts'
+export type SortOrder = 'asc' | 'desc'
+
+export type SearchPagination = {
+  total: number
+  page: number
+  limit: number
+  totalPages: number
+  hasNextPage: boolean
+  hasPreviousPage: boolean
+}
 
 export type SearchResponse = {
   results: {
@@ -30,11 +40,30 @@ export type SearchResponse = {
     communities: SearchCommunity[]
     posts: SearchPost[]
   }
+  pagination: Record<SearchType, SearchPagination>
 }
 
-export function searchBackend(query: string, type: SearchType) {
-  let path: string
+export type SearchRequest = {
+  query: string
+  type: SearchType
+  page: number
+  sort: SortOrder
+  communityId?: string
+}
 
-  path = `/search?q=${encodeURIComponent(query)}&type=${type}&limit=50`
-  return apiRequest<SearchResponse>(path)
+export const SEARCH_PAGE_SIZE = 5
+
+// Paging, sorting and the community filter all run on the server.
+export function searchBackend(request: SearchRequest) {
+  const params = new URLSearchParams({
+    q: request.query,
+    type: request.type,
+    page: String(request.page),
+    limit: String(SEARCH_PAGE_SIZE),
+    sort: request.sort,
+  })
+
+  if (request.communityId)
+    params.set('communityId', request.communityId)
+  return apiRequest<SearchResponse>(`/search?${params}`)
 }

@@ -7,11 +7,9 @@ function SearchBox() {
   const navigate = useNavigate()
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-    let value: string
-
     if (event.key !== 'Enter')
       return
-    value = query.trim()
+    const value = query.trim()
     if (!value)
       return
     navigate(`/search?q=${encodeURIComponent(value)}`)

@@ -1,46 +1,33 @@
-import type { SearchSort, SearchTopic } from '../../../pages/SearchPage'
+import type { SearchRequest } from '../api/searchApi'
 import { usePagedSearch } from '../hooks/usePagedSearch'
 import PersonResultCard from './PersonResultCard'
 import SearchEmptyState from './SearchEmptyState'
-import SearchPager from './SearchPager'
+import SearchPager, { PageSummary } from './SearchPager'
 
 type Props = {
-  query: string
-  topic: SearchTopic
-  sort: SearchSort
+  request: SearchRequest
+  onPage: (page: number) => void
+  onClear: () => void
 }
 
-function PeopleResults({ query, sort }: Props) {
-  let state
-
-  state = usePagedSearch(
-    query,
-    'users',
-    (data) => data.results.users,
-    sort === 'az'
-      ? (a, b) => a.username.localeCompare(b.username)
-      : undefined,
-  )
+function PeopleResults({ request, onPage, onClear }: Props) {
+  const state = usePagedSearch(request, (data) => data.results.users)
 
   if (state.error)
-    return <p>{state.error}</p>
+    return <p role="alert">{state.error}</p>
   if (state.loading)
-    return <p>Searching...</p>
+    return <p role="status">Searching...</p>
   if (!state.total)
-    return <SearchEmptyState query={query}
-      onClear={() => window.location.assign('/search')} />
+    return <SearchEmptyState query={request.query} onClear={onClear} />
 
   return (
     <>
-      <p className="search-page-count">
-        Page {state.page} of {state.pages}
-      </p>
+      <PageSummary {...state} />
       <div className="people-results">
         {state.items.map((person) =>
           <PersonResultCard key={person.id} person={person} />)}
       </div>
-      <SearchPager page={state.page} pages={state.pages}
-        onChange={state.setPage} />
+      <SearchPager {...state} onChange={onPage} />
     </>
   )
 }

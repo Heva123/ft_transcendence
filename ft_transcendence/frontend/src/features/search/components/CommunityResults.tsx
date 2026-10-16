@@ -2,13 +2,16 @@ import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { apiRequest } from '../../../api/apiClient'
 import { getMyCommunities } from '../../chat/api/chatApi'
-import type { SearchCommunity } from '../api/searchApi'
-import type { SearchSort, SearchTopic } from '../../../pages/SearchPage'
+import type { SearchCommunity, SearchRequest } from '../api/searchApi'
 import { usePagedSearch } from '../hooks/usePagedSearch'
 import SearchEmptyState from './SearchEmptyState'
-import SearchPager from './SearchPager'
+import SearchPager, { PageSummary } from './SearchPager'
 
-type Props = { query: string; topic: SearchTopic; sort: SearchSort }
+type Props = {
+  request: SearchRequest
+  onPage: (page: number) => void
+  onClear: () => void
+}
 type CardProps = { item: SearchCommunity; member: boolean }
 
 function CommunityResultCard({ item, member }: CardProps) {
@@ -33,27 +36,22 @@ function CommunityResultCard({ item, member }: CardProps) {
   </article>
 }
 
-function CommunityResults({ query, sort }: Props) {
+function CommunityResults({ request, onPage, onClear }: Props) {
   const [memberIds, setMemberIds] = useState<Set<string>>(new Set())
-  const state = usePagedSearch(
-    query,
-    'communities',
-    (data) => data.results.communities,
-    sort === 'az' ? (a, b) => a.name.localeCompare(b.name) : undefined,
-  )
+  const state = usePagedSearch(request, (data) => data.results.communities)
 
   useEffect(() => {
     getMyCommunities().then((items) => setMemberIds(new Set(items.map((item) => item.id))))
       .catch(() => setMemberIds(new Set()))
   }, [])
 
-  if (state.error) return <p>{state.error}</p>
-  if (state.loading) return <p>Searching...</p>
-  if (!state.total) return <SearchEmptyState query={query} onClear={() => window.location.assign('/search')} />
+  if (state.error) return <p role="alert">{state.error}</p>
+  if (state.loading) return <p role="status">Searching...</p>
+  if (!state.total) return <SearchEmptyState query={request.query} onClear={onClear} />
   return <>
-    <p className="search-page-count">Page {state.page} of {state.pages}</p>
+    <PageSummary {...state} />
     <div className="community-search-results">{state.items.map((item) => <CommunityResultCard key={item.id} item={item} member={memberIds.has(item.id)} />)}</div>
-    <SearchPager page={state.page} pages={state.pages} onChange={state.setPage} />
+    <SearchPager {...state} onChange={onPage} />
   </>
 }
 
