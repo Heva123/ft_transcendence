@@ -5,6 +5,7 @@ import {
 import { Link } from "react-router-dom";
 
 import AppLayout from "../components/AppLayout";
+import AccountSettingsForm from "../features/auth/components/AccountSettingsForm";
 
 import {
   getBlockedUsers,
@@ -24,7 +25,7 @@ function SettingsPage() {
     activeTab,
     setActiveTab,
   ] = useState<SettingsTab>(
-    "privacy"
+    "account"
   );
 
   const [
@@ -214,33 +215,10 @@ function SettingsPage() {
 
               {user ? (
                 <>
-                  <div className="settings-row">
-                    <div>
-                      <strong>
-                        Display name
-                      </strong>
-
-                      <p>
-                        {
-                          user.username
-                        }
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="settings-divider" />
-
-                  <div className="settings-row">
-                    <div>
-                      <strong>
-                        Email address
-                      </strong>
-
-                      <p>
-                        {user.email}
-                      </p>
-                    </div>
-                  </div>
+                  <AccountSettingsForm
+                    user={user}
+                    onSaved={setUser}
+                  />
 
                   <div className="settings-divider" />
 
@@ -268,17 +246,27 @@ function SettingsPage() {
               </h3>
 
               <p className="settings-muted">
-                Notification
-                preferences are not
-                available from the
-                backend yet.
+                Updates arrive live in
+                the app while you are
+                signed in. The bell in
+                the top bar shows how
+                many are unread.
               </p>
 
               <p className="settings-muted">
-                Your existing
-                notifications still
-                work normally.
+                Choosing which updates
+                reach you will be added
+                when the backend
+                supports notification
+                preferences.
               </p>
+
+              <Link
+                className="settings-action-link"
+                to="/notifications"
+              >
+                Open notifications
+              </Link>
             </section>
           )}
 
