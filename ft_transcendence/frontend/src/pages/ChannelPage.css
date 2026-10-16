@@ -86,3 +86,25 @@
   min-height: 90px;
   resize: vertical;
 }
+
+.channel-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+}
+
+.channel-unread {
+  min-width: 22px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--color-yellow);
+  color: var(--color-ink);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.channel-link.active .channel-unread {
+  background: var(--color-surface);
+}

@@ -1,9 +1,9 @@
 import {
-  useEffect,
   useRef,
   useState,
   type ChangeEvent,
 } from 'react'
+import { IMAGE_TYPES, validateImage } from '../../../utils/validateImage'
 
 type Props = {
   file: File | null
@@ -11,44 +11,28 @@ type Props = {
   onFileChange: (file: File | null) => void
 }
 
-function validateImage(file: File) {
-  if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type))
-    return 'Please choose a PNG, JPEG, or WEBP image.'
-  if (file.size > 5 * 1024 * 1024)
-    return 'Please choose an image under 5 MB.'
-  return ''
-}
-
 function ImageAttachmentPicker(props: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
-  const [preview, setPreview] = useState('')
   const [error, setError] = useState('')
-
-  useEffect(() => {
-    let url = ''
-
-    if (props.file)
-      url = URL.createObjectURL(props.file)
-    setPreview(url)
-    return () => {
-      if (url)
-        URL.revokeObjectURL(url)
-    }
-  }, [props.file])
+  const [picked, setPicked] = useState<{ file: File; url: string } | null>(null)
+  // The parent clears `file` after sending, which hides the preview.
+  const preview = picked && picked.file === props.file ? picked.url : ''
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    let selected: File | undefined
-    let validation: string
+    const selected = event.target.files?.[0]
 
-    selected = event.target.files?.[0]
+    event.target.value = ''
     if (!selected)
       return
-    validation = validateImage(selected)
+    const validation = validateImage(selected)
     if (validation) {
       setError(validation)
       return
     }
     setError('')
+    if (picked)
+      URL.revokeObjectURL(picked.url)
+    setPicked({ file: selected, url: URL.createObjectURL(selected) })
     props.onFileChange(selected)
   }
 
@@ -60,10 +44,10 @@ function ImageAttachmentPicker(props: Props) {
       </button>
 
       <input ref={inputRef} type="file" hidden
-        accept="image/png,image/jpeg,image/webp"
+        accept={IMAGE_TYPES.join(',')}
         onChange={handleChange} />
 
-      {error && <p className="chat-attachment__error">{error}</p>}
+      {error && <p className="chat-attachment__error" role="alert">{error}</p>}
 
       {props.file && preview && (
         <div className="chat-attachment__preview">

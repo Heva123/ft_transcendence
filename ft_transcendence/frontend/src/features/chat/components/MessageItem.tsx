@@ -5,23 +5,31 @@ import type { Message } from '../types/Message'
 type MessageItemProps = {
   message: Message
   currentUserId?: string
+  /** userId → username, used to name readers. */
+  names?: Map<string, string>
 }
 
-function MessageItem({ message, currentUserId }: MessageItemProps) {
+function joinNames(names: string[]) {
+  if (names.length <= 1)
+    return names.join('')
+  return `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`
+}
+
+function MessageItem({ message, currentUserId, names }: MessageItemProps) {
   const isOwn = message.senderId === currentUserId
-  const initials = message.sender === 'You'
-    ? 'AF'
-    : message.sender.slice(0, 2).toUpperCase()
+  const readers = (message.readBy ?? [])
+    .filter((reader) => reader.userId !== message.senderId)
+    .map((reader) => reader.username ?? names?.get(reader.userId) ?? 'someone')
 
   return (
-    <article className="message-item">
-      <div className="message-avatar">{initials}</div>
+    <article className={isOwn ? 'message-item own' : 'message-item'}>
+      <div className="message-avatar">{message.sender.slice(0, 2).toUpperCase()}</div>
       <div className="message-body">
         <p className="message-meta">
-          {message.sender === 'You'
+          {isOwn
             ? <strong>You</strong>
             : <Link to={`/profile/${encodeURIComponent(message.sender)}`}>{message.sender}</Link>}
-          {' '}· {message.createdAt}
+          {' '}· {message.time}
         </p>
         {message.text && <p className="message-text">{message.text}</p>}
         {message.attachment && (
@@ -30,7 +38,9 @@ function MessageItem({ message, currentUserId }: MessageItemProps) {
             <span>{message.attachment.name}</span>
           </div>
         )}
-        {isOwn && Boolean(message.readBy?.length) && <p className="message-read">✓✓ Read</p>}
+        {isOwn && readers.length > 0 && (
+          <p className="message-read">✓✓ Read by {joinNames(readers)}</p>
+        )}
       </div>
     </article>
   )

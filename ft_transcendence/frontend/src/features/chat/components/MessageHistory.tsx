@@ -1,32 +1,20 @@
-import { useEffect, useState } from 'react'
-import { getMessages } from '../api/chatApi'
-import { toMessage } from '../api/messageMapper'
 import type { Message } from '../types/Message'
-import MessageItem from './MessageItem'
+import MessageList from './MessageList'
 
 type Props = {
-  channelId: string
+  messages: Message[]
+  currentUserId: string
+  names: Map<string, string>
 }
 
-function MessageHistory({ channelId }: Props) {
-  const [messages, setMessages] = useState<Message[]>([])
-  const [error, setError] = useState('')
-
-  useEffect(() => {
-    getMessages(channelId)
-      .then((items) => setMessages(items.map(toMessage)))
-      .catch(() => setError('Unable to load message history.'))
-  }, [channelId])
-
-  if (error)
-    return <p>{error}</p>
-
+// Full channel history, grouped by day (design p55).
+function MessageHistory(props: Props) {
   return (
     <section className="message-history">
-      <p className="message-date">EARLIER MESSAGES</p>
-      {messages.map((message) => (
-        <MessageItem key={message.id} message={message} />
-      ))}
+      <p className="message-history__title">MESSAGE HISTORY · {props.messages.length} messages</p>
+      <MessageList messages={props.messages}
+        currentUserId={props.currentUserId} names={props.names}
+        emptyText="This channel has no history yet." />
     </section>
   )
 }
