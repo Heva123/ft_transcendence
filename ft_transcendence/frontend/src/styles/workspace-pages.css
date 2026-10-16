@@ -1664,3 +1664,65 @@ sidebar-menu a.sidebar-item:hover
     flex-direction: column;
   }
 }
+/* Editable account settings (design p70–71) */
+.settings-account-form {
+  display: grid;
+  gap: var(--space-12);
+}
+
+.settings-account-form .form-field {
+  display: grid;
+  gap: var(--space-6);
+}
+
+.settings-account-form .form-field label {
+  font-size: 12px;
+}
+
+.settings-account-form .form-field input {
+  min-height: 44px;
+  padding: 0 var(--space-12);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  font: inherit;
+}
+
+.settings-saved {
+  margin: 0;
+  padding: var(--space-8) var(--space-12);
+  border: 1px solid var(--color-border);
+  background: var(--color-cyan);
+  font-size: 12px;
+}
+
+.settings-account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12);
+}
+
+.settings-account-actions button {
+  min-height: 44px;
+  padding: 0 var(--space-20);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  font: inherit;
+  cursor: pointer;
+}
+
+.settings-account-actions .settings-save {
+  border-color: var(--color-plum);
+  background: var(--color-plum);
+  color: #fff;
+}
+
+.settings-account-actions button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.legal-card > div:first-child h2 {
+  margin-top: 0;
+}

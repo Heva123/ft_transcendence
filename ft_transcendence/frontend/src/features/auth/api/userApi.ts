@@ -20,6 +20,18 @@ export function getCurrentUser() {
   )
 }
 
+export function updateCurrentUser(
+  data: { username?: string; email?: string },
+) {
+  return apiRequest<CurrentUser>(
+    '/users/me',
+    {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    },
+  )
+}
+
 export function getBlockedUsers() {
   return apiRequest<BlockedUser[]>(
     '/users/blocked',
