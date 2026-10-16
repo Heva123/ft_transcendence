@@ -5,6 +5,7 @@ import {
 } from "react-router-dom";
 
 import AppShell from "./layout/AppShell";
+import SessionExpiredNotice from "./components/SessionExpiredNotice";
 
 import ChannelPage from "./pages/ChannelPage";
 import ChannelsPage from "./pages/ChannelsPage";
@@ -166,16 +167,19 @@ function App() {
       <Route
         path="/login"
         element={
-          <LoginPage
-            onCreateAccount={() =>
-              navigate(
-                "/register"
-              )
-            }
-            onLoginSuccess={
-              handleLogin
-            }
-          />
+          <>
+            <SessionExpiredNotice />
+            <LoginPage
+              onCreateAccount={() =>
+                navigate(
+                  "/register"
+                )
+              }
+              onLoginSuccess={
+                handleLogin
+              }
+            />
+          </>
         }
       />
 

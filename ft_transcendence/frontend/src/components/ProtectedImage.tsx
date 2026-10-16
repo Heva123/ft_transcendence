@@ -1,14 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { apiBlob } from '../api/apiClient'
 
 type Props = {
   src: string
   alt: string
   className?: string
+  /** Shown while loading or if the image cannot be loaded. */
+  fallback?: ReactNode
 }
 
-function ProtectedImage({ src, alt, className }: Props) {
-  const [url, setUrl] = useState('')
+function ProtectedImage({ src, alt, className, fallback = null }: Props) {
+  const [image, setImage] = useState({ src: '', url: '' })
 
   useEffect(() => {
     let active = true
@@ -18,8 +20,11 @@ function ProtectedImage({ src, alt, className }: Props) {
       if (!active)
         return
       objectUrl = URL.createObjectURL(blob)
-      setUrl(objectUrl)
-    }).catch(() => setUrl(''))
+      setImage({ src, url: objectUrl })
+    }).catch(() => {
+      if (active)
+        setImage({ src, url: '' })
+    })
 
     return () => {
       active = false
@@ -28,9 +33,9 @@ function ProtectedImage({ src, alt, className }: Props) {
     }
   }, [src])
 
-  if (!url)
-    return null
-  return <img src={url} alt={alt} className={className} />
+  if (image.src !== src || !image.url)
+    return <>{fallback}</>
+  return <img src={image.url} alt={alt} className={className} />
 }
 
 export default ProtectedImage

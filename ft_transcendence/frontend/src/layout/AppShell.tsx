@@ -13,9 +13,7 @@ type AppShellProps = {
 
 function AppShell({ children }: AppShellProps) {
   useEffect(() => {
-    let token: string | null
-
-    token = localStorage.getItem('accessToken')
+    const token = localStorage.getItem('accessToken')
     if (token)
       connectSocket(token)
 

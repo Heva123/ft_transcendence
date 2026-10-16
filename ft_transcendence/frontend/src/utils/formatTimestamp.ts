@@ -1,7 +1,5 @@
 export function formatTimestamp(value: string) {
-  let date: Date
-
-  date = new Date(value)
+  const date = new Date(value)
   if (Number.isNaN(date.getTime()))
     return value
   return date.toLocaleTimeString([], {
