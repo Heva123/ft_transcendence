@@ -18,21 +18,22 @@ function NotificationRow({ item, onRead }: RowProps) {
       <div className={badgeClass}>42</div>
       <div className="notification-copy">
         <strong>{item.title}</strong>
-        <p>{item.message} · {item.createdAt}</p>
+        <p>{item.message} · {item.createdAt} · {item.read ? 'Read' : 'Unread'}</p>
       </div>
-      <Link
-        className="notification-view"
-        to={item.targetUrl ?? '/'}
-        onClick={() => onRead(item.id)}
-      >
-        View
-      </Link>
+      {/* Only link when we know where the update points to. */}
+      {item.targetUrl
+        ? <Link className="notification-view" to={item.targetUrl}
+          onClick={() => onRead(item.id)}>View</Link>
+        : !item.read && (
+          <button type="button" className="notification-view"
+            onClick={() => onRead(item.id)}>Mark as read</button>
+        )}
     </article>
   )
 }
 
 function NotificationsPage() {
-  const { notifications, markRead, markAllRead } =
+  const { notifications, loading, error, markRead, markAllRead } =
     useNotifications()
   const unreadCount = notifications.filter((item) => !item.read).length
 
@@ -52,12 +53,18 @@ function NotificationsPage() {
         <span className={unreadCount ? 'status unread' : 'status read'}>
           {unreadCount ? `${unreadCount} UNREAD` : 'ALL READ'}
         </span>
-        <button type="button" onClick={markAllRead}>
+        <button type="button" onClick={markAllRead} disabled={!unreadCount}>
           Mark all as read
         </button>
       </div>
 
+      {error && <p className="notifications-error" role="alert">{error}</p>}
+
       <div className="notifications-panel">
+        {loading && <p className="notifications-empty">Loading your updates…</p>}
+        {!loading && !notifications.length && (
+          <p className="notifications-empty">Nothing yet. Updates about your posts and communities will appear here.</p>
+        )}
         {notifications.map((item) => (
           <NotificationRow
             key={item.id}

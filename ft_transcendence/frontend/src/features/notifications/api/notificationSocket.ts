@@ -1,18 +1,11 @@
 import { socket } from '../../../api/socket'
-import type { Notification } from '../types/Notification'
+import type { ApiNotification } from './notificationApi'
 
 export function onNewNotification(
-  callback: (notification: Notification) => void,
+  callback: (notification: ApiNotification) => void,
 ) {
   socket.on('notification:new', callback)
-}
-
-export function offNewNotification(
-  callback: (notification: Notification) => void,
-) {
-  socket.off('notification:new', callback)
-}
-
-export function markNotificationRead(notificationId: string) {
-  socket.emit('notification:read', { notificationId })
+  return () => {
+    socket.off('notification:new', callback)
+  }
 }
