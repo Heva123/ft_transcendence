@@ -119,3 +119,17 @@
   color: #fff;
   text-decoration: none;
 }
+
+/* Page styles (e.g. .dashboard-main h2) must not restyle dialogs. */
+.confirm-backdrop .confirm-dialog h2 {
+  margin: 0 0 var(--space-8);
+  color: var(--color-ink);
+  font-family: var(--font-heading);
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+.confirm-backdrop .confirm-dialog p {
+  color: var(--color-ink);
+  font-size: 13px;
+}

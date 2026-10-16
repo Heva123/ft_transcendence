@@ -6,10 +6,10 @@ import {
 
 import {
   Link,
-  useNavigate,
 } from "react-router-dom";
 
 import SearchBox from "../features/search/components/SearchBox";
+import { LogoutDialog } from "../components/LogoutButton";
 import { useCurrentUser } from "../features/auth/hooks/useCurrentUser";
 import { useUnreadNotifications } from "../features/notifications/hooks/useUnreadNotifications";
 
@@ -21,7 +21,8 @@ function TopBar() {
   const unreadCount =
     useUnreadNotifications();
 
-  const navigate = useNavigate();
+  const [confirmLogout, setConfirmLogout] =
+    useState(false);
 
   const [isProfileOpen, setIsProfileOpen] =
     useState(false);
@@ -81,16 +82,6 @@ function TopBar() {
       );
     };
   }, []);
-
-  function handleLogout() {
-    localStorage.removeItem(
-      "accessToken"
-    );
-
-    setIsProfileOpen(false);
-
-    navigate("/login");
-  }
 
   return (
     <header className="topbar">
@@ -200,15 +191,25 @@ function TopBar() {
             <button
               type="button"
               className="topbar__profile-menu-item topbar__logout"
-              onClick={
-                handleLogout
-              }
+              role="menuitem"
+              onClick={() => {
+                setIsProfileOpen(false);
+                setConfirmLogout(true);
+              }}
             >
               Log out
             </button>
           </div>
         )}
       </div>
+
+      {confirmLogout && (
+        <LogoutDialog
+          onCancel={() =>
+            setConfirmLogout(false)
+          }
+        />
+      )}
     </header>
   );
 }
