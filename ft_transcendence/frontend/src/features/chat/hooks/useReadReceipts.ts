@@ -2,8 +2,8 @@ import { useEffect, useRef, type Dispatch, type SetStateAction } from 'react'
 import { socket } from '../../../api/socket'
 import {
   markMessageRead,
-  offMessageRead,
   onMessageRead,
+  onSocketConnect,
 } from '../api/chatSocket'
 import type { Message } from '../types/Message'
 import type { MessageReadEvent } from '../types/SocketEvents'
@@ -33,24 +33,27 @@ export function useReadReceipts(
   const marked = useRef(new Set<string>())
 
   useEffect(() => {
-    function handleRead(data: MessageReadEvent) {
+    return onMessageRead((data) => {
       setMessages((items) =>
         items.map((item) => addReader(item, data)))
-    }
-
-    onMessageRead(handleRead)
-    return () => offMessageRead(handleRead)
+    })
   }, [setMessages])
 
   useEffect(() => {
-    if (!currentUserId || !socket.connected)
-      return
-    messages.forEach((message) => {
-      if (message.senderId === currentUserId
-        || marked.current.has(message.id))
+    function markAll() {
+      if (!currentUserId || !socket.connected)
         return
-      marked.current.add(message.id)
-      markMessageRead({ channelId, messageId: message.id })
-    })
+      messages.forEach((message) => {
+        if (message.senderId === currentUserId
+          || marked.current.has(message.id))
+          return
+        marked.current.add(message.id)
+        markMessageRead({ channelId, messageId: message.id })
+      })
+    }
+
+    markAll()
+    // Messages that arrived while offline are marked once we are back.
+    return onSocketConnect(markAll)
   }, [channelId, messages, currentUserId])
 }

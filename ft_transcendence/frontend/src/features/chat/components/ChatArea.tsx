@@ -1,121 +1,185 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { socket } from '../../../api/socket'
 import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
 import { getMessages } from '../api/chatApi'
 import { uploadChatAttachment } from '../api/chatAttachmentApi'
 import { toMessage } from '../api/messageMapper'
-import { sendMessage, startTyping, stopTyping } from '../api/chatSocket'
+import {
+  onMessageError,
+  sendMessage,
+  startTyping,
+  stopTyping,
+} from '../api/chatSocket'
 import { useBlockFlow } from '../hooks/useBlockFlow'
 import { useChatSocket } from '../hooks/useChatSocket'
 import { useReadReceipts } from '../hooks/useReadReceipts'
 import { useSocketStatus } from '../hooks/useSocketStatus'
 import { useUnblockRefresh } from '../hooks/useUnblockRefresh'
-import type { Message } from '../types/Message'
+import type { ChannelMember, Message } from '../types/Message'
 import BlockUserModal from './BlockUserModal'
 import BlockUserPickerModal from './BlockUserPickerModal'
 import ConnectionStatus from './ConnectionStatus'
-import MessageInput from './MessageInput'
+import MessageHistory from './MessageHistory'
+import MessageInput, { MAX_MESSAGE_LENGTH } from './MessageInput'
 import MessageList from './MessageList'
 import './Chat.css'
 
+// The live view shows the latest messages. "Earlier messages" shows everything.
+const LIVE_LIMIT = 50
+
 type ChatAreaProps = {
   selectedChannelId: string
+  members: ChannelMember[]
+  showHistory: boolean
 }
 
-function ChatArea({ selectedChannelId }: ChatAreaProps) {
+function ChatArea({ selectedChannelId, members, showHistory }: ChatAreaProps) {
   const [messages, setMessages] = useState<Message[]>([])
-  const [sendFailed, setSendFailed] = useState(false)
-  const typingUser = useChatSocket(selectedChannelId, setMessages)
+  const [draft, setDraft] = useState('')
+  const [sendError, setSendError] = useState('')
+  const pending = useRef<string | null>(null)
   const socketStatus = useSocketStatus()
   const currentUser = useCurrentUser()
-  async function reloadMessages() {
-    const items = await getMessages(selectedChannelId)
+  const currentUserId = currentUser?.id ?? ''
 
-    setMessages(items.map(toMessage))
-  }
-
-  const block = useBlockFlow(
-    selectedChannelId,
-    currentUser?.id ?? '',
-    reloadMessages,
-  )
-
-  useReadReceipts(
-    selectedChannelId,
-    messages,
-    setMessages,
-    currentUser?.id ?? '',
-  )
-
-  useUnblockRefresh(selectedChannelId, setMessages)
-
-  useEffect(() => {
+  const reloadMessages = useCallback(() => {
     getMessages(selectedChannelId)
       .then((items) => setMessages(items.map(toMessage)))
-      .catch(() => setMessages([]))
+      .catch(() => undefined)
   }, [selectedChannelId])
+
+  const typingUsers = useChatSocket(selectedChannelId, setMessages, reloadMessages)
+  const block = useBlockFlow(members, currentUserId, reloadMessages)
+  const names = new Map(members.map((member) => [member.id, member.username]))
+
+  useReadReceipts(selectedChannelId, messages, setMessages, currentUserId)
+  useUnblockRefresh(reloadMessages)
+
+  useEffect(() => {
+    let active = true
+
+    getMessages(selectedChannelId)
+      .then((items) => {
+        if (active)
+          setMessages(items.map(toMessage))
+      })
+      .catch(() => {
+        if (active)
+          setMessages([])
+      })
+    return () => {
+      active = false
+    }
+  }, [selectedChannelId])
+
+  /*
+    The server answers a refused message with message:error.
+    Put the text back in the box and say why.
+  */
+  useEffect(() => onMessageError((data) => {
+    if (pending.current === null)
+      return
+    setDraft(pending.current)
+    pending.current = null
+    setSendError(data.message ? `${data.message}.` : '')
+  }), [])
+
+  // Our own message came back from the server, so the send worked.
+  useEffect(() => {
+    const last = messages[messages.length - 1]
+
+    if (last && last.senderId === currentUserId)
+      pending.current = null
+  }, [messages, currentUserId])
 
   async function handleSendMessage(
     text: string,
     file: File | null,
     onProgress: (value: number) => void,
   ) {
-    let attachment
-
     if (!socket.connected) {
-      setSendFailed(true)
+      setSendError('You are offline.')
+      return false
+    }
+    if (text.length > MAX_MESSAGE_LENGTH) {
+      setSendError(`Messages can be at most ${MAX_MESSAGE_LENGTH} characters.`)
       return false
     }
     try {
-      attachment = file
-        ? await uploadChatAttachment(
-          selectedChannelId, file, onProgress)
+      const attachment = file
+        ? await uploadChatAttachment(selectedChannelId, file, onProgress)
         : undefined
+      pending.current = text
       sendMessage({
         channelId: selectedChannelId,
         content: text,
         attachmentId: attachment?.id,
       })
-      setSendFailed(false)
+      setSendError('')
+      setDraft('')
       return true
     } catch {
-      setSendFailed(true)
+      setSendError('The image could not be uploaded.')
       return false
     }
   }
 
-  function handleTypingChange(typing: boolean) {
+  const handleTypingChange = useCallback((typing: boolean) => {
     if (!socket.connected)
       return
     if (typing)
       startTyping({ channelId: selectedChannelId })
     else
       stopTyping({ channelId: selectedChannelId })
-  }
+  }, [selectedChannelId])
+
+  const visible = messages.filter((message) =>
+    !block.blockedIds.has(message.senderId))
+  const live = visible.slice(-LIVE_LIMIT)
+  const blockedTypists = new Set(block.state.blocked.map((user) => user.username))
 
   return (
     <section className="chat-area">
-      <MessageList
-        messages={messages}
-        selectedChannelId={selectedChannelId}
-        typingUser={typingUser}
-        blockedUser={block.state.blocked?.username ?? ''}
-        currentUserId={currentUser?.id ?? ''}
-      />
+      <ConnectionStatus status={socketStatus} />
+
+      {showHistory
+        ? <MessageHistory messages={visible} currentUserId={currentUserId} names={names} />
+        : <>
+          {visible.length > live.length && (
+            <p className="message-earlier-note">
+              Showing the latest {LIVE_LIMIT} messages. Use “Earlier messages” for the full history.
+            </p>
+          )}
+          <MessageList
+            messages={live}
+            currentUserId={currentUserId}
+            names={names}
+            typingUsers={typingUsers.filter((name) => !blockedTypists.has(name))}
+          />
+        </>}
+
+      {block.state.blocked.map((user) => (
+        <p key={user.id} className="blocked-status">
+          {user.username} is blocked. Their messages are hidden for you.
+          {' '}
+          <button type="button" onClick={() => block.unblock(user)}>Unblock</button>
+        </p>
+      ))}
+      {block.state.error && <p className="blocked-status" role="alert">{block.state.error}</p>}
 
       <MessageInput
+        text={draft}
+        onTextChange={setDraft}
         onSendMessage={handleSendMessage}
         onTypingChange={handleTypingChange}
-        sendFailed={sendFailed}
-        blockedUser={Boolean(block.state.blocked)}
-        onBlockToggle={block.toggle}
+        sendError={sendError}
+        canBlock={block.candidates.length > 0}
+        onBlock={block.open}
       />
-
-      <ConnectionStatus status={socketStatus} />
 
       {block.state.mode === 'pick' && (
         <BlockUserPickerModal
-          users={block.state.candidates}
+          users={block.candidates}
           onSelect={block.select}
           onCancel={block.cancel}
         />

@@ -1,17 +1,16 @@
 import { useEffect, useState } from 'react'
 import {
-  offPresenceOffline,
-  offPresenceOnline,
-  offPresenceSnapshot,
   onPresenceOffline,
   onPresenceOnline,
   onPresenceSnapshot,
+  onSocketConnect,
   requestPresence,
 } from '../../chat/api/chatSocket'
 import type { PresencePayload } from '../../chat/types/SocketEvents'
 
 type Event = Omit<PresencePayload, 'online'>
 
+/** Everyone online on the platform. Filter by members where needed. */
 export function usePresence() {
   const [users, setUsers] = useState<PresencePayload[]>([])
 
@@ -32,16 +31,16 @@ export function usePresence() {
         current.filter((item) => item.userId !== data.userId))
     }
 
-    onPresenceSnapshot(snapshot)
-    onPresenceOnline(online)
-    onPresenceOffline(offline)
+    const cleanups = [
+      onPresenceSnapshot(snapshot),
+      onPresenceOnline(online),
+      onPresenceOffline(offline),
+      // After a reconnect the list may be stale, so ask again.
+      onSocketConnect(requestPresence),
+    ]
     requestPresence()
 
-    return () => {
-      offPresenceSnapshot(snapshot)
-      offPresenceOnline(online)
-      offPresenceOffline(offline)
-    }
+    return () => cleanups.forEach((stop) => stop())
   }, [])
 
   return users

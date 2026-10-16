@@ -5,15 +5,17 @@ import {
   getMyCommunities,
 } from '../features/chat/api/chatApi'
 
+// Open the first channel of the first community that has one.
 async function findFirstChannel() {
-  let communities
-  let channels
+  const communities = await getMyCommunities()
 
-  communities = await getMyCommunities()
-  if (!communities.length)
-    return ''
-  channels = await getChannels(communities[0].id)
-  return channels[0]?.id ?? ''
+  for (const community of communities) {
+    const channels = await getChannels(community.id)
+
+    if (channels.length)
+      return channels[0].id
+  }
+  return ''
 }
 
 function ChannelsPage() {
@@ -24,7 +26,7 @@ function ChannelsPage() {
     findFirstChannel()
       .then((id) => id
         ? navigate(`/channels/${id}`, { replace: true })
-        : setError('No channels yet.'))
+        : setError('No channels yet. Join a community or ask an admin to add a channel.'))
       .catch(() => setError('Unable to load channels.'))
   }, [navigate])
 

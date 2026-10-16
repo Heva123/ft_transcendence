@@ -1,64 +1,107 @@
-import { useState } from 'react'
-import { blockUser, unblockUser } from '../../auth/api/userApi'
+import { useEffect, useState } from 'react'
 import {
-  getBlockTargets,
-  type BlockTarget,
-} from '../api/blockApi'
+  blockUser,
+  getBlockedUsers,
+  unblockUser,
+} from '../../auth/api/userApi'
+import type { BlockTarget } from '../api/blockApi'
 
 type Mode = 'closed' | 'pick' | 'confirm'
 
 type BlockState = {
-  blocked: BlockTarget | null
+  blocked: BlockTarget[]
   selected: BlockTarget | null
-  candidates: BlockTarget[]
   mode: Mode
+  error: string
 }
 
-const initialState: BlockState = {
-  blocked: null,
-  selected: null,
-  candidates: [],
-  mode: 'closed',
-}
-
+/*
+  The blocked list comes from the backend, so it survives a reload
+  and several people can be blocked at once.
+*/
 export function useBlockFlow(
-  channelId: string,
+  members: BlockTarget[],
   currentUserId: string,
-  onUnblock: () => Promise<void>,
+  onChange: () => void,
 ) {
-  const [state, setState] = useState<BlockState>(initialState)
+  const [state, setState] = useState<BlockState>({
+    blocked: [],
+    selected: null,
+    mode: 'closed',
+    error: '',
+  })
 
-  async function toggle() {
-    let users: BlockTarget[]
+  useEffect(() => {
+    let active = true
 
-    if (state.blocked) {
-      await unblockUser(state.blocked.id)
-      setState(initialState)
-      await onUnblock()
-      return
+    getBlockedUsers()
+      .then((items) => {
+        if (active)
+          setState((current) => ({
+            ...current,
+            blocked: items.map((item) => item.blocked),
+          }))
+      })
+      .catch(() => undefined)
+    return () => {
+      active = false
     }
-    users = await getBlockTargets(channelId, currentUserId)
-    if (users.length === 1) {
-      setState({ ...state, selected: users[0], mode: 'confirm' })
-      return
-    }
-    setState({ ...state, candidates: users, mode: 'pick' })
+  }, [])
+
+  const blockedIds = new Set(state.blocked.map((user) => user.id))
+  const candidates = members.filter((user) =>
+    user.id !== currentUserId && !blockedIds.has(user.id))
+
+  function open() {
+    setState((current) => ({ ...current, mode: 'pick', error: '' }))
   }
 
   function select(user: BlockTarget) {
-    setState({ ...state, selected: user, mode: 'confirm' })
+    setState((current) => ({ ...current, selected: user, mode: 'confirm' }))
   }
 
   async function confirm() {
-    if (!state.selected)
+    const user = state.selected
+
+    if (!user)
       return
-    await blockUser(state.selected.id)
-    setState({ ...initialState, blocked: state.selected })
+    try {
+      await blockUser(user.id)
+      setState((current) => ({
+        ...current,
+        blocked: [...current.blocked, user],
+        selected: null,
+        mode: 'closed',
+      }))
+      onChange()
+    } catch {
+      setState((current) => ({
+        ...current,
+        mode: 'closed',
+        error: `Could not block ${user.username}.`,
+      }))
+    }
+  }
+
+  async function unblock(user: BlockTarget) {
+    try {
+      await unblockUser(user.id)
+      setState((current) => ({
+        ...current,
+        blocked: current.blocked.filter((item) => item.id !== user.id),
+      }))
+      onChange()
+    } catch {
+      setState((current) => ({
+        ...current,
+        error: `Could not unblock ${user.username}.`,
+      }))
+    }
   }
 
   function cancel() {
-    setState({ ...state, selected: null, mode: 'closed' })
+    setState((current) => ({ ...current, selected: null, mode: 'closed' }))
   }
 
-  return { state, toggle, select, confirm, cancel }
+  return { state, blockedIds, candidates, open, select, confirm, unblock, cancel }
 }

@@ -35,3 +35,7 @@ export type MessageReadEvent = {
   username?: string
   readAt: string
 }
+
+export type MessageErrorEvent = {
+  message?: string
+}

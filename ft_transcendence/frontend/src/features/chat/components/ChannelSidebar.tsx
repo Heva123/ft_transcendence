@@ -1,46 +1,63 @@
 import { NavLink } from 'react-router-dom'
-import type { PresencePayload } from '../types/SocketEvents'
+import { useChannelUnread } from '../hooks/useChannelUnread'
 import type { Channel } from '../types/Channel'
+import type { ChannelMember } from '../types/Message'
 
 type ChannelSidebarProps = {
   channels: Channel[]
+  activeChannelId: string
   communityName: string
-  onlineUsers: PresencePayload[]
+  onlineMembers: ChannelMember[]
   onAddChannel: () => void
   canCreateChannel: boolean
 }
 
 function ChannelSidebar({
   channels,
+  activeChannelId,
   communityName,
-  onlineUsers,
+  onlineMembers,
   onAddChannel,
   canCreateChannel,
 }: ChannelSidebarProps) {
+  const unread = useChannelUnread(
+    channels.map((channel) => channel.id),
+    activeChannelId,
+  )
+
   return (
     <aside className="channel-sidebar">
       <p className="channel-sidebar__community">{communityName.toUpperCase()}</p>
       <h2>Channels</h2>
-      {channels.map((channel) => (
-        <NavLink
-          key={channel.id}
-          to={`/channels/${channel.id}`}
-          className={({ isActive }) =>
-            isActive ? 'channel-link active' : 'channel-link'}
-        >
-          # {channel.name}
-        </NavLink>
-      ))}
+      {channels.map((channel) => {
+        const count = unread(channel.id)
+
+        return (
+          <NavLink
+            key={channel.id}
+            to={`/channels/${channel.id}`}
+            className={({ isActive }) =>
+              isActive ? 'channel-link active' : 'channel-link'}
+          >
+            <span># {channel.name}</span>
+            {count > 0 && (
+              <span className="channel-unread" aria-label={`${count} unread`}>
+                {count > 99 ? '99+' : count}
+              </span>
+            )}
+          </NavLink>
+        )
+      })}
       {canCreateChannel && (
         <button type="button" onClick={onAddChannel}>
           + Add channel
         </button>
       )}
       <p className="channel-sidebar__online">
-        ONLINE — {onlineUsers.length}
+        ONLINE — {onlineMembers.length}
       </p>
-      {onlineUsers.map((user) => (
-        <span key={user.userId}>{user.username}</span>
+      {onlineMembers.map((user) => (
+        <span key={user.id} className="channel-sidebar__person">{user.username}</span>
       ))}
     </aside>
   )

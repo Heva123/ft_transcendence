@@ -263,3 +263,40 @@
 .block-user-list button:hover {
   background: var(--color-cyan);
 }
+
+/* Composer counter, empty + history notes */
+.message-counter {
+  margin: var(--space-4) 0 0;
+  color: var(--color-teal);
+  font-size: 11px;
+  text-align: right;
+}
+
+.message-counter.over {
+  color: #b3261e;
+  font-weight: 700;
+}
+
+.message-actions > button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.message-empty,
+.message-earlier-note,
+.message-history__title {
+  margin: 0 0 var(--space-16);
+  color: var(--color-teal);
+  font-size: 11px;
+}
+
+.blocked-status button {
+  padding: 2px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-plum);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}

@@ -12,6 +12,19 @@ export type ApiMessage = {
     id: string
     username: string
   }
+  reads?: {
+    userId: string
+    user?: { username: string }
+  }[]
+}
+
+export type ApiMember = {
+  id: string
+  role: string
+  user: {
+    id: string
+    username: string
+  }
 }
 
 export type ApiCommunity = {
@@ -46,6 +59,18 @@ export function getChannels(communityId: string) {
 export function getCommunity(communityId: string) {
   return apiRequest<ApiCommunity>(
     `/communities/${communityId}`,
+  )
+}
+
+export function getMembers(communityId: string) {
+  return apiRequest<ApiMember[]>(
+    `/communities/${communityId}/members`,
+  )
+}
+
+export function getUnreadCount(channelId: string) {
+  return apiRequest<{ channelId: string; unreadCount: number }>(
+    `/channels/${channelId}/messages/unread-count`,
   )
 }
 
