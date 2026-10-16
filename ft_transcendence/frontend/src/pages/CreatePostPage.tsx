@@ -1,28 +1,49 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { ApiError } from '../api/apiClient'
 import { getMyCommunities, type ApiCommunity } from '../features/chat/api/chatApi'
-import { createPost, uploadPostImage } from '../features/feed/api/feedApi'
+import { createPost, deletePost, uploadPostImage } from '../features/feed/api/feedApi'
 import PostImageField from '../features/feed/components/PostImageField'
+import { validateImage } from '../utils/validateImage'
 import './CreatePostPage.css'
 
-type Values = { content: string; target: string; file: File | null }
-
-function readValues(form: HTMLFormElement): Values {
-  const data = new FormData(form)
-  const file = data.get('image')
-  return {
-    content: String(data.get('idea')).trim(),
-    target: String(data.get('target')),
-    file: file instanceof File && file.size ? file : null,
-  }
+type View = {
+  error: string
+  file: File | null
+  progress: number
+  uploading: boolean
+  publishing: boolean
 }
 
-async function publish(values: Values, onProgress: (value: number) => void) {
+class ImageUploadError extends Error {}
+
+/*
+  The post is created first, because the image endpoint needs the post id.
+  If the image then fails, the post is deleted again so no half post is left.
+*/
+async function publish(
+  content: string,
+  target: string,
+  file: File | null,
+  onProgress: (value: number) => void,
+  onUploadStart: () => void,
+) {
   const post = await createPost({
-    content: values.content,
-    communityId: values.target === 'global' ? null : values.target,
+    content,
+    communityId: target === 'global' ? null : target,
   })
-  if (values.file) await uploadPostImage(post.id, values.file, onProgress)
+  if (!file)
+    return
+  try {
+    onUploadStart()
+    await uploadPostImage(post.id, file, onProgress)
+  } catch (err) {
+    await deletePost(post.id).catch(() => undefined)
+    const reason = err instanceof ApiError && err.status === 413
+      ? 'The image is too large.'
+      : 'The image could not be uploaded.'
+    throw new ImageUploadError(`${reason} Your post was not published.`)
+  }
 }
 
 function CreatePostPage() {
@@ -30,7 +51,8 @@ function CreatePostPage() {
   const [searchParams] = useSearchParams()
   const [communities, setCommunities] = useState<ApiCommunity[]>([])
   const [target, setTarget] = useState(() => searchParams.get('community') ?? 'global')
-  const [view, setView] = useState({ error: '', file: null as File | null, progress: 0 })
+  const [content, setContent] = useState('')
+  const [view, setView] = useState<View>({ error: '', file: null, progress: 0, uploading: false, publishing: false })
 
   useEffect(() => {
     getMyCommunities().then(setCommunities)
@@ -39,13 +61,34 @@ function CreatePostPage() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    const values = readValues(event.currentTarget)
-    if (!values.content) return
+    const text = content.trim()
+
+    if (!text) {
+      setView((state) => ({ ...state, error: 'Write something before publishing.' }))
+      return
+    }
+    const fileError = view.file ? validateImage(view.file) : ''
+    if (fileError) {
+      setView((state) => ({ ...state, error: fileError }))
+      return
+    }
+    setView((state) => ({ ...state, error: '', progress: 0, publishing: true }))
     try {
-      setView((state) => ({ ...state, error: '', progress: 0 }))
-      await publish(values, (progress) => setView((state) => ({ ...state, progress })))
-      navigate(values.target === 'global' ? '/' : `/communities/${values.target}`)
-    } catch { setView((state) => ({ ...state, error: 'Unable to publish post.' })) }
+      await publish(text, target, view.file,
+        (progress) => setView((state) => ({ ...state, progress })),
+        () => setView((state) => ({ ...state, uploading: true })))
+      navigate(target === 'global' ? '/' : `/communities/${target}`)
+    } catch (err) {
+      setView((state) => ({
+        ...state,
+        publishing: false,
+        uploading: false,
+        progress: 0,
+        error: err instanceof ImageUploadError
+          ? err.message
+          : 'Unable to publish post.',
+      }))
+    }
   }
 
   return <section className="create-post-page">
@@ -57,10 +100,16 @@ function CreatePostPage() {
         {communities.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
       </select>
       <label htmlFor="post-idea">Your idea</label>
-      <textarea id="post-idea" name="idea" rows={7} placeholder="What would you like to share?" />
-      <PostImageField file={view.file} progress={view.progress} onFileChange={(file) => setView((state) => ({ ...state, file }))} />
-      {view.error && <p>{view.error}</p>}
-      <div className="create-post-actions"><button type="submit">Publish post</button><button type="button" onClick={() => navigate(-1)}>Cancel</button></div>
+      <textarea id="post-idea" name="idea" rows={7} maxLength={2000} placeholder="What would you like to share?"
+        value={content} onChange={(event) => setContent(event.target.value)} />
+      <p className="attachment-note">{content.length}/2000</p>
+      <PostImageField file={view.file} progress={view.progress} uploading={view.uploading}
+        onFileChange={(file) => setView((state) => ({ ...state, file, error: '' }))} />
+      {view.error && <p className="create-post-error" role="alert">{view.error}</p>}
+      <div className="create-post-actions">
+        <button type="submit" disabled={view.publishing}>{view.publishing ? 'Publishing…' : 'Publish post'}</button>
+        <button type="button" onClick={() => navigate(-1)}>Cancel</button>
+      </div>
     </form>
   </section>
 }

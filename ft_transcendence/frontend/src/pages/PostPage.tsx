@@ -1,55 +1,97 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useCurrentUser } from '../features/auth/hooks/useCurrentUser'
-import { createReply, getPostDetails } from '../features/feed/api/feedApi'
+import { getPostDetails } from '../features/feed/api/feedApi'
 import PostCard from '../features/feed/components/PostCard'
-import ReplyItem from '../features/feed/components/ReplyItem'
+import ReplyItem, { ReplyForm } from '../features/feed/components/ReplyItem'
 import type { Post } from '../features/feed/types/Post'
 import type { Reply } from '../features/feed/types/Reply'
 import './PostPage.css'
 
-type ReplyFormProps = { postId: string; onCreated: (reply: Reply) => void }
+type PageState = {
+  postId: string
+  post: Post | null
+  replies: Reply[]
+  error: string
+}
 
-function ReplyForm({ postId, onCreated }: ReplyFormProps) {
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const form = event.currentTarget
-    const content = String(new FormData(form).get('reply')).trim()
-    if (!content) return
-    const reply = await createReply(postId, content)
-    onCreated(reply)
-    form.reset()
+function groupReplies(replies: Reply[]) {
+  const ids = new Set(replies.map((reply) => reply.id))
+  const roots: Reply[] = []
+  const childrenOf = new Map<string, Reply[]>()
+
+  replies.forEach((reply) => {
+    if (!reply.parentId || !ids.has(reply.parentId)) {
+      roots.push(reply)
+      return
+    }
+    childrenOf.set(reply.parentId, [...(childrenOf.get(reply.parentId) ?? []), reply])
+  })
+  return { roots, childrenOf }
+}
+
+// A reply and everything under it, for removing a deleted thread.
+function withDescendants(replies: Reply[], id: string) {
+  const removed = new Set([id])
+  let grew = true
+
+  while (grew) {
+    grew = false
+    replies.forEach((reply) => {
+      if (reply.parentId && removed.has(reply.parentId) && !removed.has(reply.id)) {
+        removed.add(reply.id)
+        grew = true
+      }
+    })
   }
-
-  return <form className="reply-form" onSubmit={handleSubmit}>
-    <label htmlFor="reply">Your reply</label>
-    <textarea id="reply" name="reply" rows={4} />
-    <button type="submit">Post reply</button>
-  </form>
+  return removed
 }
 
 function PostPage() {
   const postId = useParams().postId ?? ''
-  const [post, setPost] = useState<Post | null>(null)
-  const [replies, setReplies] = useState<Reply[]>([])
-  const [error, setError] = useState('')
+  const [state, setState] = useState<PageState>({ postId: '', post: null, replies: [], error: '' })
   const user = useCurrentUser()
 
   useEffect(() => {
+    let active = true
+
     getPostDetails(postId).then((data) => {
-      setPost(data.post)
-      setReplies(data.comments)
-    }).catch(() => setError('Post not found.'))
+      if (active)
+        setState({ postId, post: data.post, replies: data.comments, error: '' })
+    }).catch(() => {
+      if (active)
+        setState({ postId, post: null, replies: [], error: 'Post not found.' })
+    })
+    return () => {
+      active = false
+    }
   }, [postId])
 
-  if (error) return <h1>{error}</h1>
-  if (!post) return <p>Loading post...</p>
+  function addReply(reply: Reply) {
+    setState((current) => ({ ...current, replies: [...current.replies, reply] }))
+  }
+
+  function removeReply(reply: Reply) {
+    setState((current) => {
+      const removed = withDescendants(current.replies, reply.id)
+      return { ...current, replies: current.replies.filter((item) => !removed.has(item.id)) }
+    })
+  }
+
+  if (state.postId !== postId) return <p>Loading post...</p>
+  if (state.error || !state.post) return <h1>{state.error || 'Post not found.'}</h1>
+  const { roots, childrenOf } = groupReplies(state.replies)
+  const count = state.replies.length
+
   return <section className="post-page">
-    <header><p>42 COMMUNITY</p><h1>A small idea. A big conversation.</h1></header>
-    <PostCard post={post} commentsCount={replies.length} currentUserId={user?.id} />
-    <h2>{replies.length} {replies.length === 1 ? 'reply' : 'replies'}</h2>
-    {replies.map((reply) => <ReplyItem key={reply.id} reply={reply} currentUserId={user?.id} />)}
-    <ReplyForm postId={postId} onCreated={(reply) => setReplies((current) => [...current, reply])} />
+    <header><p>42 COMMUNITY</p><h1>A small idea. A big conversation.</h1>
+      <p className="post-page__crumb">{state.post.community?.name ?? 'Global feed'} / Post</p></header>
+    <PostCard post={state.post} commentsCount={count} currentUserId={user?.id} />
+    <h2>{count} {count === 1 ? 'reply' : 'replies'}</h2>
+    {roots.map((reply) => <ReplyItem key={reply.id} reply={reply} childrenOf={childrenOf}
+      currentUserId={user?.id} communityId={state.post?.community?.id ?? null}
+      onCreated={addReply} onDeleted={removeReply} />)}
+    <ReplyForm postId={postId} parentId={null} onCreated={addReply} />
   </section>
 }
 
