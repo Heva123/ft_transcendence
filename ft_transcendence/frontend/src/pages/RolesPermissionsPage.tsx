@@ -83,7 +83,6 @@ const roleNames = [
 ];
 
 function RolesPermissionsPage({
-  token: _token,
   onBack,
 }: RolesPermissionsPageProps) {
   const [roles, setRoles] =

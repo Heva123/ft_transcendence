@@ -42,7 +42,6 @@ type CommunitiesPageProps = {
 };
 
 function CommunitiesPage({
-  token: _token,
   onOpenCommunity,
 }: CommunitiesPageProps) {
   const [groups, setGroups] =

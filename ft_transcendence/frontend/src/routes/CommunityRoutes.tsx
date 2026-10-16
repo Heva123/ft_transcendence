@@ -45,9 +45,7 @@ export function DiscoverCommunitiesRoute() {
   }
 
   return (
-    <DiscoverCommunitiesPage
-      token={token}
-    />
+    <DiscoverCommunitiesPage />
   );
 }
 
