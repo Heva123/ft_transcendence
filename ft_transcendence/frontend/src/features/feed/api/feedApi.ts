@@ -8,13 +8,16 @@ type PostDetails = { post: Post; comments: Reply[] }
 type LikeResponse = { liked: boolean; likesCount: number }
 type DeleteResponse = { deleted: boolean; id: string }
 
-export function getFeed() {
-  return apiRequest<FeedResponse>('/posts')
+/** The backend returns 10 posts per page. */
+export const FEED_PAGE_SIZE = 10
+
+export function getFeed(page = 1) {
+  return apiRequest<FeedResponse>(`/posts?page=${page}`)
 }
 
-export function getCommunityFeed(communityId: string) {
+export function getCommunityFeed(communityId: string, page = 1) {
   return apiRequest<FeedResponse>(
-    `/posts?communityId=${encodeURIComponent(communityId)}`,
+    `/posts?communityId=${encodeURIComponent(communityId)}&page=${page}`,
   )
 }
 
@@ -42,10 +45,14 @@ export function deletePost(postId: string) {
   })
 }
 
-export function createReply(postId: string, content: string) {
+export function createReply(
+  postId: string,
+  content: string,
+  parentId: string | null = null,
+) {
   return apiRequest<Reply>(`/posts/${postId}/comments`, {
     method: 'POST',
-    body: JSON.stringify({ content }),
+    body: JSON.stringify(parentId ? { content, parentId } : { content }),
   })
 }
 
@@ -74,4 +81,19 @@ export function uploadPostImage(
   onProgress: (value: number) => void,
 ) {
   return uploadRequest(`/uploads/post/${postId}`, file, onProgress)
+}
+
+export type ReportTarget = 'POST' | 'COMMENT'
+
+/** Reports belong to a community, so only community posts can be reported. */
+export function reportContent(
+  communityId: string,
+  targetType: ReportTarget,
+  targetId: string,
+  reason: string,
+) {
+  return apiRequest(`/communities/${communityId}/reports`, {
+    method: 'POST',
+    body: JSON.stringify({ targetType, targetId, reason }),
+  })
 }

@@ -88,3 +88,55 @@
   background: var(--color-surface);
   cursor: pointer;
 }
+
+.post-page__crumb {
+  margin: 0;
+  color: var(--color-teal);
+  font-size: 11px;
+}
+
+.reply-thread.nested {
+  margin-left: var(--space-28);
+  padding-left: var(--space-12);
+  border-left: 2px solid var(--color-pink);
+}
+
+.reply-avatar {
+  flex-shrink: 0;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  font-size: 11px;
+}
+
+.reply-actions button.link {
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-plum);
+  text-decoration: underline;
+}
+
+.reply-error {
+  margin: var(--space-6) 0 0;
+  color: #b3261e;
+  font-size: 12px;
+}
+
+.reply-form.nested {
+  margin-top: var(--space-12);
+}
+
+.reply-form__actions {
+  display: flex;
+  gap: var(--space-8);
+}
+
+.reply-form button.secondary {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.reply-form button:disabled {
+  opacity: 0.6;
+}
