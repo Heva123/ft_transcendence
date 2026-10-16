@@ -3,6 +3,9 @@ import { apiRequest } from '../../../api/apiClient'
 export type SearchUser = {
   id: string
   username: string
+  displayName?: string | null
+  avatarUrl?: string | null
+  skills?: string[]
 }
 
 export type SearchCommunity = {
@@ -22,7 +25,7 @@ export type SearchPost = {
   } | null
 }
 
-export type SearchType = 'users' | 'communities' | 'posts'
+export type SearchType = 'users' | 'skills' | 'communities' | 'posts'
 export type SortOrder = 'asc' | 'desc'
 
 export type SearchPagination = {
@@ -37,6 +40,7 @@ export type SearchPagination = {
 export type SearchResponse = {
   results: {
     users: SearchUser[]
+    skills: SearchUser[]
     communities: SearchCommunity[]
     posts: SearchPost[]
   }

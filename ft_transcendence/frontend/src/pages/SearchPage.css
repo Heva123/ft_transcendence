@@ -296,3 +296,10 @@
   color: var(--color-ink);
   text-decoration: none;
 }
+
+.person-result__avatar {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  font-size: 12px;
+}

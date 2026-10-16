@@ -11,7 +11,9 @@ type Props = {
 }
 
 function PeopleResults({ request, onPage, onClear }: Props) {
-  const state = usePagedSearch(request, (data) => data.results.users)
+  // The same list shows people by name, or by skill on the Skills tab.
+  const state = usePagedSearch(request, (data) =>
+    request.type === 'skills' ? data.results.skills : data.results.users)
 
   if (state.error)
     return <p role="alert">{state.error}</p>
@@ -25,7 +27,8 @@ function PeopleResults({ request, onPage, onClear }: Props) {
       <PageSummary {...state} />
       <div className="people-results">
         {state.items.map((person) =>
-          <PersonResultCard key={person.id} person={person} />)}
+          <PersonResultCard key={person.id} person={person}
+            highlight={request.type === 'skills' ? request.query : undefined} />)}
       </div>
       <SearchPager {...state} onChange={onPage} />
     </>

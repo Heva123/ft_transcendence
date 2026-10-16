@@ -7,17 +7,18 @@ import PeopleResults from '../features/search/components/PeopleResults'
 import PostResults from '../features/search/components/PostResults'
 import './SearchPage.css'
 
-export type SearchTab = 'people' | 'communities' | 'posts'
+export type SearchTab = 'people' | 'communities' | 'posts' | 'skills'
 
 const TABS: { id: SearchTab; label: string; type: SearchType; heading: string }[] = [
   { id: 'people', label: 'People', type: 'users', heading: 'Find your next collaborator.' },
   { id: 'communities', label: 'Communities', type: 'communities', heading: 'Find a place to belong.' },
   { id: 'posts', label: 'Posts', type: 'posts', heading: 'Ideas worth finding.' },
+  { id: 'skills', label: 'Skills', type: 'skills', heading: 'Find the skills you need.' },
 ]
 
 // People sort by name. Communities and posts sort by date.
 function sortOptions(tab: SearchTab): { value: SortOrder; label: string }[] {
-  if (tab === 'people')
+  if (tab === 'people' || tab === 'skills')
     return [{ value: 'asc', label: 'Name A–Z' }, { value: 'desc', label: 'Name Z–A' }]
   return [{ value: 'desc', label: 'Newest first' }, { value: 'asc', label: 'Oldest first' }]
 }
@@ -143,7 +144,7 @@ function SearchPage() {
       )}
 
       <section className="search-results">
-        {query && tab === 'people' && <PeopleResults {...resultProps} />}
+        {query && (tab === 'people' || tab === 'skills') && <PeopleResults key={tab} {...resultProps} />}
         {query && tab === 'communities' && <CommunityResults {...resultProps} />}
         {query && tab === 'posts' && <PostResults {...resultProps} />}
         {!query && <p>Enter something to search.</p>}
