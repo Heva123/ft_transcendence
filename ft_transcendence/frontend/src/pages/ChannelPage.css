@@ -48,6 +48,11 @@
 }
 
 .channel-room__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-12);
   padding-bottom: var(--space-16);
   margin-bottom: var(--space-16);
   border-bottom: 1px solid #d8ced3;
@@ -62,31 +67,6 @@
   color: var(--color-teal);
   font-size: 11px;
 }
-.channel-create-form {
-  display: grid;
-  gap: var(--space-8);
-  margin-top: var(--space-16);
-}
-
-.channel-create-form label {
-  font-size: 11px;
-}
-
-.channel-create-form input,
-.channel-create-form textarea {
-  width: 100%;
-  padding: var(--space-12);
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  box-sizing: border-box;
-  font: inherit;
-}
-
-.channel-create-form textarea {
-  min-height: 90px;
-  resize: vertical;
-}
-
 .channel-link {
   display: flex;
   align-items: center;
@@ -107,4 +87,46 @@
 
 .channel-link.active .channel-unread {
   background: var(--color-surface);
+}
+
+.channel-room__header p a {
+  color: inherit;
+}
+
+.channel-room__header .channel-room__description {
+  color: var(--color-ink);
+  font-size: 12px;
+}
+
+.channel-room__tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.channel-room__tools button {
+  padding: 8px 14px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.channel-room__error {
+  color: var(--color-plum);
+  font-weight: 700;
+}
+
+.channel-room {
+  min-width: 0;
+}
+
+/* Phone: channel list on top, chat below. */
+@media (max-width: 720px) {
+  .channel-page {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .channel-page .message-actions {
+    grid-template-columns: repeat(2, max-content);
+  }
 }

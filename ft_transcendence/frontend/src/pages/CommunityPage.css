@@ -107,3 +107,24 @@
   border: 1px solid var(--color-border);
   background: var(--color-surface);
 }
+button.community-tab-link {
+  font: inherit;
+  cursor: pointer;
+}
+
+.conversations-panel:focus {
+  outline: 2px solid var(--color-plum);
+  outline-offset: 2px;
+}
+
+.conversations-panel .conversations-empty {
+  margin: 0;
+  font-size: 12px;
+  line-height: 18px;
+}
+
+.conversations-panel .new-channel {
+  background: var(--color-yellow);
+  font-weight: 700;
+  cursor: pointer;
+}

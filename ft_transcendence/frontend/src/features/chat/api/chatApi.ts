@@ -97,3 +97,17 @@ export function createChannel(
     },
   )
 }
+
+export function updateChannel(
+  channelId: string,
+  input: CreateChannelInput,
+) {
+  return apiRequest<Channel>(`/channels/${channelId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  })
+}
+
+export function deleteChannel(channelId: string) {
+  return apiRequest<void>(`/channels/${channelId}`, { method: 'DELETE' })
+}

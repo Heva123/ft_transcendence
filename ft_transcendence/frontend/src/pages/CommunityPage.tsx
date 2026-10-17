@@ -17,9 +17,14 @@ import {
 } from "../api/apiClient";
 
 import {
+  createChannel,
   getChannels,
   getCommunity,
 } from "../features/chat/api/chatApi";
+
+import { canCreateChannel } from "../features/chat/channelRoles";
+
+import ChannelFormModal from "../features/chat/components/ChannelFormModal";
 
 import { toCommunity } from "../features/chat/api/communityMapper";
 
@@ -83,6 +88,54 @@ function CommunityView({
   const firstChannel =
     data.channels[0];
 
+  const canCreate =
+    canCreateChannel(data.role);
+
+  const navigate =
+    useNavigate();
+
+  const [
+    showCreate,
+    setShowCreate,
+  ] = useState(false);
+
+  async function handleCreate(values: {
+    name: string;
+    description: string;
+  }) {
+    const channel =
+      await createChannel(
+        data.community.id,
+        {
+          name: values.name,
+          description:
+            values.description ||
+            undefined,
+        }
+      );
+
+    setShowCreate(false);
+    navigate(`/channels/${channel.id}`);
+  }
+
+  // With no channels yet, the tab opens the form or points to the panel.
+  function handleEmptyChannelsTab() {
+    if (canCreate) {
+      setShowCreate(true);
+      return;
+    }
+
+    const panel =
+      document.getElementById(
+        "community-channels"
+      );
+
+    panel?.scrollIntoView({
+      behavior: "smooth",
+    });
+    panel?.focus();
+  }
+
   return (
     <section className="community-page">
       <div className="community-header-actions">
@@ -115,9 +168,15 @@ function CommunityView({
             Channels
           </Link>
         ) : (
-          <span className="community-tab-link">
+          <button
+            type="button"
+            className="community-tab-link"
+            onClick={
+              handleEmptyChannelsTab
+            }
+          >
             Channels
-          </span>
+          </button>
         )}
 
         <Link
@@ -152,15 +211,22 @@ function CommunityView({
           />
         </main>
 
-        <aside className="conversations-panel">
-          <h2>
+        <aside
+          className="conversations-panel"
+          id="community-channels"
+          tabIndex={-1}
+          aria-labelledby="community-channels-title"
+        >
+          <h2 id="community-channels-title">
             Conversations
           </h2>
 
           {data.channels.length ===
             0 && (
-            <p>
-              No channels yet.
+            <p className="conversations-empty">
+              {canCreate
+                ? "No channels yet. Create the first one so members can start talking."
+                : "No channels yet. An owner, admin or moderator of this community can add one."}
             </p>
           )}
 
@@ -173,6 +239,18 @@ function CommunityView({
                 # {channel.name}
               </Link>
             )
+          )}
+
+          {canCreate && (
+            <button
+              type="button"
+              className="new-channel"
+              onClick={() =>
+                setShowCreate(true)
+              }
+            >
+              + New channel
+            </button>
           )}
 
           {canLeave && (
@@ -189,6 +267,18 @@ function CommunityView({
           )}
         </aside>
       </div>
+
+      {showCreate && (
+        <ChannelFormModal
+          title="Create channel"
+          intro={`Add a new channel to ${data.community.name}. Every member can read and post in it.`}
+          submitLabel="Create channel"
+          onCancel={() =>
+            setShowCreate(false)
+          }
+          onSubmit={handleCreate}
+        />
+      )}
     </section>
   );
 }
