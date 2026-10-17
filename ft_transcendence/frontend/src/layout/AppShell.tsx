@@ -3,6 +3,7 @@ import {
   connectSocket,
   disconnectSocket,
 } from '../api/socket'
+import NotificationToasts from '../features/notifications/components/NotificationToasts'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
 import './layout.css'
@@ -29,6 +30,7 @@ function AppShell({ children }: AppShellProps) {
           {children}
         </main>
       </div>
+      <NotificationToasts />
     </div>
   )
 }
