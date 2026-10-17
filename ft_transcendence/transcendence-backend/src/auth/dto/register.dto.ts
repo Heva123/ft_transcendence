@@ -2,6 +2,7 @@ import { Transform } from "class-transformer";
 import {
   IsEmail,
   IsString,
+  IsNotIn,
   Matches,
   MaxLength,
   MinLength,
@@ -19,6 +20,7 @@ export class RegisterDto {
   @IsString()
   @MinLength(3)
   @MaxLength(30)
+  @IsNotIn(["me", "blocked"], { message: "This username is reserved" })
   @Matches(/^[a-zA-Z0-9_]+$/, {
     message: "username can contain only letters, numbers, and underscores",
   })
