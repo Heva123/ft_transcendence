@@ -11,12 +11,22 @@ import { RolesModule } from "./roles/roles.module";
 import { ProjectsModule } from "./projects/projects.module";
 import { TasksModule } from "./tasks/tasks.module";
 import { ChannelsModule } from "./channels/channels.module";
+import { MessagesModule } from "./messages/messages.module";
+import { PostsModule } from "./posts/posts.module";
+import { ReportsModule } from "./reports/reports.module";
+import { NotificationsModule } from "./notifications/notifications.module";
+import { SearchModule } from "./search/search.module";
+import { UploadsModule } from "./uploads/uploads.module";
+import { RealtimeModule } from "./realtime/realtime.module";
+import { FriendsModule } from "./friends/friends.module";
+import { InvitationsModule } from "./invitations/invitations.module";
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    RealtimeModule,
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -27,6 +37,14 @@ import { ChannelsModule } from "./channels/channels.module";
     ProjectsModule,
     TasksModule,
     ChannelsModule,
+    MessagesModule,
+    PostsModule,
+    ReportsModule,
+    NotificationsModule,
+    SearchModule,
+    UploadsModule,
+    FriendsModule,
+    InvitationsModule,
   ],
   controllers: [AppController],
 })

@@ -8,18 +8,38 @@ datasource db {
 }
 
 model User {
-  id              String    @id @default(uuid())
-  email           String    @unique
-  username        String    @unique
-  passwordHash    String
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                   String                @id @default(uuid())
+  email                String                @unique
+  username             String                @unique
+  passwordHash         String
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  lastSeenAt           DateTime?
+  avatarPath           String?
+  displayName          String?               @db.VarChar(50)
+  bio                  String?               @db.VarChar(300)
+  skills               UserSkill[]
+  friendshipsSent      Friendship[]          @relation("FriendshipRequester")
+  friendshipsReceived  Friendship[]          @relation("FriendshipAddressee")
+  invitationsSent      CommunityInvitation[] @relation("InvitationInviter")
+  invitationsReceived  CommunityInvitation[] @relation("InvitationInvitee")
   communityMemberships CommunityMember[]
-  createdCommunities   Community[]       @relation("CommunityCreator")
-  createdChannels      Channel[]         @relation("ChannelCreator")
-  createdProjects      Project[]         @relation("ProjectCreator")
-  createdTasks         Task[]            @relation("TaskCreator")
-  assignedTasks        Task[]            @relation("TaskAssignee")
+  createdCommunities   Community[]           @relation("CommunityCreator")
+  createdChannels      Channel[]             @relation("ChannelCreator")
+  createdProjects      Project[]             @relation("ProjectCreator")
+  createdTasks         Task[]                @relation("TaskCreator")
+  assignedTasks        Task[]                @relation("TaskAssignee")
+  messages             Message[]
+  messageReads         MessageRead[]
+  messageAttachments   MessageAttachment[]   @relation("MessageAttachmentUploader")
+  posts                Post[]
+  comments             Comment[]
+  likes                Like[]
+  reportsFiled         Report[]              @relation("ReportReporter")
+  reportsReviewed      Report[]              @relation("ReportReviewer")
+  notifications        Notification[]
+  blocksInitiated      Block[]               @relation("Blocker")
+  blocksReceived       Block[]               @relation("Blocked")
 
   @@map("users")
 }
@@ -42,10 +62,13 @@ model Community {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  createdBy User      @relation("CommunityCreator", fields: [createdById], references: [id], onDelete: Restrict)
-  members   CommunityMember[]
-  projects  Project[]
-  channels  Channel[]
+  createdBy   User                  @relation("CommunityCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  members     CommunityMember[]
+  projects    Project[]
+  channels    Channel[]
+  posts       Post[]
+  reports     Report[]
+  invitations CommunityInvitation[]
 
   @@index([createdById])
   @@map("groups")
@@ -65,8 +88,10 @@ model Channel {
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
 
-  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  createdBy  User      @relation("ChannelCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  community   Community           @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  createdBy   User                @relation("ChannelCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  messages    Message[]
+  attachments MessageAttachment[]
 
   @@unique([communityId, name])
   @@index([communityId])
@@ -91,13 +116,13 @@ model Project {
   id          String   @id @default(uuid())
   name        String
   description String?
-  communityId String @map("groupId")
+  communityId String   @map("groupId")
   createdById String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  community     Community  @relation(fields: [communityId], references: [id], onDelete: Cascade)
-  createdBy User   @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  createdBy User      @relation("ProjectCreator", fields: [createdById], references: [id], onDelete: Restrict)
   tasks     Task[]
 
   @@index([communityId])
@@ -130,16 +155,253 @@ model Task {
 }
 
 model CommunityMember {
-  id       String    @id @default(uuid())
-  userId   String
-  communityId String @map("groupId")
+  id          String        @id @default(uuid())
+  userId      String
+  communityId String        @map("groupId")
   role        CommunityRole @default(MEMBER)
-  joinedAt DateTime  @default(now())
+  joinedAt    DateTime      @default(now())
 
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
 
   @@unique([userId, communityId])
   @@index([communityId])
   @@map("members")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  channelId String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  channel    Channel            @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  author     User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  reads      MessageRead[]
+  attachment MessageAttachment?
+}
+
+model MessageAttachment {
+  id         String   @id @default(uuid())
+  channelId  String
+  uploaderId String
+  messageId  String?  @unique
+  name       String   @db.VarChar(255)
+  mimeType   String   @db.VarChar(100)
+  size       Int
+  path       String
+  createdAt  DateTime @default(now())
+
+  channel  Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  uploader User     @relation("MessageAttachmentUploader", fields: [uploaderId], references: [id], onDelete: Cascade)
+  message  Message? @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([channelId, createdAt])
+  @@index([uploaderId])
+  @@map("message_attachments")
+}
+
+model MessageRead {
+  messageId String
+  userId    String
+  readAt    DateTime @default(now())
+
+  message Message @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([messageId, userId])
+  @@index([userId, readAt])
+  @@map("message_reads")
+}
+
+model Post {
+  id          String   @id @default(uuid())
+  authorId    String
+  communityId String?
+  content     String   @db.VarChar(2000)
+  imagePath   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  author    User       @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  community Community? @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  comments  Comment[]
+  likes     Like[]
+  reports   Report[]
+
+  @@index([authorId])
+  @@index([communityId, createdAt])
+  @@map("posts")
+}
+
+model Comment {
+  id        String   @id @default(uuid())
+  content   String   @db.VarChar(1000)
+  postId    String
+  authorId  String
+  parentId  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post    Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  author  User      @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+  reports Report[]
+
+  @@index([postId, createdAt])
+  @@index([authorId])
+  @@index([parentId])
+  @@map("comments")
+}
+
+model Like {
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([postId, userId])
+  @@index([userId])
+  @@map("likes")
+}
+
+enum ReportTargetType {
+  POST
+  COMMENT
+}
+
+enum ReportStatus {
+  OPEN
+  RESOLVED
+  DISMISSED
+}
+
+model Report {
+  id           String           @id @default(uuid())
+  reporterId   String
+  communityId  String
+  targetType   ReportTargetType
+  postId       String?
+  commentId    String?
+  reason       String           @db.VarChar(500)
+  status       ReportStatus     @default(OPEN)
+  reviewedById String?
+  reviewedAt   DateTime?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  reporter   User      @relation("ReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  reviewedBy User?     @relation("ReportReviewer", fields: [reviewedById], references: [id], onDelete: SetNull)
+  community  Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  post       Post?     @relation(fields: [postId], references: [id], onDelete: SetNull)
+  comment    Comment?  @relation(fields: [commentId], references: [id], onDelete: SetNull)
+
+  @@index([communityId, status, createdAt])
+  @@index([reporterId])
+  @@index([postId])
+  @@index([commentId])
+  @@map("reports")
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String
+  type      String    @db.VarChar(50)
+  title     String    @db.VarChar(150)
+  message   String    @db.VarChar(500)
+  isRead    Boolean   @default(false)
+  readAt    DateTime?
+  link      String?   @db.VarChar(255)
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+  @@map("notifications")
+}
+
+model Block {
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+
+  blocker User @relation("Blocker", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("Blocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId])
+  @@map("blocks")
+}
+
+model Skill {
+  id   String @id @default(uuid())
+  name String @unique @db.VarChar(30)
+
+  users UserSkill[]
+
+  @@map("skills")
+}
+
+model UserSkill {
+  userId  String
+  skillId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([userId, skillId])
+  @@index([skillId])
+  @@map("user_skills")
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+}
+
+/// One row per pair of users. The service checks both directions.
+model Friendship {
+  id          String           @id @default(uuid())
+  requesterId String
+  addresseeId String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  respondedAt DateTime?
+
+  requester User @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("FriendshipAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId, status])
+  @@map("friendships")
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model CommunityInvitation {
+  id          String           @id @default(uuid())
+  communityId String
+  inviterId   String
+  inviteeId   String
+  role        CommunityRole    @default(MEMBER)
+  status      InvitationStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  respondedAt DateTime?
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  inviter   User      @relation("InvitationInviter", fields: [inviterId], references: [id], onDelete: Cascade)
+  invitee   User      @relation("InvitationInvitee", fields: [inviteeId], references: [id], onDelete: Cascade)
+
+  @@index([inviteeId, status])
+  @@index([communityId, status])
+  @@map("community_invitations")
 }
