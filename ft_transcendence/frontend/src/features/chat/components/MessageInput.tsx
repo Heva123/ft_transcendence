@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import ImageAttachmentPicker from './ImageAttachmentPicker'
+import AttachmentPicker from './AttachmentPicker'
 
 export const MAX_MESSAGE_LENGTH = 2000
 // Send typing:stop if the user has not typed for this long.
@@ -94,7 +94,7 @@ function MessageInput(props: Props) {
             {props.sendError ? 'Retry send' : 'Send message'}
           </button>
 
-          <ImageAttachmentPicker
+          <AttachmentPicker
             file={file}
             progress={progress}
             onFileChange={setFile}

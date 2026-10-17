@@ -60,3 +60,23 @@
 .create-post-actions button:disabled {
   opacity: 0.6;
 }
+
+.post-image-editor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-12);
+  margin: var(--space-8) 0;
+}
+
+.post-image-editor button {
+  min-height: 36px;
+  padding: 0 var(--space-12);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-plum);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}

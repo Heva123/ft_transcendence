@@ -3,7 +3,12 @@ import {
   useState,
   type ChangeEvent,
 } from 'react'
-import { IMAGE_TYPES, validateImage } from '../../../utils/validateImage'
+import {
+  ATTACHMENT_TYPES,
+  formatBytes,
+  isImageType,
+  validateAttachment,
+} from '../../../utils/validateImage'
 
 type Props = {
   file: File | null
@@ -11,12 +16,13 @@ type Props = {
   onFileChange: (file: File | null) => void
 }
 
-function ImageAttachmentPicker(props: Props) {
+// Attach an image or a PDF to a chat message, with preview and progress.
+function AttachmentPicker(props: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState('')
   const [picked, setPicked] = useState<{ file: File; url: string } | null>(null)
   // The parent clears `file` after sending, which hides the preview.
-  const preview = picked && picked.file === props.file ? picked.url : ''
+  const current = picked && picked.file === props.file ? picked : null
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
     const selected = event.target.files?.[0]
@@ -24,15 +30,18 @@ function ImageAttachmentPicker(props: Props) {
     event.target.value = ''
     if (!selected)
       return
-    const validation = validateImage(selected)
+    const validation = validateAttachment(selected)
     if (validation) {
       setError(validation)
       return
     }
     setError('')
-    if (picked)
+    if (picked?.url)
       URL.revokeObjectURL(picked.url)
-    setPicked({ file: selected, url: URL.createObjectURL(selected) })
+    setPicked({
+      file: selected,
+      url: isImageType(selected.type) ? URL.createObjectURL(selected) : '',
+    })
     props.onFileChange(selected)
   }
 
@@ -40,23 +49,28 @@ function ImageAttachmentPicker(props: Props) {
     <>
       <button className="chat-attachment__button" type="button"
         onClick={() => inputRef.current?.click()}>
-        Attach image
+        Attach file
       </button>
 
-      <input ref={inputRef} type="file" hidden
-        accept={IMAGE_TYPES.join(',')}
+      <input ref={inputRef} type="file" hidden aria-label="Attach an image or PDF"
+        accept={ATTACHMENT_TYPES.join(',')}
         onChange={handleChange} />
 
       {error && <p className="chat-attachment__error" role="alert">{error}</p>}
 
-      {props.file && preview && (
+      {props.file && current && (
         <div className="chat-attachment__preview">
-          <img src={preview} alt="Selected attachment preview" />
+          {current.url
+            ? <img src={current.url} alt="Selected attachment preview" />
+            : <span className="file-attachment__icon" aria-hidden="true">PDF</span>}
           <div>
             <strong>{props.file.name}</strong>
-            <span>{Math.ceil(props.file.size / 1024)} KB</span>
+            <span>{formatBytes(props.file.size)}</span>
             {props.progress > 0 && (
-              <span>Uploading {props.progress}%</span>
+              <>
+                <progress max="100" value={props.progress} />
+                <span>Uploading {props.progress}%</span>
+              </>
             )}
           </div>
           <button type="button"
@@ -69,4 +83,4 @@ function ImageAttachmentPicker(props: Props) {
   )
 }
 
-export default ImageAttachmentPicker
+export default AttachmentPicker

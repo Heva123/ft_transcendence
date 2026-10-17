@@ -97,3 +97,8 @@ export function reportContent(
     body: JSON.stringify({ targetType, targetId, reason }),
   })
 }
+
+/** Removes the image of a post. Only the author can do this. */
+export function deletePostImage(postId: string) {
+  return apiRequest(`/uploads/post/${postId}`, { method: 'DELETE' })
+}
