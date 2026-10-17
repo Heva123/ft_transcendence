@@ -119,7 +119,7 @@ function ChatArea({ selectedChannelId, members, showHistory }: ChatAreaProps) {
       setDraft('')
       return true
     } catch {
-      setSendError('The image could not be uploaded.')
+      setSendError('The file could not be uploaded.')
       return false
     }
   }

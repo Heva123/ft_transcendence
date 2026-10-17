@@ -2,16 +2,17 @@ import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import ConfirmDialog from '../../../components/ConfirmDialog'
 import ProtectedImage from '../../../components/ProtectedImage'
-import { deletePost, togglePostLike, updatePost } from '../api/feedApi'
+import { deletePost, deletePostImage, togglePostLike, updatePost, uploadPostImage } from '../api/feedApi'
 import { formatTimestamp } from '../../../utils/formatTimestamp'
 import type { Post } from '../types/Post'
 import AuthorAvatar from './AuthorAvatar'
 import ReportDialog from './ReportDialog'
+import PostImageEditor from './PostImageEditor'
 import './PostImage.css'
 
 type Props = { post: Post; commentsCount?: number; currentUserId?: string }
 type ViewState = { content: string; editing: boolean; deleted: boolean; error: string }
-type Dialog = 'none' | 'delete' | 'report'
+type Dialog = 'none' | 'delete' | 'report' | 'removeImage'
 type HeaderProps = {
   post: Post
   owner: boolean
@@ -57,6 +58,8 @@ function PostCard({ post, commentsCount, currentUserId }: Props) {
   const [reaction, setReaction] = useState({ likes: post.likesCount, liked: post.likedByMe, busy: false })
   const [dialog, setDialog] = useState<Dialog>('none')
   const [deleting, setDeleting] = useState(false)
+  // Changes when the image is added or removed while editing.
+  const [imageUrl, setImageUrl] = useState(post.imageUrl ?? null)
   const owner = Boolean(currentUserId) && currentUserId === post.author.id
   // Reports are per community, so global posts cannot be reported.
   const canReport = !owner && Boolean(post.community)
@@ -96,6 +99,24 @@ function PostCard({ post, commentsCount, currentUserId }: Props) {
     } finally { setDeleting(false) }
   }
 
+  async function handleRemoveImage() {
+    setDeleting(true)
+    try {
+      await deletePostImage(post.id)
+      setImageUrl(null)
+      setDialog('none')
+    } catch {
+      setDialog('none')
+      setView((current) => ({ ...current, error: 'Unable to remove the image.' }))
+    } finally { setDeleting(false) }
+  }
+
+  async function handleAddImage(file: File, onProgress: (value: number) => void) {
+    await uploadPostImage(post.id, file, onProgress)
+    // New query string so the image is fetched again.
+    setImageUrl(`/api/uploads/post/${post.id}?v=${Date.now()}`)
+  }
+
   if (view.deleted) return null
   const replies = commentsCount ?? post.commentsCount
   return <article className="post-card">
@@ -103,7 +124,9 @@ function PostCard({ post, commentsCount, currentUserId }: Props) {
       onEdit={() => setView((current) => ({ ...current, editing: true, error: '' }))}
       onDelete={() => setDialog('delete')} onReport={() => setDialog('report')} />
     {view.editing ? <PostEditor content={view.content} onSave={handleSave} onCancel={() => setView((current) => ({ ...current, editing: false, error: '' }))} /> : <p className="post-card__content">{view.content}</p>}
-    {post.imageUrl && <ProtectedImage src={post.imageUrl} alt="Post attachment" className="post-card__image" />}
+    {imageUrl && <ProtectedImage src={imageUrl} alt="Post attachment" className="post-card__image" />}
+    {view.editing && <PostImageEditor hasImage={Boolean(imageUrl)}
+      onRemove={() => setDialog('removeImage')} onAdd={handleAddImage} />}
     {view.error && <p className="post-card__error" role="alert">{view.error}</p>}
     <footer className="post-card__actions">
       <button className="post-card__like" type="button" aria-pressed={reaction.liked} onClick={handleLike}>{reaction.liked ? '♥' : '♡'} {reaction.likes} {reaction.likes === 1 ? 'like' : 'likes'}</button>
@@ -113,6 +136,10 @@ function PostCard({ post, commentsCount, currentUserId }: Props) {
       message="Your post and its comments will be removed. This action cannot be undone."
       confirmLabel="Delete post" busy={deleting}
       onCancel={() => setDialog('none')} onConfirm={handleDelete} />}
+    {dialog === 'removeImage' && <ConfirmDialog title="Remove this image?"
+      message="The image will be deleted from this post. Your text stays."
+      confirmLabel="Remove image" busy={deleting}
+      onCancel={() => setDialog('none')} onConfirm={handleRemoveImage} />}
     {dialog === 'report' && post.community && <ReportDialog communityId={post.community.id}
       targetType="POST" targetId={post.id} onClose={() => setDialog('none')} />}
   </article>

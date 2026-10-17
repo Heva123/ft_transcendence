@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
+import FileAttachment from '../../../components/FileAttachment'
 import ProtectedImage from '../../../components/ProtectedImage'
+import { isImageType } from '../../../utils/validateImage'
 import type { Message } from '../types/Message'
 
 type MessageItemProps = {
@@ -32,12 +34,14 @@ function MessageItem({ message, currentUserId, names }: MessageItemProps) {
           {' '}· {message.time}
         </p>
         {message.text && <p className="message-text">{message.text}</p>}
-        {message.attachment && (
-          <div className="message-attachment">
-            <ProtectedImage src={message.attachment.url} alt={message.attachment.name} />
-            <span>{message.attachment.name}</span>
-          </div>
-        )}
+        {message.attachment && (isImageType(message.attachment.type)
+          ? (
+            <div className="message-attachment">
+              <ProtectedImage src={message.attachment.url} alt={message.attachment.name} />
+              <span>{message.attachment.name}</span>
+            </div>
+          )
+          : <FileAttachment {...message.attachment} />)}
         {isOwn && readers.length > 0 && (
           <p className="message-read">✓✓ Read by {joinNames(readers)}</p>
         )}

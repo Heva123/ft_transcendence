@@ -133,3 +133,83 @@
   color: var(--color-ink);
   font-size: 13px;
 }
+
+/* Documents in chat and the PDF preview window */
+.file-attachment {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-12);
+  width: min(460px, 100%);
+  margin-top: var(--space-8);
+  padding: var(--space-12);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+}
+
+.file-attachment__icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 52px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-pink);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.file-attachment__info {
+  display: grid;
+  flex: 1;
+  min-width: 140px;
+  gap: 2px;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.file-attachment__actions {
+  display: flex;
+  gap: var(--space-8);
+}
+
+.file-attachment__actions button,
+.file-preview header button {
+  min-height: 36px;
+  padding: 0 var(--space-12);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-plum);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.file-preview {
+  display: flex;
+  flex-direction: column;
+  width: min(900px, 100%);
+  height: min(85vh, 1000px);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.file-preview header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 13px;
+}
+
+.file-preview iframe {
+  flex: 1;
+  width: 100%;
+  border: 0;
+}
