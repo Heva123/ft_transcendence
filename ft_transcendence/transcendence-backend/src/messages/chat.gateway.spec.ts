@@ -23,7 +23,8 @@ describe("ChatGateway", () => {
   const prisma = {
     user: {
       findMany: jest.fn(),
-      update: jest.fn(),
+      findUnique: jest.fn(),
+      updateMany: jest.fn(),
     },
   };
 
@@ -68,11 +69,13 @@ describe("ChatGateway", () => {
         this.rooms.delete(room);
       }),
       disconnect: jest.fn(),
+      use: jest.fn(),
     };
   }
 
   beforeEach(() => {
     jest.clearAllMocks();
+    prisma.user.findUnique.mockImplementation(({ where }) => Promise.resolve({ id: where.id, username: where.id === "user-2" ? "afnan" : "worod", siteRole: "USER" }));
 
     messagesService.requireChannelMember.mockResolvedValue(
       undefined,
@@ -427,7 +430,7 @@ describe("ChatGateway", () => {
 
     jest.clearAllMocks();
 
-    prisma.user.update.mockResolvedValue({
+    prisma.user.updateMany.mockResolvedValue({
       id: "user-1",
     });
 
@@ -436,7 +439,7 @@ describe("ChatGateway", () => {
     );
 
     expect(
-      prisma.user.update,
+      prisma.user.updateMany,
     ).toHaveBeenCalledWith({
       where: {
         id: "user-1",
@@ -454,5 +457,40 @@ describe("ChatGateway", () => {
         lastSeenAt: expect.any(Date),
       },
     );
+  });
+  it("rejects sockets belonging to deleted accounts", async () => {
+    const client = createSocket();
+    client.handshake.auth = { token: "valid-token" };
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: "deleted",
+      username: "gone",
+    });
+    prisma.user.findUnique.mockResolvedValue(null);
+    await gateway.handleConnection(client as never);
+    expect(client.disconnect).toHaveBeenCalled();
+    expect(client.join).not.toHaveBeenCalled();
+  });
+
+  it("blocks guest writes on an already connected socket after role changes", async () => {
+    const client = createSocket();
+    client.handshake.auth = { token: "valid-token" };
+    jwtService.verifyAsync.mockResolvedValue({
+      sub: "user-1",
+      username: "worod",
+    });
+    await gateway.handleConnection(client as never);
+    const middleware = client.use.mock.calls[0][0] as (
+      event: unknown[],
+      next: () => void,
+    ) => Promise<void>;
+    prisma.user.findUnique.mockResolvedValue({ siteRole: "GUEST" });
+    const next = jest.fn();
+    await middleware(["message:send", {}], next);
+    expect(next).not.toHaveBeenCalled();
+    expect(client.emit).toHaveBeenCalledWith("message:error", {
+      message: "Guest accounts have read-only access",
+    });
+    await middleware(["presence:get"], next);
+    expect(next).toHaveBeenCalledTimes(1);
   });
 });

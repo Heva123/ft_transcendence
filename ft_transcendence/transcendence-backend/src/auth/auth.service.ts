@@ -12,6 +12,7 @@ import { RegisterDto } from "./dto/register.dto";
 import { JwtPayload } from "./types/jwt-payload.type";
 
 const SAFE_USER_SELECT = {
+  siteRole: true,
   id: true,
   email: true,
   username: true,

@@ -1,3 +1,4 @@
+import { AdminModule } from "./admin/admin.module";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { AppController } from "./app.controller";
@@ -43,6 +44,7 @@ import { InvitationsModule } from "./invitations/invitations.module";
     NotificationsModule,
     SearchModule,
     UploadsModule,
+    AdminModule,
     FriendsModule,
     InvitationsModule,
   ],

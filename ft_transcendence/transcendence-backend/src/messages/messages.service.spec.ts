@@ -7,6 +7,7 @@ import { MessagesService } from "./messages.service";
 
 describe("MessagesService", () => {
   const prisma = {
+    user: { findUnique: jest.fn() },
     channel: {
       findUnique: jest.fn(),
     },
@@ -31,6 +32,7 @@ describe("MessagesService", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    prisma.user.findUnique.mockResolvedValue({ siteRole: "USER" });
 
     prisma.channel.findUnique.mockResolvedValue({
       id: "channel-1",
@@ -199,5 +201,20 @@ describe("MessagesService", () => {
       channelId: "channel-1",
       unreadCount: 3,
     });
+  });
+  it("prevents guest message creation through the socket-shared service", async () => {
+    prisma.user.findUnique.mockResolvedValue({ siteRole: "GUEST" });
+    await expect(
+      service.create("channel-1", "guest", { content: "hello" }),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(prisma.message.create).not.toHaveBeenCalled();
+  });
+
+  it("prevents guests writing read receipts", async () => {
+    prisma.user.findUnique.mockResolvedValue({ siteRole: "GUEST" });
+    await expect(
+      service.markRead("channel-1", "message-1", "guest"),
+    ).rejects.toBeInstanceOf(ForbiddenException);
+    expect(prisma.messageRead.upsert).not.toHaveBeenCalled();
   });
 });

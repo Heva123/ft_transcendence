@@ -63,9 +63,46 @@ export class ChatGateway
       const payload =
         await this.jwtService.verifyAsync<JwtPayload>(token);
 
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+        select: { id: true, username: true },
+      });
+      if (!user) throw new Error("User no longer exists");
+      payload.username = user.username;
       client.data.userId = payload.sub;
       client.data.username = payload.username;
 
+      client.use(async ([event], next) => {
+        try {
+          const current = await this.prisma.user.findUnique({
+            where: { id: payload.sub },
+            select: { siteRole: true },
+          });
+          if (!current) {
+            client.emit("auth:error", { message: "User no longer exists" });
+            client.disconnect();
+            return;
+          }
+          if (
+            current.siteRole === "GUEST" &&
+            [
+              "message:send",
+              "message:read",
+              "typing:start",
+              "typing:stop",
+            ].includes(event)
+          ) {
+            client.emit(
+              event.startsWith("typing:") ? "typing:error" : "message:error",
+              { message: "Guest accounts have read-only access" },
+            );
+            return;
+          }
+          next();
+        } catch {
+          client.emit("auth:error", { message: "Unable to validate account" });
+        }
+      });
       await client.join(`user:${payload.sub}`);
 
       const sockets = this.userSockets.get(payload.sub) ?? new Set<string>();
@@ -516,7 +553,7 @@ export class ChatGateway
 
     const lastSeenAt = new Date();
 
-    await this.prisma.user.update({
+    await this.prisma.user.updateMany({
       where: { id: userId },
       data: { lastSeenAt },
     });
