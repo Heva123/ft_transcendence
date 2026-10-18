@@ -1,0 +1,2 @@
+CREATE TYPE "SiteRole" AS ENUM ('ADMIN', 'USER', 'GUEST');
+ALTER TABLE "users" ADD COLUMN "siteRole" "SiteRole" NOT NULL DEFAULT 'USER';

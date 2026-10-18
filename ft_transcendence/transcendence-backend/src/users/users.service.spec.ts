@@ -34,7 +34,7 @@ describe("UsersService", () => {
     const readArguments = prisma.user.findUnique.mock.calls[0][0];
     expect(readArguments.select).not.toHaveProperty("passwordHash");
     expect(result).not.toHaveProperty("passwordHash");
-    expect(result).toMatchObject({ username: "new_name", avatarUrl: null, skills: [] });
+    expect(result).toMatchObject({ username: "new_name", avatarUrl: "/api/default-avatar", skills: [] });
   });
 
   it("clears display name and bio when sent as empty strings", async () => {

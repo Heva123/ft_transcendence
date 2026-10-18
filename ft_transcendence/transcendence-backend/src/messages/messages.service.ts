@@ -126,6 +126,7 @@ export class MessagesService {
     messageId: string,
     userId: string,
   ) {
+    await this.requireWritableUser(userId);
     await this.requireChannelMember(
       channelId,
       userId,
@@ -207,6 +208,7 @@ export class MessagesService {
     authorId: string,
     dto: CreateMessageDto,
   ) {
+    await this.requireWritableUser(authorId);
     await this.requireChannelMember(
       channelId,
       authorId,
@@ -341,6 +343,15 @@ export class MessagesService {
         };
       },
     );
+  }
+
+  async requireWritableUser(userId: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { siteRole: true },
+    });
+    if (!user || user.siteRole === "GUEST")
+      throw new ForbiddenException("This account cannot write chat data");
   }
 
   private toPublicAttachment(

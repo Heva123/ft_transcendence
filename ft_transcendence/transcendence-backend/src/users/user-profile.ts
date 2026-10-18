@@ -29,7 +29,9 @@ export function toPublicUser(user: PublicUserRow) {
     username: user.username,
     displayName: user.displayName,
     bio: user.bio,
-    avatarUrl: user.avatarPath ? `/api/uploads/avatar/${user.id}` : null,
+    avatarUrl: user.avatarPath
+      ? `/api/uploads/avatar/${user.id}`
+      : "/api/default-avatar",
     lastSeenAt: user.lastSeenAt,
     createdAt: user.createdAt,
     skills: user.skills.map((item) => item.skill.name),

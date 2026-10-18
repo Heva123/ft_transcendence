@@ -10,6 +10,7 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { PUBLIC_USER_SELECT, toPublicUser } from "./user-profile";
 
 const SAFE_USER_SELECT = {
+  siteRole: true,
   id: true,
   email: true,
   username: true,
@@ -32,14 +33,14 @@ export class UsersService {
   async findMe(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
-      select: { ...PUBLIC_USER_SELECT, email: true },
+      select: { ...PUBLIC_USER_SELECT, email: true, siteRole: true },
     });
 
     if (!user) {
       throw new NotFoundException("User not found");
     }
 
-    return { ...toPublicUser(user), email: user.email };
+    return { ...toPublicUser(user), email: user.email, siteRole: user.siteRole };
   }
 
   /**
