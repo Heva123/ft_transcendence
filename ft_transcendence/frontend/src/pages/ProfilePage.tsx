@@ -6,6 +6,7 @@ import {
 } from "react";
 
 import AppLayout from "../components/AppLayout";
+import ProtectedImage from "../components/ProtectedImage";
 import MyCornersCard from "../features/profile/components/MyCornersCard";
 import ProfileAboutCard from "../features/profile/components/ProfileAboutCard";
 import type { CurrentUser } from "../features/auth/api/userApi";
@@ -458,9 +459,15 @@ function ProfilePage({
               alt={`${user.username}'s avatar`}
             />
           ) : (
-            user.username
-              .charAt(0)
-              .toUpperCase()
+            <ProtectedImage
+              src="/default-avatar"
+              alt={`${user.username}'s avatar`}
+              fallback={
+                user.username
+                  .charAt(0)
+                  .toUpperCase()
+              }
+            />
           )}
         </div>
 

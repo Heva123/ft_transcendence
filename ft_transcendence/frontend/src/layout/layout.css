@@ -444,3 +444,20 @@
   height: 100%;
   object-fit: cover;
 }
+
+.sidebar__legal-links {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-plum);
+  font-size: 11px;
+}
+
+.sidebar__legal-links a {
+  color: var(--color-plum);
+  text-decoration: none;
+}
+
+.sidebar__legal-links a:hover {
+  text-decoration: underline;
+}

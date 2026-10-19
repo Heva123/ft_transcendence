@@ -3,7 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import AppLayout from "../components/AppLayout";
 import ConfirmDialog from "../components/ConfirmDialog";
-import ProtectedImage from "../components/ProtectedImage";
+import UserAvatar from "../components/UserAvatar";
 import { ApiError } from "../api/apiClient";
 import {
   acceptFriendRequest,
@@ -114,10 +114,11 @@ function PublicProfilePage() {
     <AppLayout>
       <section className="profile-hero">
         <div className="profile-avatar">
-          {person.avatarUrl
-            ? <ProtectedImage src={person.avatarUrl} alt={`${person.username}'s avatar`}
-              fallback={person.username.charAt(0).toUpperCase()} />
-            : person.username.charAt(0).toUpperCase()}
+          <UserAvatar
+            username={person.username}
+            avatarUrl={person.avatarUrl}
+            alt={`${person.username}'s avatar`}
+          />
         </div>
 
         <div className="profile-identity">

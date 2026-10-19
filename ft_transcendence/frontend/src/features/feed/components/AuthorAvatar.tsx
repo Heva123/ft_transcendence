@@ -1,19 +1,27 @@
-import ProtectedImage from '../../../components/ProtectedImage'
+import UserAvatar from "../../../components/UserAvatar";
 
-type AvatarUser = { username: string; avatarUrl?: string | null }
+type AvatarUser = {
+  username: string;
+  avatarUrl?: string | null;
+};
 
-// Uploaded avatar when there is one, otherwise the initials.
-function AuthorAvatar({ author, className }: { author: AvatarUser; className: string }) {
-  const initials = author.username.slice(0, 2).toUpperCase()
-
+function AuthorAvatar({
+  author,
+  className,
+}: {
+  author: AvatarUser;
+  className: string;
+}) {
   return (
     <div className={className}>
-      {author.avatarUrl
-        ? <ProtectedImage src={author.avatarUrl} alt="" className="author-avatar__img"
-          fallback={initials} />
-        : initials}
+      <UserAvatar
+        username={author.username}
+        avatarUrl={author.avatarUrl}
+        className="author-avatar__img"
+        alt={`${author.username}'s avatar`}
+      />
     </div>
-  )
+  );
 }
 
-export default AuthorAvatar
+export default AuthorAvatar;

@@ -7,6 +7,7 @@ import {
 import AppShell from "./layout/AppShell";
 import SessionExpiredNotice from "./components/SessionExpiredNotice";
 
+import AdminUsersPage from "./pages/AdminUsersPage";
 import ChannelPage from "./pages/ChannelPage";
 import ChannelsPage from "./pages/ChannelsPage";
 import CommunityPage from "./pages/CommunityPage";
@@ -131,6 +132,11 @@ function AppRoutes() {
       <Route
         path="/settings"
         element={<SettingsPage />}
+      />
+
+      <Route
+        path="/admin/users"
+        element={<AdminUsersPage />}
       />
 
       <Route

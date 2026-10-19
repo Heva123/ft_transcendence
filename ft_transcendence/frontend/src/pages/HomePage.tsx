@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Feed from '../features/feed/components/Feed'
+import UserAvatar from "../components/UserAvatar";
 import { useCurrentUser } from '../features/auth/hooks/useCurrentUser'
 import './HomePage.css'
 
@@ -25,7 +26,6 @@ function HomePage() {
   const [feedMode, setFeedMode] = useState<'global' | 'communities'>('global')
   const user = useCurrentUser()
   const username = user?.username ?? 'there'
-  const initials = user?.username.slice(0, 2).toUpperCase() ?? '--'
 
   return <section className="home-page">
     <header className="home-page__header">
@@ -37,7 +37,26 @@ function HomePage() {
         <button className={feedMode === 'global' ? 'feed-tab active' : 'feed-tab'} onClick={() => setFeedMode('global')}>GLOBAL FEED</button>
         <button className={feedMode === 'communities' ? 'feed-tab active' : 'feed-tab'} onClick={() => setFeedMode('communities')}>My communities</button>
       </div>
-      <section className="post-composer"><div className="post-composer__avatar">{initials}</div><div><p>What are you building today?</p><Link className="post-composer__action" to="/posts/new">Share an idea</Link><Link className="post-composer__photo" to="/posts/new">Add a photo</Link></div></section>
+      <section className="post-composer">
+        <div className="post-composer__avatar">
+          <UserAvatar
+            username={user?.username ?? "User"}
+            avatarUrl={user?.avatarUrl}
+            className="post-composer__avatar-img"
+            alt={`${user?.username ?? "User"}'s avatar`}
+          />
+        </div>
+
+        <div>
+          <p>What are you building today?</p>
+          <Link className="post-composer__action" to="/posts/new">
+            Share an idea
+          </Link>
+          <Link className="post-composer__photo" to="/posts/new">
+            Add a photo
+          </Link>
+        </div>
+      </section>
       <Feed mode={feedMode} />
     </main><div className="home-rail"><MomentumCard /><PeopleCard /></div></div>
   </section>
