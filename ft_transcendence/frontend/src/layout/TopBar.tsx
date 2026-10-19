@@ -9,7 +9,7 @@ import {
 } from "react-router-dom";
 
 import SearchBox from "../features/search/components/SearchBox";
-import ProtectedImage from "../components/ProtectedImage";
+import UserAvatar from "../components/UserAvatar";
 import { LogoutDialog } from "../components/LogoutButton";
 import { useCurrentUser } from "../features/auth/hooks/useCurrentUser";
 import { useUnreadNotifications } from "../features/notifications/hooks/useUnreadNotifications";
@@ -33,11 +33,6 @@ function TopBar() {
 
   const username =
     user?.username ?? "User";
-
-  const initials =
-    username
-      .slice(0, 2)
-      .toUpperCase();
 
   useEffect(() => {
     function handleClickOutside(
@@ -140,16 +135,12 @@ function TopBar() {
           }
         >
           <span className="topbar__avatar">
-            {user?.avatarUrl ? (
-              <ProtectedImage
-                src={user.avatarUrl}
-                alt=""
-                className="topbar__avatar-img"
-                fallback={initials}
-              />
-            ) : (
-              initials
-            )}
+            <UserAvatar
+              username={username}
+              avatarUrl={user?.avatarUrl}
+              className="topbar__avatar-img"
+              alt={`${username}'s avatar`}
+            />
           </span>
 
           <span className="topbar__username">

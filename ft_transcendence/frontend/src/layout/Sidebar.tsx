@@ -5,6 +5,15 @@ import {
 import {
   useMyCommunities,
 } from "../features/chat/hooks/useMyCommunities";
+
+import {
+  useCurrentUser,
+} from "../features/auth/hooks/useCurrentUser";
+
+import {
+  isSiteAdmin,
+} from "../features/auth/utils/sitePermissions";
+
 import LogoutButton from "../components/LogoutButton";
 
 import "./layout.css";
@@ -61,7 +70,6 @@ function WorkspaceNav() {
         Friends
       </NavLink>
 
-      {/* end: someone else's /profile/:username is not "My profile". */}
       <NavLink
         className={navClass}
         end
@@ -77,6 +85,9 @@ function Sidebar() {
   const {
     communities,
   } = useMyCommunities();
+
+  const currentUser =
+    useCurrentUser();
 
   return (
     <>
@@ -96,9 +107,7 @@ function Sidebar() {
             (item) => (
               <NavLink
                 key={item.id}
-                className={
-                  navClass
-                }
+                className={navClass}
                 to={`/communities/${item.id}`}
               >
                 {item.name}
@@ -125,22 +134,39 @@ function Sidebar() {
         </aside>
 
         <nav className="sidebar__footer">
+          {isSiteAdmin(currentUser) && (
+            <NavLink to="/admin/users">
+              Admin users
+            </NavLink>
+          )}
+
           <NavLink to="/settings">
             Settings
           </NavLink>
+
+          <div className="sidebar__legal-links">
+            <NavLink to="/privacy">
+              Privacy
+            </NavLink>
+
+            <span aria-hidden="true">
+              ·
+            </span>
+
+            <NavLink to="/terms">
+              Terms
+            </NavLink>
+          </div>
 
           <LogoutButton />
         </nav>
       </aside>
 
-      {/* Mobile navigation from Figma */}
       <nav className="mobile-nav">
         <NavLink
           end
           to="/"
-          className={
-            mobileNavClass
-          }
+          className={mobileNavClass}
         >
           <span>⌂</span>
           Home
@@ -148,9 +174,7 @@ function Sidebar() {
 
         <NavLink
           to="/communities/discover"
-          className={
-            mobileNavClass
-          }
+          className={mobileNavClass}
         >
           <span>⌕</span>
           Explore
@@ -158,9 +182,7 @@ function Sidebar() {
 
         <NavLink
           to="/channels"
-          className={
-            mobileNavClass
-          }
+          className={mobileNavClass}
         >
           <span>#</span>
           Chat
@@ -169,9 +191,7 @@ function Sidebar() {
         <NavLink
           end
           to="/profile"
-          className={
-            mobileNavClass
-          }
+          className={mobileNavClass}
         >
           <span>◉</span>
           Me
