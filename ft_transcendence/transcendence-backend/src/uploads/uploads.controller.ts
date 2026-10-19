@@ -71,6 +71,40 @@ function imageFileFilter(
   callback(null, true);
 }
 
+function chatFileFilter(
+  _request: unknown,
+  file: Express.Multer.File,
+  callback: (
+    error: Error | null,
+    acceptFile: boolean,
+  ) => void,
+) {
+  const allowed: Record<string, string[]> = {
+    "image/jpeg": [".jpg", ".jpeg"],
+    "image/png": [".png"],
+    "image/webp": [".webp"],
+    "application/pdf": [".pdf"],
+  };
+
+  const extension = extname(
+    file.originalname,
+  ).toLowerCase();
+
+  if (
+    !allowed[file.mimetype]?.includes(extension)
+  ) {
+    callback(
+      new BadRequestException(
+        "Only JPG, PNG, WEBP images and PDF documents are allowed",
+      ),
+      false,
+    );
+    return;
+  }
+
+  callback(null, true);
+}
+
 @UseGuards(JwtAuthGuard)
 @Controller("uploads")
 export class UploadsController {
@@ -193,10 +227,10 @@ export class UploadsController {
       }),
 
       limits: {
-        fileSize: 5 * 1024 * 1024,
+        fileSize: 10 * 1024 * 1024,
       },
 
-      fileFilter: imageFileFilter,
+      fileFilter: chatFileFilter,
     }),
   )
   uploadChatAttachment(
