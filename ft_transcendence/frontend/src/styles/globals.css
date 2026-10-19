@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Handjet:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-background);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: var(--color-background);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}

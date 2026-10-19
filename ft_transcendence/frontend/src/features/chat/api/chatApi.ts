@@ -1,0 +1,113 @@
+import { apiRequest } from '../../../api/apiClient'
+import type { Channel } from '../types/Channel'
+import type { MessageAttachment } from '../types/Message'
+
+export type ApiMessage = {
+  id: string
+  channelId: string
+  content: string
+  createdAt: string
+  attachment?: MessageAttachment | null
+  author: {
+    id: string
+    username: string
+  }
+  reads?: {
+    userId: string
+    user?: { username: string }
+  }[]
+}
+
+export type ApiMember = {
+  id: string
+  role: string
+  user: {
+    id: string
+    username: string
+  }
+}
+
+export type ApiCommunity = {
+  id: string
+  name: string
+  description: string | null
+  members?: {
+    role: string
+  }[]
+  memberCount?: number
+  _count?: {
+    members: number
+    channels: number
+    projects: number
+  }
+}
+
+export function getMyCommunities() {
+  return apiRequest<ApiCommunity[]>('/communities')
+}
+
+export function getChannel(channelId: string) {
+  return apiRequest<Channel>(`/channels/${channelId}`)
+}
+
+export function getChannels(communityId: string) {
+  return apiRequest<Channel[]>(
+    `/communities/${communityId}/channels`,
+  )
+}
+
+export function getCommunity(communityId: string) {
+  return apiRequest<ApiCommunity>(
+    `/communities/${communityId}`,
+  )
+}
+
+export function getMembers(communityId: string) {
+  return apiRequest<ApiMember[]>(
+    `/communities/${communityId}/members`,
+  )
+}
+
+export function getUnreadCount(channelId: string) {
+  return apiRequest<{ channelId: string; unreadCount: number }>(
+    `/channels/${channelId}/messages/unread-count`,
+  )
+}
+
+export function getMessages(channelId: string) {
+  return apiRequest<ApiMessage[]>(
+    `/channels/${channelId}/messages`,
+  )
+}
+
+export type CreateChannelInput = {
+  name: string
+  description?: string
+}
+
+export function createChannel(
+  communityId: string,
+  input: CreateChannelInput,
+) {
+  return apiRequest<Channel>(
+    `/communities/${communityId}/channels`,
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+  )
+}
+
+export function updateChannel(
+  channelId: string,
+  input: CreateChannelInput,
+) {
+  return apiRequest<Channel>(`/channels/${channelId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(input),
+  })
+}
+
+export function deleteChannel(channelId: string) {
+  return apiRequest<void>(`/channels/${channelId}`, { method: 'DELETE' })
+}

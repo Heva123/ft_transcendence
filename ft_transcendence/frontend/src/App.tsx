@@ -1,276 +1,238 @@
-import { useEffect, useState } from "react";
-import SettingsPage from "./pages/SettingsPage";
-import { UserContext, type User } from "./UserContext";
+import {
+  Route,
+  Routes,
+  useNavigate,
+} from "react-router-dom";
 
-import CommunityMembersPage from "./pages/CommunityMembersPage";
-import CommunitiesPage from "./pages/CommunitiesPage";
-import DiscoverCommunitiesPage from "./pages/DiscoverCommunitiesPage";
+import AppShell from "./layout/AppShell";
+import SessionExpiredNotice from "./components/SessionExpiredNotice";
+
+import AdminUsersPage from "./pages/AdminUsersPage";
+import ChannelPage from "./pages/ChannelPage";
+import ChannelsPage from "./pages/ChannelsPage";
+import CommunityPage from "./pages/CommunityPage";
+import CreatePostPage from "./pages/CreatePostPage";
+import FriendsPage from "./pages/FriendsPage";
+import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import NotFoundPage from "./pages/NotFoundPage";
+import NotificationsPage from "./pages/NotificationsPage";
+import PostPage from "./pages/PostPage";
+import PublicProfilePage from "./pages/PublicProfilePage";
 import RegisterPage from "./pages/RegisterPage";
-import DashboardPage from "./pages/DashboardPage";
-import LegalPage from "./pages/LegalPage";
-import ProfilePage from "./pages/ProfilePage";
+import SearchPage from "./pages/SearchPage";
+import SettingsPage from "./pages/SettingsPage";
 
-type Page =
-  | "login"
-  | "register"
-  | "dashboard"
-  | "profile"
-  | "communities"
-  | "discover"
-  | "members"
-  | "terms"
-  | "settings"
-  | "privacy";
+import {
+  CommunitiesRoute,
+  CommunityDetailsRoute,
+  CommunityMembersRoute,
+  DiscoverCommunitiesRoute,
+  RolesPermissionsRoute,
+} from "./routes/CommunityRoutes";
 
-type LoginResponse = {
-  accessToken: string;
-  user: User;
-};
+import LegalRoute from "./routes/LegalRoute";
+import ProfileRoute from "./routes/ProfileRoute";
+import ProtectedRoute from "./routes/ProtectedRoute";
 
-function getPageFromHash(): Page {
-  const hash = window.location.hash;
+import "./styles/auth.css";
+import "./styles/workspace-pages.css";
 
-  if (hash === "#/register") return "register";
-  if (hash === "#/dashboard") return "dashboard";
-  if (hash === "#/profile") return "profile";
-  if (hash === "#/communities") return "communities";
-  if (hash === "#/discover") return "discover";
-  if (hash === "#/members") return "members";
-  if (hash === "#/terms") return "terms";
-  if (hash === "#/privacy") return "privacy";
-  if (hash === "#/settings") return "settings";
-  return "login";
+function AppRoutes() {
+  return (
+    <Routes>
+      <Route
+        path="/"
+        element={<HomePage />}
+      />
+
+      <Route
+        path="/communities"
+        element={<CommunitiesRoute />}
+      />
+
+      <Route
+        path="/communities/discover"
+        element={
+          <DiscoverCommunitiesRoute />
+        }
+      />
+
+      <Route
+        path="/communities/:communityId"
+        element={<CommunityPage />}
+      />
+
+      <Route
+        path="/communities/:communityId/details"
+        element={
+          <CommunityDetailsRoute />
+        }
+      />
+
+      <Route
+        path="/communities/:communityId/members"
+        element={
+          <CommunityMembersRoute />
+        }
+      />
+
+      <Route
+        path="/communities/:communityId/roles"
+        element={
+          <RolesPermissionsRoute />
+        }
+      />
+
+      <Route
+        path="/channels"
+        element={<ChannelsPage />}
+      />
+
+      <Route
+        path="/channels/:channelId"
+        element={<ChannelPage />}
+      />
+
+      <Route
+        path="/friends"
+        element={<FriendsPage />}
+      />
+
+      <Route
+        path="/profile"
+        element={<ProfileRoute />}
+      />
+
+      <Route
+        path="/profile/:username"
+        element={<PublicProfilePage />}
+      />
+
+      <Route
+        path="/posts/new"
+        element={<CreatePostPage />}
+      />
+
+      <Route
+        path="/posts/:postId"
+        element={<PostPage />}
+      />
+
+      <Route
+        path="/notifications"
+        element={<NotificationsPage />}
+      />
+
+      <Route
+        path="/search"
+        element={<SearchPage />}
+      />
+
+      <Route
+        path="/settings"
+        element={<SettingsPage />}
+      />
+
+      <Route
+        path="/admin/users"
+        element={<AdminUsersPage />}
+      />
+
+      <Route
+        path="*"
+        element={<NotFoundPage />}
+      />
+    </Routes>
+  );
 }
 
-function loadStoredSession(): LoginResponse | null {
-  const storedSession =
-    sessionStorage.getItem("transcendence-session");
-
-  if (!storedSession) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(storedSession);
-  } catch {
-    sessionStorage.removeItem(
-      "transcendence-session"
-    );
-
-    return null;
-  }
+function ProtectedApp() {
+  return (
+    <ProtectedRoute>
+      <AppShell>
+        <AppRoutes />
+      </AppShell>
+    </ProtectedRoute>
+  );
 }
 
 function App() {
-  const [page, setPage] =
-    useState<Page>(getPageFromHash);
+  const navigate =
+    useNavigate();
 
-  const [session, setSession] =
-    useState<LoginResponse | null>(
-      loadStoredSession
-    );
-
-  const [
-  selectedMembersGroupId,
-  setSelectedMembersGroupId,
-  ] = useState<string | null>(() =>
-    sessionStorage.getItem("selected-community-id")
-  );
-
-  useEffect(() => {
-    function handleHashChange() {
-      setPage(getPageFromHash());
+  function handleLogin(
+    data: {
+      accessToken: string;
     }
-
-    window.addEventListener(
-      "hashchange",
-      handleHashChange
-    );
-
-    return () => {
-      window.removeEventListener(
-        "hashchange",
-        handleHashChange
-      );
-    };
-  }, []);
-
-  function navigate(nextPage: Page) {
-    window.location.hash = `/${nextPage}`;
-    setPage(nextPage);
-  }
-
-
-
-  function handleLoginSuccess(
-    data: LoginResponse
   ) {
-    setSession(data);
-
-    sessionStorage.setItem(
-      "transcendence-session",
-      JSON.stringify(data)
+    localStorage.setItem(
+      "accessToken",
+      data.accessToken
     );
 
-    navigate("dashboard");
-  }
-
-  function handleLogout() {
-    setSession(null);
-
-    sessionStorage.removeItem(
-      "transcendence-session"
-    );
-
-    navigate("login");
-  }
-
-  function handleUserUpdated(
-    updatedUser: User
-  ) {
-    setSession((currentSession) => {
-      if (!currentSession) {
-        return null;
-      }
-
-      const updatedSession = {
-        ...currentSession,
-        user: updatedUser,
-      };
-
-      sessionStorage.setItem(
-        "transcendence-session",
-        JSON.stringify(updatedSession)
-      );
-
-      return updatedSession;
-    });
-  }
-
-  function renderPage() {
-    if (page === "terms") {
-      return (
-        <LegalPage
-          title="Terms of Service"
-          onBack={() =>
-            navigate(
-              session ? "settings" : "register"
-            )
-          }
-        />
-      );
-    }
-
-    if (page === "privacy") {
-      return (
-        <LegalPage
-          title="Privacy Policy"
-          onBack={() =>
-            navigate(
-              session ? "settings" : "register"
-            )
-          }
-        />
-      );
-    }
-
-    if (page === "profile" && session) {
-      return (
-        <ProfilePage
-          user={session.user}
-          token={session.accessToken}
-          onUserUpdated={handleUserUpdated}
-        />
-      );
-    }
-
-    if (
-      page === "members" &&
-      session &&
-      selectedMembersGroupId
-    ) {
-      return (
-        <CommunityMembersPage
-          groupId={selectedMembersGroupId}
-          token={session.accessToken}
-          onBack={() => {
-            sessionStorage.removeItem(
-              "selected-community-id"
-            );
-
-            setSelectedMembersGroupId(null);
-
-            navigate("communities");
-          }}
-        />
-      );
-    }
-
-    if (page === "discover" && session) {
-      return (
-        <DiscoverCommunitiesPage
-          token={session.accessToken}
-        />
-      );
-    }
-
-    if (page === "communities" && session) {
-      return (
-        <CommunitiesPage
-          token={session.accessToken}
-          onOpenMembers={(groupId) => {
-            setSelectedMembersGroupId(groupId);
-
-            sessionStorage.setItem(
-              "selected-community-id",
-              groupId
-            );
-
-            navigate("members");
-          }}
-        />
-      );
-    }
-    if (page === "settings" && session) {
-        return <SettingsPage />;
-      }
-    if (page === "dashboard" && session) {
-      return (
-        <DashboardPage
-          onBackToLogin={handleLogout}
-        />
-      );
-    }
-
-    if (page === "register") {
-      return (
-        <RegisterPage
-          onSignIn={() =>
-            navigate("login")
-          }
-        />
-      );
-    }
-
-    return (
-      <LoginPage
-        onCreateAccount={() =>
-          navigate("register")
-        }
-        onLoginSuccess={
-          handleLoginSuccess
-        }
-      />
-    );
+    navigate("/");
   }
 
   return (
-    <UserContext.Provider
-      value={session?.user ?? null}
-    >
-      {renderPage()}
-    </UserContext.Provider>
+    <Routes>
+      <Route
+        path="/login"
+        element={
+          <>
+            <SessionExpiredNotice />
+            <LoginPage
+              onCreateAccount={() =>
+                navigate(
+                  "/register"
+                )
+              }
+              onLoginSuccess={
+                handleLogin
+              }
+            />
+          </>
+        }
+      />
+
+      <Route
+        path="/register"
+        element={
+          <RegisterPage
+            onSignIn={() =>
+              navigate(
+                "/login"
+              )
+            }
+          />
+        }
+      />
+
+      {/* Public legal pages */}
+      <Route
+        path="/privacy"
+        element={
+          <LegalRoute
+            title="Privacy Policy"
+          />
+        }
+      />
+
+      <Route
+        path="/terms"
+        element={
+          <LegalRoute
+            title="Terms of Service"
+          />
+        }
+      />
+
+      {/* Everything else needs login */}
+      <Route
+        path="/*"
+        element={<ProtectedApp />}
+      />
+    </Routes>
   );
 }
 

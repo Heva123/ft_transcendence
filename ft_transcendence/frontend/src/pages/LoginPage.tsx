@@ -1,10 +1,21 @@
-import { useState, type FormEvent } from "react";
+import {
+  useState,
+  type FormEvent,
+} from "react";
+
+import { Link } from "react-router-dom";
 
 import Button from "../components/Button";
 import Input from "../components/Input";
 
+import {
+  apiRequest,
+  ApiError,
+} from "../api/apiClient";
+
 type LoginResponse = {
   accessToken: string;
+
   user: {
     id: string;
     email: string;
@@ -14,35 +25,66 @@ type LoginResponse = {
 
 type LoginPageProps = {
   onCreateAccount: () => void;
-  onLoginSuccess?: (data: LoginResponse) => void;
+
+  onLoginSuccess?: (
+    data: LoginResponse
+  ) => void;
 };
 
 function LoginPage({
   onCreateAccount,
   onLoginSuccess,
 }: LoginPageProps) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] =
+    useState("");
 
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [password, setPassword] =
+    useState("");
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  const [message, setMessage] =
+    useState("");
+
+  const [error, setError] =
+    useState("");
+
+  const [
+    isLoading,
+    setIsLoading,
+  ] = useState(false);
+
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
     setError("");
     setMessage("");
 
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const cleanEmail =
+      email.trim();
 
-    if (!emailPattern.test(email.trim())) {
-      setError("Please enter a valid email address.");
+    const emailPattern =
+      /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (
+      !emailPattern.test(
+        cleanEmail
+      )
+    ) {
+      setError(
+        "Please enter a valid email address."
+      );
+
       return;
     }
 
-    if (password.trim() === "") {
-      setError("Please enter your password.");
+    if (
+      password.trim() === ""
+    ) {
+      setError(
+        "Please enter your password."
+      );
+
       return;
     }
 
@@ -53,39 +95,43 @@ function LoginPage({
     setIsLoading(true);
 
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: email.trim(),
-            password: password,
-          }),
-        }
+      const data =
+        await apiRequest<LoginResponse>(
+          "/auth/login",
+          {
+            method: "POST",
+
+            body: JSON.stringify({
+              email: cleanEmail,
+              password,
+            }),
+          }
+        );
+
+      setMessage(
+        "Login successful!"
       );
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          setError("Invalid email or password.");
-        } else {
-          setError("Login failed. Please try again.");
-        }
-
-        return;
-      }
-
-      const data: LoginResponse = await response.json();
-
-      setMessage("Login successful!");
 
       onLoginSuccess?.(data);
-    } catch {
-      setError(
-        "Cannot connect to the server. Please check that the backend is running."
-      );
+    } catch (err) {
+      if (
+        err instanceof ApiError &&
+        err.status === 401
+      ) {
+        setError(
+          "Invalid email or password."
+        );
+      } else if (
+        err instanceof ApiError
+      ) {
+        setError(
+          err.message
+        );
+      } else {
+        setError(
+          "Cannot connect to the server."
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -94,7 +140,9 @@ function LoginPage({
   return (
     <main className="login-page">
       <section className="brand-side">
-        <p className="small-label">BUILT FOR YOUR 42 JOURNEY</p>
+        <p className="small-label">
+          BUILT FOR YOUR 42 JOURNEY
+        </p>
 
         <h1>PXL_LAB</h1>
 
@@ -104,17 +152,29 @@ function LoginPage({
           Small pixels.
         </h2>
 
-        <p>Your campus, connected.</p>
+        <p>
+          Your campus, connected.
+        </p>
       </section>
 
       <section className="login-card">
-        <p className="small-label">SIGN IN</p>
+        <p className="small-label">
+          SIGN IN
+        </p>
 
-        <h2>Welcome back.</h2>
+        <h2>
+          Welcome back.
+        </h2>
 
-        <p>Pick up where your curiosity left off.</p>
+        <p>
+          Pick up where your
+          curiosity left off.
+        </p>
 
-        <form onSubmit={handleSubmit} noValidate>
+        <form
+          onSubmit={handleSubmit}
+          noValidate
+        >
           <Input
             id="email"
             label="Email address"
@@ -136,18 +196,28 @@ function LoginPage({
           />
 
           <Button
-            text={isLoading ? "Logging in..." : "Log in"}
+            text={
+              isLoading
+                ? "Logging in..."
+                : "Log in"
+            }
           />
         </form>
 
         {error && (
-          <p className="form-error" role="alert">
+          <p
+            className="form-error"
+            role="alert"
+          >
             {error}
           </p>
         )}
 
         {message && (
-          <p className="message" role="status">
+          <p
+            className="message"
+            role="status"
+          >
             {message}
           </p>
         )}
@@ -155,10 +225,23 @@ function LoginPage({
         <button
           type="button"
           className="text-link"
-          onClick={onCreateAccount}
+          onClick={
+            onCreateAccount
+          }
         >
-          New around here? Create an account
+          New around here?
+          Create an account
         </button>
+
+        <div className="auth-legal-links">
+          <Link to="/privacy">
+            Privacy policy
+          </Link>
+
+          <Link to="/terms">
+            Terms of service
+          </Link>
+        </div>
       </section>
     </main>
   );

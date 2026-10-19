@@ -1,17 +1,26 @@
-import { useEffect, useState, type FormEvent } from "react";
+import {
+  useEffect,
+  useState,
+  type FormEvent,
+} from "react";
 
-import CommunityDetailsPage from "./CommunityDetailsPage";
 import AppLayout from "../components/AppLayout";
-import Button from "../components/Button";
-import Input from "../components/Input";
+import MyInvitations from "../features/invitations/components/MyInvitations";
+
+import {
+  apiRequest,
+  ApiError,
+} from "../api/apiClient";
 
 type Group = {
   id: string;
   name: string;
   description: string | null;
+
   _count: {
     members: number;
   };
+
   members: {
     role: string;
   }[];
@@ -27,351 +36,438 @@ type CreatedGroup = {
 
 type CommunitiesPageProps = {
   token: string;
-  onOpenMembers: (groupId: string) => void;
+
+  onOpenCommunity: (
+    groupId: string
+  ) => void;
 };
 
 function CommunitiesPage({
-  token,
-  onOpenMembers,
+  onOpenCommunity,
 }: CommunitiesPageProps) {
-  const [groups, setGroups] = useState<Group[]>([]);
-  const [selectedGroupId, setSelectedGroupId] =
-  useState<string | null>(null);
+  const [groups, setGroups] =
+    useState<Group[]>([]);
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [isCreating, setIsCreating] = useState(false);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [
+    showCreateForm,
+    setShowCreateForm,
+  ] = useState(false);
 
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
+  const [name, setName] =
+    useState("");
 
-  const [error, setError] = useState("");
-  const [createError, setCreateError] = useState("");
-  const [message, setMessage] = useState("");
+  const [
+    description,
+    setDescription,
+  ] = useState("");
 
-  // Load the user's communities when the page opens.
+  const [
+    isLoading,
+    setIsLoading,
+  ] = useState(true);
+
+  const [
+    isCreating,
+    setIsCreating,
+  ] = useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [
+    createError,
+    setCreateError,
+  ] = useState("");
+
+  const [message, setMessage] =
+    useState("");
+
   useEffect(() => {
-    const controller = new AbortController();
-
     async function loadCommunities() {
       setIsLoading(true);
       setError("");
 
       try {
-        const response = await fetch(
-          "http://localhost:3000/api/communities",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            signal: controller.signal,
-          }
-        );
-
-        if (response.status === 401) {
-          throw new Error(
-            "Your session has expired. Please sign in again."
+        const data =
+          await apiRequest<Group[]>(
+            "/communities"
           );
-        }
 
-        if (!response.ok) {
-          const errorData = await response.text();
-          console.log("COMMUNITIES API ERROR:", response.status, errorData);
-
-          throw new Error(
-            `Could not load communities. (${response.status})`
-          );
-        }
-
-        const data: Group[] = await response.json();
-
-        if (!controller.signal.aborted) {
-          setGroups(data);
-        }
+        setGroups(data);
       } catch (err) {
-        if (!controller.signal.aborted) {
+        if (err instanceof ApiError) {
+          setError(err.message);
+        } else {
           setError(
-            err instanceof Error
-              ? err.message
-              : "Something went wrong."
+            "Could not load communities."
           );
         }
       } finally {
-        if (!controller.signal.aborted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
     }
 
     loadCommunities();
+  }, []);
 
-    return () => {
-      controller.abort();
-    };
-  }, [token]);
-
-  // Create a community using Heba's API.
-  async function handleCreate(event: FormEvent<HTMLFormElement>) {
+  async function handleCreate(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
 
-    if (isCreating) return;
+    if (isCreating) {
+      return;
+    }
+
+    const cleanName =
+      name.trim();
+
+    const cleanDescription =
+      description.trim();
 
     setCreateError("");
     setMessage("");
 
-    const cleanName = name.trim();
-    const cleanDescription = description.trim();
-
-    if (cleanName.length < 2 || cleanName.length > 100) {
+    if (
+      cleanName.length < 2 ||
+      cleanName.length > 100
+    ) {
       setCreateError(
         "Community name must contain 2-100 characters."
       );
+
       return;
     }
 
-    if (cleanDescription.length > 500) {
+    if (
+      cleanDescription.length >
+      500
+    ) {
       setCreateError(
         "Description cannot exceed 500 characters."
       );
+
       return;
     }
 
     setIsCreating(true);
 
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/communities",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            name: cleanName,
-            description: cleanDescription,
-          }),
-        }
-      );
+      const created =
+        await apiRequest<CreatedGroup>(
+          "/communities",
+          {
+            method: "POST",
 
-      if (response.status === 401) {
-        setCreateError(
-          "Your session has expired. Please sign in again."
+            body: JSON.stringify({
+              name: cleanName,
+
+              description:
+                cleanDescription ||
+                undefined,
+            }),
+          }
         );
-        return;
-      }
 
-      if (response.status === 400) {
-        setCreateError(
-          "Please check the community name and description."
-        );
-        return;
-      }
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.log("CREATE COMMUNITY API ERROR:", response.status, errorData);
-
-        setCreateError(
-          `Could not create the community. (${response.status})`
-        );
-        return;
-      }
-
-      const created: CreatedGroup = await response.json();
-
-      // Convert the create response into the same format
-      // used by our communities list.
       const newGroup: Group = {
         id: created.id,
         name: created.name,
-        description: created.description,
+
+        description:
+          created.description,
+
         _count: {
-          members: created.memberCount,
+          members:
+            created.memberCount,
         },
+
         members: [
           {
-            role: created.currentUserRole,
+            role:
+              created.currentUserRole,
           },
         ],
       };
 
-      // Add the new community immediately to the page.
-      setGroups((currentGroups) => [
-        newGroup,
-        ...currentGroups,
-      ]);
+      setGroups(
+        (current) => [
+          newGroup,
+          ...current,
+        ]
+      );
 
       setName("");
       setDescription("");
+
       setShowCreateForm(false);
 
-      setMessage("Community created successfully!");
-    } catch {
-      setCreateError(
-        "Cannot connect to the server. Please check that the backend is running."
+      setMessage(
+        "Community created successfully!"
       );
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setCreateError(
+          err.message
+        );
+      } else {
+        setCreateError(
+          "Could not create community."
+        );
+      }
     } finally {
       setIsCreating(false);
     }
   }
 
-  function handleCancel() {
+  function cancelCreate() {
     setShowCreateForm(false);
     setCreateError("");
     setName("");
     setDescription("");
   }
-if (selectedGroupId) {
-      return (
-        <CommunityDetailsPage
-      groupId={selectedGroupId}
-      token={token}
-      onBack={() => setSelectedGroupId(null)}
-      onOpenMembers={onOpenMembers}
-      onLeave={(groupId) => {
-        setGroups((currentGroups) =>
-          currentGroups.filter(
-            (group) => group.id !== groupId
-          )
-        );
 
-        setSelectedGroupId(null);
+  if (showCreateForm) {
+    return (
+      <AppLayout>
+        <button
+          type="button"
+          className="text-link"
+          onClick={cancelCreate}
+          disabled={isCreating}
+        >
+          ← Back to communities
+        </button>
 
-        setMessage(
-          "You left the community successfully."
-        );
-      }}
-    />
-  );
-}
-  return (
-    <AppLayout>
-      <p className="small-label">YOUR COMMUNITIES</p>
-
-      <h2>Communities</h2>
-
-      <button
-        type="button"
-        className="text-link"
-        onClick={() => {
-          setMessage("");
-          setCreateError("");
-          setShowCreateForm(true);
-        }}
-        disabled={showCreateForm}
-      >
-        + Create Community
-      </button>
-
-      {message && (
-        <p className="message" role="status">
-          {message}
+        <p className="small-label">
+          CREATE COMMUNITY
         </p>
-      )}
 
-      {showCreateForm && (
-        <div className="dashboard-card">
-          <h3>Create a community</h3>
+        <h2>
+          Start a new corner.
+        </h2>
 
-          <form onSubmit={handleCreate} noValidate>
-            <Input
+        <p className="community-form-subtitle">
+          Make a little change.
+          Keep building.
+        </p>
+
+        <form
+          className="community-form-card"
+          onSubmit={handleCreate}
+        >
+          <label
+            className="community-form-field"
+            htmlFor="community-name"
+          >
+            <span>
+              Community name
+            </span>
+
+            <input
               id="community-name"
-              label="Community name"
               type="text"
-              placeholder="Web Builders"
               value={name}
-              onChange={setName}
+              placeholder="Systems Circle"
+              onChange={(event) =>
+                setName(
+                  event.target.value
+                )
+              }
+              maxLength={100}
               required
             />
+          </label>
 
-            <Input
+          <label
+            className="community-form-field"
+            htmlFor="community-description"
+          >
+            <span>
+              Description
+            </span>
+
+            <textarea
               id="community-description"
-              label="Description (optional)"
-              type="text"
-              placeholder="A space for web developers"
               value={description}
-              onChange={setDescription}
-            />
-
-            {createError && (
-              <p className="form-error" role="alert">
-                {createError}
-              </p>
-            )}
-
-            <Button
-              text={
-                isCreating
-                  ? "Creating..."
-                  : "Create Community"
+              placeholder="A home for C, C++ and curious systems builders."
+              onChange={(event) =>
+                setDescription(
+                  event.target.value
+                )
               }
+              maxLength={500}
+              rows={5}
             />
+          </label>
+
+          {createError && (
+            <p
+              className="form-error"
+              role="alert"
+            >
+              {createError}
+            </p>
+          )}
+
+          <div className="community-form-actions">
+            <button
+              type="submit"
+              className="community-primary-button"
+              disabled={isCreating}
+            >
+              {isCreating
+                ? "Creating..."
+                : "Create community"}
+            </button>
 
             <button
               type="button"
-              className="text-link"
-              onClick={handleCancel}
+              className="community-secondary-button"
+              onClick={cancelCreate}
               disabled={isCreating}
             >
               Cancel
             </button>
-          </form>
+          </div>
+        </form>
+      </AppLayout>
+    );
+  }
+
+  return (
+    <AppLayout>
+      <p className="small-label">
+        YOUR COMMUNITIES
+      </p>
+
+      <div className="communities-heading-row">
+        <div>
+          <h2>
+            Your corners.
+          </h2>
+
+          <p>
+            The communities you
+            belong to.
+          </p>
         </div>
+
+        <button
+          type="button"
+          className="community-primary-button"
+          onClick={() => {
+            setMessage("");
+            setCreateError("");
+            setShowCreateForm(true);
+          }}
+        >
+          + Create community
+        </button>
+      </div>
+
+      <MyInvitations />
+
+      {message && (
+        <p
+          className="message"
+          role="status"
+        >
+          {message}
+        </p>
       )}
 
       {isLoading && (
-        <p className="message" role="status">
+        <p
+          className="message"
+          role="status"
+        >
           Loading communities...
         </p>
       )}
 
       {error && (
-        <p className="form-error" role="alert">
+        <p
+          className="form-error"
+          role="alert"
+        >
           {error}
         </p>
       )}
 
-      {!isLoading && !error && groups.length === 0 && (
-        <div className="dashboard-card">
-          <h3>No communities yet.</h3>
+      {!isLoading &&
+        !error &&
+        groups.length === 0 && (
+          <div className="dashboard-card">
+            <h3>
+              No communities yet.
+            </h3>
 
-          <p>
-            You haven't joined or created any communities.
-          </p>
-
-          <p>
-            Create your first community to get started!
-          </p>
-        </div>
-      )}
+            <p>
+              Create a community or
+              explore existing ones.
+            </p>
+          </div>
+        )}
 
       {!isLoading &&
         !error &&
-        groups.map((group) => (
-          <div className="dashboard-card" key={group.id}>
-            <h3>{group.name}</h3>
+        groups.length > 0 && (
+          <div className="my-communities-grid">
+            {groups.map(
+              (group) => (
+                <article
+                  className="my-community-card"
+                  key={group.id}
+                >
+                  <div className="discover-community-mark">
+                    {group.name
+                      .slice(0, 2)
+                      .toUpperCase()}
+                  </div>
 
-            <p>
-              {group.description || "No description yet."}
-            </p>
+                  <h3>
+                    {group.name}
+                  </h3>
 
-            <p>
-              Members: {group._count.members}
-            </p>
+                  <p>
+                    {group.description ||
+                      "No description yet."}
+                  </p>
 
-            <p>
-              Your role: {group.members[0]?.role || "Unknown"}
-            </p>
-            <button
-            type="button"
-            className="text-link"
-            onClick={() => setSelectedGroupId(group.id)}
-            >
-            View Community
-            </button>
+                  <p className="community-meta">
+                    {
+                      group._count
+                        .members
+                    }{" "}
+                    {group._count
+                      .members === 1
+                      ? "member"
+                      : "members"}
+
+                    {" · "}
+
+                    {
+                      group.members[0]
+                        ?.role
+                    }
+                  </p>
+
+                  <button
+                    type="button"
+                    className="discover-view-button"
+                    onClick={() =>
+                      onOpenCommunity(
+                        group.id
+                      )
+                    }
+                  >
+                    View community
+                  </button>
+                </article>
+              )
+            )}
           </div>
-        ))}
+        )}
     </AppLayout>
   );
 }
