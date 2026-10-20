@@ -7,6 +7,7 @@ import {
 
 import AppLayout from "../components/AppLayout";
 import ProtectedImage from "../components/ProtectedImage";
+import { useCanWrite } from "../features/auth/hooks/useCanWrite";
 import MyCornersCard from "../features/profile/components/MyCornersCard";
 import ProfileAboutCard from "../features/profile/components/ProfileAboutCard";
 import type { CurrentUser } from "../features/auth/api/userApi";
@@ -39,6 +40,8 @@ function ProfilePage({
   user,
   onUserUpdated,
 }: ProfilePageProps) {
+  const canWrite = useCanWrite();
+
   const [isEditing, setIsEditing] =
     useState(false);
 
@@ -77,7 +80,11 @@ function ProfilePage({
 
   // Only request the image when the user has one, so there is no 404 in the console.
   const [hasAvatar, setHasAvatar] =
-    useState(Boolean(user.avatarUrl));
+    // The API sends /api/default-avatar when no photo was uploaded.
+    useState(
+      Boolean(user.avatarUrl) &&
+        !user.avatarUrl?.endsWith("/default-avatar")
+    );
 
   // Load saved avatar from backend.
   useEffect(() => {
@@ -485,17 +492,19 @@ function ProfilePage({
           </p>
         </div>
 
-        <button
-          type="button"
-          className="profile-edit-button"
-          onClick={() => {
-            setError("");
-            setMessage("");
-            setIsEditing(true);
-          }}
-        >
-          Edit profile
-        </button>
+        {canWrite && (
+          <button
+            type="button"
+            className="profile-edit-button"
+            onClick={() => {
+              setError("");
+              setMessage("");
+              setIsEditing(true);
+            }}
+          >
+            Edit profile
+          </button>
+        )}
       </section>
 
       <div className="profile-grid">
@@ -575,6 +584,7 @@ function ProfilePage({
           )}
         </section>
 
+        {canWrite && (
         <section className="profile-card">
           <h3>
             A face for your profile.
@@ -674,6 +684,7 @@ function ProfilePage({
               </div>
             )}
         </section>
+        )}
       </div>
 
       <div className="profile-grid profile-grid--details">

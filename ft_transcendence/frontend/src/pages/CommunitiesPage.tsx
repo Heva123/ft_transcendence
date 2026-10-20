@@ -6,6 +6,7 @@ import {
 
 import AppLayout from "../components/AppLayout";
 import MyInvitations from "../features/invitations/components/MyInvitations";
+import { useCanWrite } from "../features/auth/hooks/useCanWrite";
 
 import {
   apiRequest,
@@ -45,6 +46,8 @@ type CommunitiesPageProps = {
 function CommunitiesPage({
   onOpenCommunity,
 }: CommunitiesPageProps) {
+  const canWrite = useCanWrite();
+
   const [groups, setGroups] =
     useState<Group[]>([]);
 
@@ -352,17 +355,19 @@ function CommunitiesPage({
           </p>
         </div>
 
-        <button
-          type="button"
-          className="community-primary-button"
-          onClick={() => {
-            setMessage("");
-            setCreateError("");
-            setShowCreateForm(true);
-          }}
-        >
-          + Create community
-        </button>
+        {canWrite && (
+          <button
+            type="button"
+            className="community-primary-button"
+            onClick={() => {
+              setMessage("");
+              setCreateError("");
+              setShowCreateForm(true);
+            }}
+          >
+            + Create community
+          </button>
+        )}
       </div>
 
       <MyInvitations />

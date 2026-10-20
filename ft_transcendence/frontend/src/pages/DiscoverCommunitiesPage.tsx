@@ -9,6 +9,7 @@ import {
 } from "react-router-dom";
 
 import AppLayout from "../components/AppLayout";
+import { useCanWrite } from "../features/auth/hooks/useCanWrite";
 
 import {
   apiRequest,
@@ -27,6 +28,7 @@ type DiscoverGroup = {
 
 // Requests read the token through apiClient, so no props are needed.
 function DiscoverCommunitiesPage() {
+  const canWrite = useCanWrite();
   const navigate = useNavigate();
 
   const [groups, setGroups] =
@@ -212,7 +214,7 @@ function DiscoverCommunitiesPage() {
             </div>
           </div>
 
-          <button
+          {canWrite && <button
             type="button"
             className="community-preview-join"
             disabled={
@@ -229,7 +231,7 @@ function DiscoverCommunitiesPage() {
             selectedGroup.id
               ? "Joining..."
               : "Join community"}
-          </button>
+          </button>}
         </section>
 
         <div className="community-preview-tabs">
@@ -274,6 +276,7 @@ function DiscoverCommunitiesPage() {
           <button
             type="button"
             className="community-preview-join secondary"
+            hidden={!canWrite}
             disabled={
               joiningId ===
               selectedGroup.id
@@ -312,6 +315,7 @@ function DiscoverCommunitiesPage() {
       <div className="discover-toolbar">
         <input
           className="discover-search"
+          aria-label="Search communities"
           type="search"
           placeholder="Search communities..."
           value={search}
@@ -322,12 +326,14 @@ function DiscoverCommunitiesPage() {
           }
         />
 
-        <Link
-          to="/communities"
-          className="discover-create"
-        >
-          + Create community
-        </Link>
+        {canWrite && (
+          <Link
+            to="/communities"
+            className="discover-create"
+          >
+            + Create community
+          </Link>
+        )}
       </div>
 
       {isLoading && (
