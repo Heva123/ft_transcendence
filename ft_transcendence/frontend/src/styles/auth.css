@@ -1,0 +1,129 @@
+@import url('https://fonts.googleapis.com/css2?family=Handjet:wght@400;700&family=IBM+Plex+Mono:wght@400;500;700&display=swap');
+
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 100px;
+  padding: 60px;
+  background-color: #f7f1e5;
+  color: #352830;
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.login-page .brand-side {
+  width: 420px;
+}
+
+.login-page .brand-side h1 {
+  color: #8a335d;
+  font-family: "Handjet", sans-serif;
+  font-size: 30px;
+}
+
+.login-page .brand-side h2 {
+  margin: 30px 0;
+  color: #8a335d;
+  font-family: "Handjet", sans-serif;
+  font-size: 60px;
+  line-height: 1;
+}
+
+.login-page .small-label {
+  color: #8a335d;
+  font-size: 12px;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.login-card {
+  width: 420px;
+  padding: 40px;
+  background-color: white;
+  border: 2px solid #352830;
+  border-radius: 4px;
+}
+
+.login-card h2 {
+  margin-top: 8px;
+  font-family: "Handjet", sans-serif;
+  font-size: 32px;
+}
+
+.login-card form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.login-card label {
+  display: block;
+  margin-top: 10px;
+  font-size: 13px;
+}
+
+.login-card input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #c9c0ba;
+  background-color: white;
+}
+
+.login-card input:focus {
+  outline: 2px solid #a3e5f0;
+  border-color: #3a7f8a;
+}
+
+.login-card button {
+  margin-top: 20px;
+  padding: 13px;
+  border: none;
+  background-color: #8a335d;
+  color: white;
+  cursor: pointer;
+}
+
+.login-card .text-link {
+  display: block;
+  padding: 0;
+  background: transparent;
+  color: #8a335d;
+  text-decoration: underline;
+}
+
+.password-hint {
+  color: #3a7f8a;
+  font-size: 12px;
+}
+
+.login-page .message {
+  margin-top: 20px;
+  color: #3a7f8a;
+}
+
+.login-page .form-error {
+  margin-top: 12px;
+  color: #b42318;
+  font-size: 13px;
+}
+
+@media (max-width: 1100px) {
+  .login-page {
+    flex-direction: column;
+    gap: 32px;
+    padding: 32px 20px;
+  }
+
+  .login-page .brand-side,
+  .login-card {
+    width: 100%;
+    max-width: 420px;
+  }
+
+  .login-page .brand-side h2 {
+    margin: 16px 0;
+    font-size: 48px;
+  }
+}

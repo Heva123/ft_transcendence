@@ -1,0 +1,115 @@
+.admin-users-subtitle {
+  margin-bottom: var(--space-24);
+}
+
+.admin-users-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-panel);
+
+  background: var(--color-surface);
+}
+
+.admin-users-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.admin-users-table th,
+.admin-users-table td {
+  padding: 14px;
+
+  border-bottom:
+    1px solid
+    var(--color-border);
+
+  text-align: left;
+  vertical-align: middle;
+}
+
+.admin-users-table th {
+  background:
+    var(--color-background);
+
+  font-size: 12px;
+}
+
+.admin-users-table input,
+.admin-users-table select {
+  width: 100%;
+  min-width: 130px;
+
+  padding: 8px;
+
+  border:
+    1px solid
+    var(--color-border);
+
+  border-radius:
+    var(--radius-control);
+
+  background:
+    var(--color-surface);
+
+  color:
+    var(--color-ink);
+
+  font: inherit;
+}
+
+.admin-user-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.admin-role-badge {
+  display: inline-block;
+
+  padding: 4px 8px;
+
+  border:
+    1px solid
+    var(--color-border);
+
+  border-radius: 999px;
+
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.admin-role-badge.admin {
+  background:
+    var(--color-pink);
+}
+
+.admin-role-badge.user {
+  background:
+    var(--color-cyan);
+}
+
+.admin-role-badge.guest {
+  background:
+    var(--color-yellow);
+}
+
+.admin-you-badge {
+  margin-left: 8px;
+
+  padding: 2px 6px;
+
+  border-radius: 999px;
+
+  background:
+    var(--color-yellow);
+
+  font-size: 10px;
+}
+
+@media (max-width: 760px) {
+  .admin-users-table {
+    min-width: 700px;
+  }
+}
