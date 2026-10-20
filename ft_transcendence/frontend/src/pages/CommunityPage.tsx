@@ -4,6 +4,7 @@ import {
 } from "react";
 
 import ConfirmDialog from "../components/ConfirmDialog";
+import { useCanWrite } from "../features/auth/hooks/useCanWrite";
 
 import {
   Link,
@@ -78,6 +79,8 @@ function CommunityView({
   isLeaving,
   onLeave,
 }: CommunityViewProps) {
+  const canWrite = useCanWrite();
+
   const canManage =
     data.role === "OWNER" ||
     data.role === "ADMIN";
@@ -196,13 +199,15 @@ function CommunityView({
 
       <div className="community-layout">
         <main className="community-feed">
-          <Link
-            className="community-post-button"
-            to={`/posts/new?community=${data.community.id}`}
-          >
-            + Post to{" "}
-            {data.community.name}
-          </Link>
+          {canWrite && (
+            <Link
+              className="community-post-button"
+              to={`/posts/new?community=${data.community.id}`}
+            >
+              + Post to{" "}
+              {data.community.name}
+            </Link>
+          )}
 
           {/* Paged feed, so posts after the first 10 also show. */}
           <Feed

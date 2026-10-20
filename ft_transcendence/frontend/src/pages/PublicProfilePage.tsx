@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import AppLayout from "../components/AppLayout";
 import ConfirmDialog from "../components/ConfirmDialog";
+import { useCanWrite } from "../features/auth/hooks/useCanWrite";
 import UserAvatar from "../components/UserAvatar";
 import { ApiError } from "../api/apiClient";
 import {
@@ -32,6 +33,7 @@ function PublicProfilePage() {
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState("");
   const [confirmRemove, setConfirmRemove] = useState(false);
+  const canWrite = useCanWrite();
   const online = usePresence();
 
   useEffect(() => {
@@ -88,7 +90,7 @@ function PublicProfilePage() {
   const canAct = !person.blockedByMe && !person.blocksMe;
 
   function friendButton() {
-    if (!canAct || status === "self") return null;
+    if (!canAct || !canWrite || status === "self") return null;
     if (status === "friends")
       return (
         <button type="button" className="profile-edit-button" disabled={busy}

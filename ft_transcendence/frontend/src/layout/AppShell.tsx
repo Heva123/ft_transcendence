@@ -3,6 +3,7 @@ import {
   connectSocket,
   disconnectSocket,
 } from '../api/socket'
+import GuestBanner from '../components/GuestBanner'
 import NotificationToasts from '../features/notifications/components/NotificationToasts'
 import Sidebar from './Sidebar'
 import TopBar from './TopBar'
@@ -27,6 +28,7 @@ function AppShell({ children }: AppShellProps) {
       <div className="app-shell__body">
         <Sidebar />
         <main className="app-shell__main">
+          <GuestBanner />
           {children}
         </main>
       </div>

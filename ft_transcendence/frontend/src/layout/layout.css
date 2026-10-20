@@ -31,7 +31,8 @@
 
 .app-shell__body {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  /* minmax(0, 1fr) stops wide tables from stretching the page sideways. */
+  grid-template-columns: 220px minmax(0, 1fr);
   min-height: calc(100vh - 72px);
 }
 
@@ -460,4 +461,12 @@
 
 .sidebar__legal-links a:hover {
   text-decoration: underline;
+}
+
+.guest-banner {
+  margin: 0 0 var(--space-16);
+  padding: var(--space-12) var(--space-16);
+  border: 1px solid var(--color-border);
+  background: var(--color-yellow);
+  font-size: 13px;
 }
