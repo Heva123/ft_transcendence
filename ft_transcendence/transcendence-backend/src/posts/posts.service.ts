@@ -5,6 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { MessagesService } from '../messages/messages.service';
+import { NotificationsService } from '../notifications/notifications.service';
 import { toPostResponse, toReplyResponse } from './post-response';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
@@ -12,7 +14,11 @@ import { FeedQueryDto } from './dto/feed-query.dto';
 
 @Injectable()
 export class PostsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly messages: MessagesService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async ensureCommunityAccess(userId: string, communityId: string | null): Promise<void> {
     if (communityId === null) return;
@@ -107,6 +113,11 @@ export class PostsService {
       data: { authorId: userId, communityId, content },
       select: { id: true },
     });
+
+    if (communityId) {
+      await this.notifyPostCreated(userId, communityId, created.id);
+    }
+
     return this.getResponse(userId, created.id);
   }
 
@@ -117,6 +128,9 @@ export class PostsService {
       where: { id: postId },
       data: { content: this.validContent(dto.content) },
     });
+
+    await this.notifyPostUpdated(userId, postId);
+
     return this.getResponse(userId, postId);
   }
 
@@ -124,7 +138,91 @@ export class PostsService {
     const post = await this.assertReadable(postId, userId);
     if (post.authorId !== userId) throw new ForbiddenException('Only the author may delete a post');
     await this.prisma.post.delete({ where: { id: postId } });
+
+    await this.notifications.create(userId, {
+      type: "POST_DELETED",
+      title: "Post deleted",
+      message: "Your post was deleted.",
+      link: "/",
+    });
+
     return { deleted: true, id: postId };
+  }
+
+  private async notifyPostUpdated(
+    actorId: string,
+    postId: string,
+  ) {
+    const [actor, blockedUserIds, replies] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: actorId },
+        select: { username: true },
+      }),
+      this.messages.getBlockedUserIds(actorId),
+      this.prisma.comment.findMany({
+        where: { postId },
+        select: { authorId: true },
+        distinct: ["authorId"],
+      }),
+    ]);
+
+    if (!actor) return;
+
+    const recipientIds = replies
+      .map((reply) => reply.authorId)
+      .filter(
+        (userId) =>
+          userId !== actorId &&
+          !blockedUserIds.includes(userId),
+      );
+
+    await Promise.all(
+      recipientIds.map((userId) =>
+        this.notifications.create(userId, {
+          type: "POST_UPDATED",
+          title: "Post updated",
+          message: `${actor.username} updated a post you replied to.`,
+          link: `/posts/${postId}`,
+        }),
+      ),
+    );
+  }
+
+  private async notifyPostCreated(
+    actorId: string,
+    communityId: string,
+    postId: string,
+  ) {
+    const [actor, blockedUserIds] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: actorId },
+        select: { username: true },
+      }),
+      this.messages.getBlockedUserIds(actorId),
+    ]);
+
+    if (!actor) return;
+
+    const members = await this.prisma.communityMember.findMany({
+      where: {
+        communityId,
+        userId: {
+          notIn: [actorId, ...blockedUserIds],
+        },
+      },
+      select: { userId: true },
+    });
+
+    await Promise.all(
+      members.map((member) =>
+        this.notifications.create(member.userId, {
+          type: "POST_CREATED",
+          title: "New post",
+          message: `${actor.username} created a new post.`,
+          link: `/posts/${postId}`,
+        }),
+      ),
+    );
   }
 
   private validContent(content: string): string {

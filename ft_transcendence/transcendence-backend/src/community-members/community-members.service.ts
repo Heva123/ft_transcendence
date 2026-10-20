@@ -6,12 +6,18 @@ import {
 } from "@nestjs/common";
 import { CommunityRole, Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
+import { MessagesService } from "../messages/messages.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import { AddCommunityMemberDto } from "./dto/add-member.dto";
 import { ChangeCommunityMemberRoleDto } from "./dto/change-member-role.dto";
 
 @Injectable()
 export class CommunityMembersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly messages: MessagesService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   async findAll(currentUserId: string, communityId: string) {
     await this.requireCommunityMembership(currentUserId, communityId);
@@ -112,7 +118,9 @@ export class CommunityMembersService {
       throw new ForbiddenException("Only owners can manage administrators");
     }
 
-    return this.prisma.communityMember.update({
+    const previousRole = communityMember.role;
+
+    const updated = await this.prisma.communityMember.update({
       where: { id: communityMemberId },
       data: { role: dto.role },
       select: {
@@ -122,6 +130,28 @@ export class CommunityMembersService {
         user: { select: { id: true, email: true, username: true } },
       },
     });
+
+    if (
+      previousRole !== dto.role &&
+      communityMember.userId !== currentUserId
+    ) {
+      const blockedUserIds =
+        await this.messages.getBlockedUserIds(currentUserId);
+
+      if (!blockedUserIds.includes(communityMember.userId)) {
+        await this.notifications.create(
+          communityMember.userId,
+          {
+            type: "ROLE_CHANGED",
+            title: "Community role changed",
+            message: `Your role was changed to ${dto.role}.`,
+            link: `/communities/${communityId}`,
+          },
+        );
+      }
+    }
+
+    return updated;
   }
 
   async remove(
@@ -154,9 +184,34 @@ export class CommunityMembersService {
       throw new ForbiddenException("Moderators can only remove members");
     }
 
+    const community = await this.prisma.community.findUnique({
+      where: { id: communityId },
+      select: { name: true },
+    });
+
     await this.prisma.communityMember.delete({
       where: { id: communityMemberId },
     });
+
+    if (
+      communityMember.userId !== currentUserId &&
+      community
+    ) {
+      const blockedUserIds =
+        await this.messages.getBlockedUserIds(currentUserId);
+
+      if (!blockedUserIds.includes(communityMember.userId)) {
+        await this.notifications.create(
+          communityMember.userId,
+          {
+            type: "MEMBER_REMOVED",
+            title: "Removed from community",
+            message: `You were removed from ${community.name}.`,
+            link: "/communities",
+          },
+        );
+      }
+    }
   }
 
   private async findCommunityMemberInCommunity(
@@ -165,7 +220,12 @@ export class CommunityMembersService {
   ) {
     const communityMember = await this.prisma.communityMember.findUnique({
       where: { id: communityMemberId },
-      select: { id: true, communityId: true, role: true },
+      select: {
+        id: true,
+        communityId: true,
+        role: true,
+        userId: true,
+      },
     });
 
     if (!communityMember || communityMember.communityId !== communityId) {

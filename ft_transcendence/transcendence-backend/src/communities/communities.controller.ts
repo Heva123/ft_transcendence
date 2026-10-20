@@ -70,17 +70,28 @@ export class CommunitiesController {
   @UseGuards(CommunityPermissionGuard)
   @RequirePermissions(Permission.COMMUNITY_UPDATE)
   update(
+    @CurrentUser() user: AuthUser,
     @Param("communityId", ParseUUIDPipe) communityId: string,
     @Body() dto: UpdateCommunityDto,
   ) {
-    return this.communitiesService.update(communityId, dto);
+    return this.communitiesService.update(
+      user.id,
+      communityId,
+      dto,
+    );
   }
 
   @Delete(":communityId")
   @UseGuards(CommunityPermissionGuard)
   @RequirePermissions(Permission.COMMUNITY_DELETE)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param("communityId", ParseUUIDPipe) communityId: string) {
-    await this.communitiesService.remove(communityId);
+  async remove(
+    @CurrentUser() user: AuthUser,
+    @Param("communityId", ParseUUIDPipe) communityId: string,
+  ) {
+    await this.communitiesService.remove(
+      user.id,
+      communityId,
+    );
   }
 }

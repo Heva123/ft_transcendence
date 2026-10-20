@@ -3,6 +3,10 @@ import { CommunityRole } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { CommunityMembersService } from "./community-members.service";
 
+jest.mock("../messages/chat.gateway", () => ({
+  ChatGateway: class ChatGateway {},
+}));
+
 describe("CommunityMembersService", () => {
   const prisma = {
     community: { findUnique: jest.fn() },
@@ -15,11 +19,26 @@ describe("CommunityMembersService", () => {
     },
     user: { findUnique: jest.fn() },
   };
+  const messages = {
+    getBlockedUserIds: jest.fn(),
+  };
+
+  const notifications = {
+    create: jest.fn(),
+  };
+
   let service: CommunityMembersService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new CommunityMembersService(prisma as unknown as PrismaService);
+    messages.getBlockedUserIds.mockResolvedValue([]);
+    notifications.create.mockResolvedValue({});
+
+    service = new CommunityMembersService(
+      prisma as unknown as PrismaService,
+      messages as any,
+      notifications as any,
+    );
     prisma.community.findUnique.mockResolvedValue({ id: "community-id" });
   });
 
@@ -95,6 +114,7 @@ describe("CommunityMembersService", () => {
       .mockResolvedValueOnce({
         id: "communityMember-id",
         communityId: "community-id",
+        userId: "member-user-id",
         role: CommunityRole.MEMBER,
       });
     prisma.communityMember.update.mockResolvedValue({

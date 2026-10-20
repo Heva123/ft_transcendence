@@ -6,15 +6,21 @@ import {
 } from "@nestjs/common";
 import { CommunityRole, Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
+import { NotificationsService } from "../notifications/notifications.service";
+import { MessagesService } from "../messages/messages.service";
 import { CreateCommunityDto } from "./dto/create-community.dto";
 import { UpdateCommunityDto } from "./dto/update-community.dto";
 
 @Injectable()
 export class CommunitiesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notifications: NotificationsService,
+    private readonly messages: MessagesService,
+  ) {}
 
-  create(userId: string, dto: CreateCommunityDto) {
-    return this.prisma.$transaction(async (tx) => {
+  async create(userId: string, dto: CreateCommunityDto) {
+    const created = await this.prisma.$transaction(async (tx) => {
       const community = await tx.community.create({
         data: {
           name: dto.name,
@@ -38,6 +44,15 @@ export class CommunitiesService {
         memberCount: 1,
       };
     });
+
+    await this.notifications.create(userId, {
+      type: "COMMUNITY_CREATED",
+      title: "Community created",
+      message: `${created.name} was created successfully.`,
+      link: `/communities/${created.id}`,
+    });
+
+    return created;
   }
 
   findAllForUser(userId: string) {
@@ -108,10 +123,14 @@ export class CommunitiesService {
     if (existing) throw new ConflictException("You are already a member");
 
     try {
-      return await this.prisma.communityMember.create({
+      const membership = await this.prisma.communityMember.create({
         data: { userId, communityId, role: CommunityRole.MEMBER },
         select: { id: true, role: true, joinedAt: true, communityId: true },
       });
+
+      await this.notifyMemberJoined(userId, communityId);
+
+      return membership;
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -121,6 +140,48 @@ export class CommunitiesService {
       }
       throw error;
     }
+  }
+
+  private async notifyMemberJoined(
+    actorId: string,
+    communityId: string,
+  ) {
+    const [actor, blockedUserIds] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: actorId },
+        select: { username: true },
+      }),
+      this.messages.getBlockedUserIds(actorId),
+    ]);
+
+    if (!actor) return;
+
+    const managers = await this.prisma.communityMember.findMany({
+      where: {
+        communityId,
+        role: {
+          in: [
+            CommunityRole.OWNER,
+            CommunityRole.ADMIN,
+          ],
+        },
+        userId: {
+          notIn: [actorId, ...blockedUserIds],
+        },
+      },
+      select: { userId: true },
+    });
+
+    await Promise.all(
+      managers.map((member) =>
+        this.notifications.create(member.userId, {
+          type: "MEMBER_JOINED",
+          title: "Member joined",
+          message: `${actor.username} joined the community.`,
+          link: `/communities/${communityId}/members`,
+        }),
+      ),
+    );
   }
 
   async leave(userId: string, communityId: string) {
@@ -137,17 +198,131 @@ export class CommunitiesService {
       );
     }
 
-    await this.prisma.communityMember.delete({ where: { id: membership.id } });
+    await this.prisma.communityMember.delete({
+      where: { id: membership.id },
+    });
+
+    await this.notifyMemberLeft(userId, communityId);
   }
 
-  update(communityId: string, dto: UpdateCommunityDto) {
-    return this.prisma.community.update({
+  private async notifyMemberLeft(
+    actorId: string,
+    communityId: string,
+  ) {
+    const [actor, blockedUserIds] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: actorId },
+        select: { username: true },
+      }),
+      this.messages.getBlockedUserIds(actorId),
+    ]);
+
+    if (!actor) return;
+
+    const managers = await this.prisma.communityMember.findMany({
+      where: {
+        communityId,
+        role: {
+          in: [
+            CommunityRole.OWNER,
+            CommunityRole.ADMIN,
+          ],
+        },
+        userId: {
+          notIn: [actorId, ...blockedUserIds],
+        },
+      },
+      select: { userId: true },
+    });
+
+    await Promise.all(
+      managers.map((member) =>
+        this.notifications.create(member.userId, {
+          type: "MEMBER_LEFT",
+          title: "Member left",
+          message: `${actor.username} left the community.`,
+          link: `/communities/${communityId}/members`,
+        }),
+      ),
+    );
+  }
+
+  async update(
+    actorId: string,
+    communityId: string,
+    dto: UpdateCommunityDto,
+  ) {
+    const updated = await this.prisma.community.update({
       where: { id: communityId },
       data: dto,
     });
+
+    const blockedUserIds =
+      await this.messages.getBlockedUserIds(actorId);
+
+    const members = await this.prisma.communityMember.findMany({
+      where: {
+        communityId,
+        userId: {
+          notIn: [actorId, ...blockedUserIds],
+        },
+      },
+      select: { userId: true },
+    });
+
+    await Promise.all(
+      members.map((member) =>
+        this.notifications.create(member.userId, {
+          type: "COMMUNITY_UPDATED",
+          title: "Community updated",
+          message: `${updated.name} was updated.`,
+          link: `/communities/${communityId}`,
+        }),
+      ),
+    );
+
+    return updated;
   }
 
-  remove(communityId: string) {
-    return this.prisma.community.delete({ where: { id: communityId } });
+  async remove(
+    actorId: string,
+    communityId: string,
+  ) {
+    const [community, blockedUserIds] = await Promise.all([
+      this.prisma.community.findUnique({
+        where: { id: communityId },
+        select: { name: true },
+      }),
+      this.messages.getBlockedUserIds(actorId),
+    ]);
+
+    if (!community) {
+      throw new NotFoundException("Community not found");
+    }
+
+    const members = await this.prisma.communityMember.findMany({
+      where: {
+        communityId,
+        userId: {
+          notIn: [actorId, ...blockedUserIds],
+        },
+      },
+      select: { userId: true },
+    });
+
+    await this.prisma.community.delete({
+      where: { id: communityId },
+    });
+
+    await Promise.all(
+      members.map((member) =>
+        this.notifications.create(member.userId, {
+          type: "COMMUNITY_DELETED",
+          title: "Community deleted",
+          message: `${community.name} was deleted.`,
+          link: "/communities",
+        }),
+      ),
+    );
   }
 }

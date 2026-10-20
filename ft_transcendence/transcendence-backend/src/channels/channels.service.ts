@@ -5,12 +5,18 @@ import {
 } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
+import { MessagesService } from "../messages/messages.service";
+import { NotificationsService } from "../notifications/notifications.service";
 import { CreateChannelDto } from "./dto/create-channel.dto";
 import { UpdateChannelDto } from "./dto/update-channel.dto";
 
 @Injectable()
 export class ChannelsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly messages: MessagesService,
+    private readonly notifications: NotificationsService,
+  ) {}
 
   findAll(communityId: string) {
     return this.prisma.channel.findMany({
@@ -25,9 +31,18 @@ export class ChannelsService {
     dto: CreateChannelDto,
   ) {
     try {
-      return await this.prisma.channel.create({
+      const channel = await this.prisma.channel.create({
         data: { ...dto, communityId, createdById },
       });
+
+      await this.notifyChannelCreated(
+        createdById,
+        communityId,
+        channel.id,
+        channel.name,
+      );
+
+      return channel;
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -37,6 +52,37 @@ export class ChannelsService {
       }
       throw error;
     }
+  }
+
+  private async notifyChannelCreated(
+    actorId: string,
+    communityId: string,
+    channelId: string,
+    channelName: string,
+  ) {
+    const blockedUserIds =
+      await this.messages.getBlockedUserIds(actorId);
+
+    const members = await this.prisma.communityMember.findMany({
+      where: {
+        communityId,
+        userId: {
+          notIn: [actorId, ...blockedUserIds],
+        },
+      },
+      select: { userId: true },
+    });
+
+    await Promise.all(
+      members.map((member) =>
+        this.notifications.create(member.userId, {
+          type: "CHANNEL_CREATED",
+          title: "Channel created",
+          message: `${channelName} channel was created.`,
+          link: `/channels/${channelId}`,
+        }),
+      ),
+    );
   }
 
   async findOne(channelId: string) {
@@ -47,13 +93,27 @@ export class ChannelsService {
     return channel;
   }
 
-  async update(channelId: string, dto: UpdateChannelDto) {
-    await this.findOne(channelId);
+  async update(
+    actorId: string,
+    channelId: string,
+    dto: UpdateChannelDto,
+  ) {
+    const existing = await this.findOne(channelId);
+
     try {
-      return await this.prisma.channel.update({
+      const updated = await this.prisma.channel.update({
         where: { id: channelId },
         data: dto,
       });
+
+      await this.notifyChannelUpdated(
+        actorId,
+        existing.communityId,
+        channelId,
+        updated.name,
+      );
+
+      return updated;
     } catch (error) {
       if (
         error instanceof Prisma.PrismaClientKnownRequestError &&
@@ -65,8 +125,69 @@ export class ChannelsService {
     }
   }
 
-  async remove(channelId: string) {
-    await this.findOne(channelId);
-    await this.prisma.channel.delete({ where: { id: channelId } });
+  private async notifyChannelUpdated(
+    actorId: string,
+    communityId: string,
+    channelId: string,
+    channelName: string,
+  ) {
+    const blockedUserIds =
+      await this.messages.getBlockedUserIds(actorId);
+
+    const members = await this.prisma.communityMember.findMany({
+      where: {
+        communityId,
+        userId: {
+          notIn: [actorId, ...blockedUserIds],
+        },
+      },
+      select: { userId: true },
+    });
+
+    await Promise.all(
+      members.map((member) =>
+        this.notifications.create(member.userId, {
+          type: "CHANNEL_UPDATED",
+          title: "Channel updated",
+          message: `${channelName} channel was updated.`,
+          link: `/channels/${channelId}`,
+        }),
+      ),
+    );
+  }
+
+  async remove(
+    actorId: string,
+    channelId: string,
+  ) {
+    const channel = await this.findOne(channelId);
+
+    const blockedUserIds =
+      await this.messages.getBlockedUserIds(actorId);
+
+    const members = await this.prisma.communityMember.findMany({
+      where: {
+        communityId: channel.communityId,
+        userId: {
+          notIn: [actorId, ...blockedUserIds],
+        },
+      },
+      select: { userId: true },
+    });
+
+    await this.prisma.channel.delete({
+      where: { id: channelId },
+    });
+
+    await Promise.all(
+      members.map((member) =>
+        this.notifications.create(member.userId, {
+          type: "CHANNEL_DELETED",
+          title: "Channel deleted",
+          message: `${channel.name} channel was deleted.`,
+          link: `/communities/${channel.communityId}`,
+        }),
+      ),
+    );
   }
 }
