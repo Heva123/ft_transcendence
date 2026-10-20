@@ -1,0 +1,214 @@
+.notifications-page {
+  width: 100%;
+  max-width: 1180px;
+  box-sizing: border-box;
+}
+
+.notifications-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.notifications-heading h1 {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 46px;
+  line-height: 52px;
+}
+
+.notifications-heading p {
+  margin: 8px 0 0;
+  font-size: 12px;
+}
+
+.notifications-community-badge {
+  min-width: 150px;
+  padding: 10px 24px;
+  background: var(--color-yellow);
+  font-size: 10px;
+  text-align: center;
+}
+
+.notifications-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.notifications-controls button,
+.status {
+  min-width: 140px;
+  padding: 10px 22px;
+  border: 1px solid var(--color-border);
+  font: inherit;
+  font-size: 11px;
+  text-align: center;
+}
+
+.notifications-controls button {
+  background: var(--color-surface);
+}
+
+.status.unread {
+  background: var(--color-pink);
+}
+
+.status.read {
+  background: var(--color-cyan);
+}
+
+.notifications-panel {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  box-sizing: border-box;
+}
+
+.notification-row {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) 140px;
+  gap: 16px;
+  align-items: center;
+  min-height: 92px;
+  padding: 20px;
+  border-bottom: 1px solid #d8d0c7;
+  box-sizing: border-box;
+}
+
+.notification-row:last-child {
+  border-bottom: 0;
+}
+
+.notification-badge {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  font-size: 11px;
+}
+
+.notification-badge.unread {
+  background: var(--color-pink);
+}
+
+.notification-badge.read {
+  background: var(--color-cyan);
+}
+
+.notification-copy strong {
+  font-size: 14px;
+}
+
+.notification-copy p {
+  margin: 6px 0 0;
+  color: var(--color-teal);
+  font-size: 11px;
+}
+
+.notification-view {
+  padding: 10px 28px;
+  border: 1px solid var(--color-border);
+  color: var(--color-ink);
+  text-align: center;
+  text-decoration: none;
+}
+
+@media (max-width: 720px) {
+  .notification-row {
+    grid-template-columns: 42px 1fr;
+  }
+
+  .notification-view {
+    grid-column: 2;
+  }
+}
+
+button.notification-view {
+  background: var(--color-surface);
+  font: inherit;
+  cursor: pointer;
+}
+
+.notifications-empty,
+.notifications-error {
+  margin: 0;
+  padding: var(--space-16);
+  font-size: 13px;
+}
+
+.notifications-error {
+  margin-bottom: var(--space-12);
+  border: 1px solid var(--color-border);
+  background: var(--color-pink);
+}
+
+/* Type labels: the category shows instead of "42" (POST, FRIEND, …) */
+.notification-row {
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+}
+
+.notification-badge {
+  width: auto;
+  min-width: 34px;
+  height: 30px;
+  padding: 0 var(--space-8);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.notification-badge.post { background: var(--color-cyan); }
+.notification-badge.like { background: var(--color-pink); }
+.notification-badge.friend { background: var(--color-yellow); }
+.notification-badge.community { background: #d9c7f0; }
+.notification-badge.channel { background: #c9ecd9; }
+.notification-badge.report { background: #f6c9b8; }
+.notification-badge.general { background: var(--color-surface); }
+
+.notification-badge.read {
+  opacity: 0.55;
+}
+
+.notification-row.is-unread .notification-copy strong::before {
+  content: "● ";
+  color: var(--color-plum);
+}
+
+.notifications-filter {
+  display: flex;
+  gap: 0;
+  margin-left: auto;
+}
+
+.notifications-controls .notifications-filter button {
+  min-width: 80px;
+  cursor: pointer;
+}
+
+.notifications-filter button.active {
+  background: var(--color-plum);
+  color: #fff;
+}
+
+@media (max-width: 720px) {
+  .notification-row {
+    grid-template-columns: 1fr;
+  }
+
+  .notification-view {
+    grid-column: auto;
+  }
+
+  .notifications-controls {
+    flex-wrap: wrap;
+  }
+
+  .notifications-filter {
+    margin-left: 0;
+  }
+}
