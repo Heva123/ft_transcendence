@@ -603,7 +603,7 @@ function AdminUsersPage() {
       {deletingUser && (
         <ConfirmDialog
           title={`Delete @${deletingUser.username}?`}
-          message="This removes the user account. This action should also be protected by the backend."
+          message="This deletes the account and everything they created. This cannot be undone."
           confirmLabel="Delete user"
           onCancel={() =>
             setDeletingUser(null)
