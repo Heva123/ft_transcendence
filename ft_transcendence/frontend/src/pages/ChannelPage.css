@@ -1,6 +1,6 @@
 .channel-page {
   display: grid;
-  grid-template-columns: 220px 1fr;
+  grid-template-columns: 220px minmax(0, 1fr);
   gap: var(--space-16);
   max-width: 1050px;
 }
@@ -120,8 +120,8 @@
   min-width: 0;
 }
 
-/* Phone: channel list on top, chat below. */
-@media (max-width: 720px) {
+/* Phone and tablet: channel list on top, chat below. */
+@media (max-width: 900px) {
   .channel-page {
     grid-template-columns: minmax(0, 1fr);
   }

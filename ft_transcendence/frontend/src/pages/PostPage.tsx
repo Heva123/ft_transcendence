@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { useCurrentUser } from '../features/auth/hooks/useCurrentUser'
+import { canWriteSite } from '../features/auth/utils/sitePermissions'
 import { getPostDetails } from '../features/feed/api/feedApi'
 import PostCard from '../features/feed/components/PostCard'
 import ReplyItem, { ReplyForm } from '../features/feed/components/ReplyItem'
@@ -86,12 +87,12 @@ function PostPage() {
   return <section className="post-page">
     <header><p>42 COMMUNITY</p><h1>A small idea. A big conversation.</h1>
       <p className="post-page__crumb">{state.post.community?.name ?? 'Global feed'} / Post</p></header>
-    <PostCard post={state.post} commentsCount={count} currentUserId={user?.id} />
+    <PostCard post={state.post} commentsCount={count} currentUserId={user?.id} canWrite={canWriteSite(user)} />
     <h2>{count} {count === 1 ? 'reply' : 'replies'}</h2>
     {roots.map((reply) => <ReplyItem key={reply.id} reply={reply} childrenOf={childrenOf}
-      currentUserId={user?.id} communityId={state.post?.community?.id ?? null}
+      currentUserId={user?.id} communityId={state.post?.community?.id ?? null} canWrite={canWriteSite(user)}
       onCreated={addReply} onDeleted={removeReply} />)}
-    <ReplyForm postId={postId} parentId={null} onCreated={addReply} />
+    {canWriteSite(user) && <ReplyForm postId={postId} parentId={null} onCreated={addReply} />}
   </section>
 }
 

@@ -11,6 +11,8 @@ type Props = {
   childrenOf: Map<string, Reply[]>
   currentUserId?: string
   communityId: string | null
+  // False for guests: no reply button.
+  canWrite?: boolean
   depth?: number
   onCreated: (reply: Reply) => void
   onDeleted: (reply: Reply) => void
@@ -110,7 +112,7 @@ function ReplyItem(props: Props) {
           {state.editing
             ? <><button type="button" onClick={saveEdit}>Save</button><button type="button" onClick={() => setState({ ...state, editing: false, draft: state.saved })}>Cancel</button></>
             : <>
-              <button type="button" className="link" onClick={() => setDialog(dialog === 'reply' ? 'none' : 'reply')}>Reply</button>
+              {props.canWrite !== false && <button type="button" className="link" onClick={() => setDialog(dialog === 'reply' ? 'none' : 'reply')}>Reply</button>}
               {owner && <button type="button" onClick={() => setState({ ...state, editing: true, draft: state.saved })}>Edit</button>}
               {owner && <button type="button" className="danger" onClick={() => setDialog('delete')}>Delete</button>}
               {!owner && communityId && <button type="button" className="link" onClick={() => setDialog('report')}>Report</button>}

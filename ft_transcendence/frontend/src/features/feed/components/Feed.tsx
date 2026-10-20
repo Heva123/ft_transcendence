@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
+import { canWriteSite } from '../../auth/utils/sitePermissions'
 import { getMyCommunities } from '../../chat/api/chatApi'
 import { FEED_PAGE_SIZE, getCommunityFeed, getFeed } from '../api/feedApi'
 import type { Post } from '../types/Post'
@@ -79,7 +80,7 @@ function Feed({ mode, emptyText }: { mode: FeedMode; emptyText?: string }) {
   if (state.error && !state.posts.length) return <p className="feed-status" role="alert">{state.error}</p>
   if (!state.posts.length) return <p className="feed-status">{emptyText ?? 'Your feed is waiting for a first idea. Share one.'}</p>
   return <section className="feed">
-    {state.posts.map((post) => <PostCard key={post.id} post={post} currentUserId={user?.id} />)}
+    {state.posts.map((post) => <PostCard key={post.id} post={post} currentUserId={user?.id} canWrite={canWriteSite(user)} />)}
     {state.error && <p className="feed-status" role="alert">{state.error}</p>}
     {state.hasMore && <button type="button" className="feed-more" onClick={loadMore} disabled={state.loadingMore}>
       {state.loadingMore ? 'Loading…' : 'Load more posts'}
