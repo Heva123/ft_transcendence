@@ -4,6 +4,8 @@ import { apiRequest } from '../../../api/apiClient'
 import { getMyCommunities } from '../../chat/api/chatApi'
 import type { SearchCommunity, SearchRequest } from '../api/searchApi'
 import { usePagedSearch } from '../hooks/usePagedSearch'
+import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
+import { canWriteSite } from '../../auth/utils/sitePermissions'
 import SearchEmptyState from './SearchEmptyState'
 import SearchPager, { PageSummary } from './SearchPager'
 
@@ -17,6 +19,8 @@ type CardProps = { item: SearchCommunity; member: boolean }
 function CommunityResultCard({ item, member }: CardProps) {
   const navigate = useNavigate()
   const [status, setStatus] = useState({ joining: false, error: '' })
+  // Guests can look at communities but cannot join.
+  const canJoin = canWriteSite(useCurrentUser())
 
   async function handleJoin() {
     try {
@@ -30,7 +34,7 @@ function CommunityResultCard({ item, member }: CardProps) {
     <div className="community-card__mark">{item.name.slice(0, 2).toUpperCase()}</div>
     <h2>{item.name}</h2><p className="community-card__meta">42 COMMUNITY</p><p>{item.description ?? ''}</p>
     <footer className="community-card__footer"><span>COMMUNITY</span>
-      {member ? <Link to={`/communities/${item.id}`}>View community</Link> : <button type="button" onClick={handleJoin} disabled={status.joining}>{status.joining ? 'Joining...' : 'Join community'}</button>}
+      {member ? <Link to={`/communities/${item.id}`}>View community</Link> : canJoin && <button type="button" onClick={handleJoin} disabled={status.joining}>{status.joining ? 'Joining...' : 'Join community'}</button>}
     </footer>
     {status.error && <p className="form-error">{status.error}</p>}
   </article>

@@ -1,5 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useCurrentUser } from '../features/auth/hooks/useCurrentUser'
+import { canWriteSite } from '../features/auth/utils/sitePermissions'
 import { ApiError } from '../api/apiClient'
 import { getMyCommunities, type ApiCommunity } from '../features/chat/api/chatApi'
 import { createPost, deletePost, uploadPostImage } from '../features/feed/api/feedApi'
@@ -48,6 +50,7 @@ async function publish(
 
 function CreatePostPage() {
   const navigate = useNavigate()
+  const user = useCurrentUser()
   const [searchParams] = useSearchParams()
   const [communities, setCommunities] = useState<ApiCommunity[]>([])
   const [target, setTarget] = useState(() => searchParams.get('community') ?? 'global')
@@ -84,12 +87,19 @@ function CreatePostPage() {
         publishing: false,
         uploading: false,
         progress: 0,
-        error: err instanceof ImageUploadError
+        // Show the server reason, for example "Guest accounts have read-only access".
+        error: err instanceof ImageUploadError || err instanceof ApiError
           ? err.message
           : 'Unable to publish post.',
       }))
     }
   }
+
+  if (!canWriteSite(user))
+    return <section className="create-post-page">
+      <header><p>42 COMMUNITY</p><h1>Read-only account.</h1>
+        <p>Guest accounts can read posts but cannot publish them.</p></header>
+    </section>
 
   return <section className="create-post-page">
     <header><p>42 COMMUNITY</p><h1>Share something.</h1><p>Make a little change. Keep building.</p></header>

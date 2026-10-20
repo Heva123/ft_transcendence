@@ -10,7 +10,8 @@ import ReportDialog from './ReportDialog'
 import PostImageEditor from './PostImageEditor'
 import './PostImage.css'
 
-type Props = { post: Post; commentsCount?: number; currentUserId?: string }
+// canWrite is false for guests: the like button is disabled.
+type Props = { post: Post; commentsCount?: number; currentUserId?: string; canWrite?: boolean }
 type ViewState = { content: string; editing: boolean; deleted: boolean; error: string }
 type Dialog = 'none' | 'delete' | 'report' | 'removeImage'
 type HeaderProps = {
@@ -51,7 +52,7 @@ function PostEditor({ content, onSave, onCancel }: { content: string; onSave: (v
   </div>
 }
 
-function PostCard({ post, commentsCount, currentUserId }: Props) {
+function PostCard({ post, commentsCount, currentUserId, canWrite = true }: Props) {
   const navigate = useNavigate()
   const location = useLocation()
   const [view, setView] = useState<ViewState>({ content: post.content, editing: false, deleted: false, error: '' })
@@ -129,7 +130,8 @@ function PostCard({ post, commentsCount, currentUserId }: Props) {
       onRemove={() => setDialog('removeImage')} onAdd={handleAddImage} />}
     {view.error && <p className="post-card__error" role="alert">{view.error}</p>}
     <footer className="post-card__actions">
-      <button className="post-card__like" type="button" aria-pressed={reaction.liked} onClick={handleLike}>{reaction.liked ? '♥' : '♡'} {reaction.likes} {reaction.likes === 1 ? 'like' : 'likes'}</button>
+      <button className="post-card__like" type="button" aria-pressed={reaction.liked} onClick={handleLike}
+        disabled={!canWrite} title={canWrite ? undefined : 'Guest accounts cannot like posts'}>{reaction.liked ? '♥' : '♡'} {reaction.likes} {reaction.likes === 1 ? 'like' : 'likes'}</button>
       <Link className="post-card__replies" to={`/posts/${post.id}`}>▢ {replies} {replies === 1 ? 'reply' : 'replies'}</Link>
     </footer>
     {dialog === 'delete' && <ConfirmDialog title="Delete this post?"

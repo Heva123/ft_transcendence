@@ -19,6 +19,7 @@ function SearchBox() {
     <input
       className="topbar__search"
       type="search"
+      aria-label="Search"
       placeholder="Search people, communities, posts..."
       value={query}
       onChange={(event) => setQuery(event.target.value)}
