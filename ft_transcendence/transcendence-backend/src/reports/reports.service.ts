@@ -136,6 +136,7 @@ export class ReportsService {
         type: "REPORT_REVIEWED",
         title: "Report reviewed",
         message: `Your report was ${dto.status.toLowerCase()}.`,
+        link: `/communities/${communityId}`,
       },
     );
 

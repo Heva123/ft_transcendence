@@ -26,7 +26,7 @@ export class UsersController {
 
   @Get("me")
   getMe(@CurrentUser() user: AuthUser) {
-    return user;
+    return this.usersService.findMe(user.id);
   }
 
   @Get("blocked")
@@ -63,5 +63,14 @@ export class UsersController {
   @Patch("me")
   updateMe(@CurrentUser() user: AuthUser, @Body() dto: UpdateUserDto) {
     return this.usersService.update(user.id, dto);
+  }
+
+  // Declared last so "me" and "blocked" are matched first.
+  @Get(":username")
+  findProfile(
+    @CurrentUser() user: AuthUser,
+    @Param("username") username: string,
+  ) {
+    return this.usersService.findPublicProfile(user.id, username);
   }
 }

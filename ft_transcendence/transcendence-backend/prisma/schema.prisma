@@ -7,32 +7,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum SiteRole {
+  ADMIN
+  USER
+  GUEST
+}
+
 model User {
-  id                   String              @id @default(uuid())
-  email                String              @unique
-  username             String              @unique
+  id                   String                @id @default(uuid())
+  email                String                @unique
+  username             String                @unique
+  siteRole             SiteRole              @default(USER)
   passwordHash         String
-  createdAt            DateTime            @default(now())
-  updatedAt            DateTime            @updatedAt
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
   lastSeenAt           DateTime?
   avatarPath           String?
+  displayName          String?               @db.VarChar(50)
+  bio                  String?               @db.VarChar(300)
+  skills               UserSkill[]
+  friendshipsSent      Friendship[]          @relation("FriendshipRequester")
+  friendshipsReceived  Friendship[]          @relation("FriendshipAddressee")
+  invitationsSent      CommunityInvitation[] @relation("InvitationInviter")
+  invitationsReceived  CommunityInvitation[] @relation("InvitationInvitee")
   communityMemberships CommunityMember[]
-  createdCommunities   Community[]         @relation("CommunityCreator")
-  createdChannels      Channel[]           @relation("ChannelCreator")
-  createdProjects      Project[]           @relation("ProjectCreator")
-  createdTasks         Task[]              @relation("TaskCreator")
-  assignedTasks        Task[]              @relation("TaskAssignee")
+  createdCommunities   Community[]           @relation("CommunityCreator")
+  createdChannels      Channel[]             @relation("ChannelCreator")
+  createdProjects      Project[]             @relation("ProjectCreator")
+  createdTasks         Task[]                @relation("TaskCreator")
+  assignedTasks        Task[]                @relation("TaskAssignee")
   messages             Message[]
   messageReads         MessageRead[]
-  messageAttachments   MessageAttachment[] @relation("MessageAttachmentUploader")
+  messageAttachments   MessageAttachment[]   @relation("MessageAttachmentUploader")
   posts                Post[]
   comments             Comment[]
   likes                Like[]
-  reportsFiled         Report[]            @relation("ReportReporter")
-  reportsReviewed      Report[]            @relation("ReportReviewer")
+  reportsFiled         Report[]              @relation("ReportReporter")
+  reportsReviewed      Report[]              @relation("ReportReviewer")
   notifications        Notification[]
-  blocksInitiated      Block[]             @relation("Blocker")
-  blocksReceived       Block[]             @relation("Blocked")
+  blocksInitiated      Block[]               @relation("Blocker")
+  blocksReceived       Block[]               @relation("Blocked")
 
   @@map("users")
 }
@@ -55,12 +69,13 @@ model Community {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  createdBy User              @relation("CommunityCreator", fields: [createdById], references: [id], onDelete: Restrict)
-  members   CommunityMember[]
-  projects  Project[]
-  channels  Channel[]
-  posts     Post[]
-  reports   Report[]
+  createdBy   User                  @relation("CommunityCreator", fields: [createdById], references: [id], onDelete: Restrict)
+  members     CommunityMember[]
+  projects    Project[]
+  channels    Channel[]
+  posts       Post[]
+  reports     Report[]
+  invitations CommunityInvitation[]
 
   @@index([createdById])
   @@map("groups")
@@ -218,7 +233,7 @@ model Post {
   updatedAt   DateTime @updatedAt
 
   author    User       @relation(fields: [authorId], references: [id], onDelete: Restrict)
-  community Community? @relation(fields: [communityId], references: [id], onDelete: Restrict)
+  community Community? @relation(fields: [communityId], references: [id], onDelete: Cascade)
   comments  Comment[]
   likes     Like[]
   reports   Report[]
@@ -308,6 +323,7 @@ model Notification {
   message   String    @db.VarChar(500)
   isRead    Boolean   @default(false)
   readAt    DateTime?
+  link      String?   @db.VarChar(255)
   createdAt DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -327,4 +343,72 @@ model Block {
   @@id([blockerId, blockedId])
   @@index([blockedId])
   @@map("blocks")
+}
+
+model Skill {
+  id   String @id @default(uuid())
+  name String @unique @db.VarChar(30)
+
+  users UserSkill[]
+
+  @@map("skills")
+}
+
+model UserSkill {
+  userId  String
+  skillId String
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  skill Skill @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@id([userId, skillId])
+  @@index([skillId])
+  @@map("user_skills")
+}
+
+enum FriendshipStatus {
+  PENDING
+  ACCEPTED
+}
+
+/// One row per pair of users. The service checks both directions.
+model Friendship {
+  id          String           @id @default(uuid())
+  requesterId String
+  addresseeId String
+  status      FriendshipStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  respondedAt DateTime?
+
+  requester User @relation("FriendshipRequester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee User @relation("FriendshipAddressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+  @@index([addresseeId, status])
+  @@map("friendships")
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  DECLINED
+}
+
+model CommunityInvitation {
+  id          String           @id @default(uuid())
+  communityId String
+  inviterId   String
+  inviteeId   String
+  role        CommunityRole    @default(MEMBER)
+  status      InvitationStatus @default(PENDING)
+  createdAt   DateTime         @default(now())
+  respondedAt DateTime?
+
+  community Community @relation(fields: [communityId], references: [id], onDelete: Cascade)
+  inviter   User      @relation("InvitationInviter", fields: [inviterId], references: [id], onDelete: Cascade)
+  invitee   User      @relation("InvitationInvitee", fields: [inviteeId], references: [id], onDelete: Cascade)
+
+  @@index([inviteeId, status])
+  @@index([communityId, status])
+  @@map("community_invitations")
 }

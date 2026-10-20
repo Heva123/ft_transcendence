@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { Prisma } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
+import { PUBLIC_USER_SELECT, toPublicUser } from "../users/user-profile";
 
 @Injectable()
 export class SearchService {
@@ -24,6 +25,7 @@ export class SearchService {
     const allowedTypes = [
       "all",
       "users",
+      "skills",
       "communities",
       "posts",
     ];
@@ -43,28 +45,27 @@ export class SearchService {
     const sortOrder = sort as "asc" | "desc";
 
     let users: unknown[] = [];
+    let skills: unknown[] = [];
     let communities: unknown[] = [];
     let posts: unknown[] = [];
 
     let usersTotal = 0;
+    let skillsTotal = 0;
     let communitiesTotal = 0;
     let postsTotal = 0;
 
     if (type === "all" || type === "users") {
-      const userWhere = {
-        username: {
-          contains: q,
-          mode: "insensitive" as const,
-        },
+      const userWhere: Prisma.UserWhereInput = {
+        OR: [
+          { username: { contains: q, mode: "insensitive" } },
+          { displayName: { contains: q, mode: "insensitive" } },
+        ],
       };
 
-      [users, usersTotal] = await Promise.all([
+      const [rows, total] = await Promise.all([
         this.prisma.user.findMany({
           where: userWhere,
-          select: {
-            id: true,
-            username: true,
-          },
+          select: PUBLIC_USER_SELECT,
           orderBy: {
             username: sortOrder,
           },
@@ -75,6 +76,32 @@ export class SearchService {
           where: userWhere,
         }),
       ]);
+
+      users = rows.map(toPublicUser);
+      usersTotal = total;
+    }
+
+    // People who list a matching skill, e.g. q=react finds React developers.
+    if (type === "all" || type === "skills") {
+      const skillWhere: Prisma.UserWhereInput = {
+        skills: {
+          some: { skill: { name: { contains: q, mode: "insensitive" } } },
+        },
+      };
+
+      const [rows, total] = await Promise.all([
+        this.prisma.user.findMany({
+          where: skillWhere,
+          select: PUBLIC_USER_SELECT,
+          orderBy: { username: sortOrder },
+          skip,
+          take: safeLimit,
+        }),
+        this.prisma.user.count({ where: skillWhere }),
+      ]);
+
+      skills = rows.map(toPublicUser);
+      skillsTotal = total;
     }
 
     if (type === "all" || type === "communities") {
@@ -213,11 +240,13 @@ export class SearchService {
       },
       results: {
         users,
+        skills,
         communities,
         posts,
       },
       pagination: {
         users: pagination(usersTotal),
+        skills: pagination(skillsTotal),
         communities: pagination(communitiesTotal),
         posts: pagination(postsTotal),
       },
