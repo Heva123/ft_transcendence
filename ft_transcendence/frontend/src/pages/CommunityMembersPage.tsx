@@ -478,6 +478,7 @@ function CommunityMembersPage({
       <div className="members-search-row">
         <input
           className="members-search"
+          aria-label="Search members"
           type="search"
           placeholder="Search members..."
           value={search}
@@ -673,6 +674,7 @@ function CommunityMembersPage({
                           "OWNER" && (
                           <select
                             className="member-role-select"
+                            aria-label={`Role of ${member.user.username}`}
                             value={
                               member.role
                             }
