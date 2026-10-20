@@ -434,6 +434,7 @@ export class UploadsService {
       jpeg: "image/jpeg",
       png: "image/png",
       webp: "image/webp",
+      pdf: "application/pdf",
     };
 
     return new StreamableFile(
