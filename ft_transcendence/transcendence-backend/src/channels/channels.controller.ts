@@ -51,16 +51,27 @@ export class ChannelsController {
   @Patch("channels/:channelId")
   @RequirePermissions(Permission.CHANNEL_UPDATE)
   update(
+    @CurrentUser() user: AuthUser,
     @Param("channelId", ParseUUIDPipe) channelId: string,
     @Body() dto: UpdateChannelDto,
   ) {
-    return this.channelsService.update(channelId, dto);
+    return this.channelsService.update(
+      user.id,
+      channelId,
+      dto,
+    );
   }
 
   @Delete("channels/:channelId")
   @RequirePermissions(Permission.CHANNEL_DELETE)
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param("channelId", ParseUUIDPipe) channelId: string) {
-    await this.channelsService.remove(channelId);
+  async remove(
+    @CurrentUser() user: AuthUser,
+    @Param("channelId", ParseUUIDPipe) channelId: string,
+  ) {
+    await this.channelsService.remove(
+      user.id,
+      channelId,
+    );
   }
 }

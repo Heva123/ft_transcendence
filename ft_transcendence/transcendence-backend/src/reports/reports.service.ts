@@ -4,11 +4,13 @@ import {
   NotFoundException,
 } from "@nestjs/common";
 import {
+  CommunityRole,
   ReportStatus,
   ReportTargetType,
 } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { NotificationsService } from "../notifications/notifications.service";
+import { MessagesService } from "../messages/messages.service";
 import { CreateReportDto } from "./dto/create-report.dto";
 import { ReviewReportDto } from "./dto/review-report.dto";
 
@@ -17,6 +19,7 @@ export class ReportsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
+    private readonly messages: MessagesService,
   ) {}
 
   async create(
@@ -43,7 +46,7 @@ export class ReportsService {
         throw new NotFoundException("Post not found in this community");
       }
 
-      return this.prisma.report.create({
+      const createdReport = await this.prisma.report.create({
         data: {
           reporterId,
           communityId,
@@ -53,6 +56,10 @@ export class ReportsService {
         },
         include: this.includeRelations(),
       });
+
+      await this.notifyReportCreated(reporterId, communityId);
+
+      return createdReport;
     }
 
     const comment = await this.prisma.comment.findUnique({
@@ -71,7 +78,7 @@ export class ReportsService {
       throw new NotFoundException("Comment not found in this community");
     }
 
-    return this.prisma.report.create({
+    const createdReport = await this.prisma.report.create({
       data: {
         reporterId,
         communityId,
@@ -81,6 +88,53 @@ export class ReportsService {
       },
       include: this.includeRelations(),
     });
+
+    await this.notifyReportCreated(reporterId, communityId);
+
+    return createdReport;
+  }
+
+  private async notifyReportCreated(
+    reporterId: string,
+    communityId: string,
+  ) {
+    const [reporter, blockedUserIds] = await Promise.all([
+      this.prisma.user.findUnique({
+        where: { id: reporterId },
+        select: { username: true },
+      }),
+      this.messages.getBlockedUserIds(reporterId),
+    ]);
+
+    if (!reporter) return;
+
+    const moderators = await this.prisma.communityMember.findMany({
+      where: {
+        communityId,
+        role: {
+          in: [
+            CommunityRole.OWNER,
+            CommunityRole.ADMIN,
+            CommunityRole.MODERATOR,
+          ],
+        },
+        userId: {
+          notIn: [reporterId, ...blockedUserIds],
+        },
+      },
+      select: { userId: true },
+    });
+
+    await Promise.all(
+      moderators.map((member) =>
+        this.notificationsService.create(member.userId, {
+          type: "REPORT_CREATED",
+          title: "New report",
+          message: `${reporter.username} submitted a new report.`,
+          link: `/communities/${communityId}`,
+        }),
+      ),
+    );
   }
 
   findAll(communityId: string) {

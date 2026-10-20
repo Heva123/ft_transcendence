@@ -3,6 +3,10 @@ import { ChannelType } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { ChannelsService } from "./channels.service";
 
+jest.mock("../messages/chat.gateway", () => ({
+  ChatGateway: class ChatGateway {},
+}));
+
 describe("ChannelsService", () => {
   const prisma = {
     channel: {
@@ -12,12 +16,33 @@ describe("ChannelsService", () => {
       update: jest.fn(),
       delete: jest.fn(),
     },
+    communityMember: {
+      findMany: jest.fn(),
+    },
   };
+
+  const messages = {
+    getBlockedUserIds: jest.fn(),
+  };
+
+  const notifications = {
+    create: jest.fn(),
+  };
+
   let service: ChannelsService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new ChannelsService(prisma as unknown as PrismaService);
+
+    messages.getBlockedUserIds.mockResolvedValue([]);
+    notifications.create.mockResolvedValue({});
+    prisma.communityMember.findMany.mockResolvedValue([]);
+
+    service = new ChannelsService(
+      prisma as unknown as PrismaService,
+      messages as any,
+      notifications as any,
+    );
   });
 
   it("creates a text channel in a community", async () => {

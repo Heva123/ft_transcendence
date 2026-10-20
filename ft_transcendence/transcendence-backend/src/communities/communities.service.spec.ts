@@ -3,6 +3,10 @@ import { CommunityRole } from "@prisma/client";
 import { PrismaService } from "../prisma/prisma.service";
 import { CommunitiesService } from "./communities.service";
 
+jest.mock("../messages/chat.gateway", () => ({
+  ChatGateway: class ChatGateway {},
+}));
+
 describe("CommunitiesService", () => {
   const transactionClient = {
     community: { create: jest.fn() },
@@ -21,15 +25,40 @@ describe("CommunitiesService", () => {
     },
     communityMember: {
       findUnique: jest.fn(),
+      findMany: jest.fn(),
       create: jest.fn(),
       delete: jest.fn(),
     },
+    user: {
+      findUnique: jest.fn(),
+    },
   };
+
+  const messages = {
+    getBlockedUserIds: jest.fn(),
+  };
+
+  const notifications = {
+    create: jest.fn(),
+  };
+
   let service: CommunitiesService;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    service = new CommunitiesService(prisma as unknown as PrismaService);
+
+    messages.getBlockedUserIds.mockResolvedValue([]);
+    notifications.create.mockResolvedValue({});
+    prisma.communityMember.findMany.mockResolvedValue([]);
+    prisma.user.findUnique.mockResolvedValue({
+      username: "test_user",
+    });
+
+    service = new CommunitiesService(
+      prisma as unknown as PrismaService,
+      notifications as any,
+      messages as any,
+    );
   });
 
   it("creates a community and makes its creator the owner in one transaction", async () => {
@@ -94,7 +123,11 @@ describe("CommunitiesService", () => {
       id: "community-id",
       name: "Updated Team",
     });
-    await service.update("community-id", { name: "Updated Team" });
+    await service.update(
+      "user-id",
+      "community-id",
+      { name: "Updated Team" },
+    );
     expect(prisma.community.update).toHaveBeenCalledWith({
       where: { id: "community-id" },
       data: { name: "Updated Team" },
@@ -102,8 +135,12 @@ describe("CommunitiesService", () => {
   });
 
   it("deletes a community after authorization", async () => {
+    prisma.community.findUnique.mockResolvedValue({
+      name: "Backend Team",
+    });
     prisma.community.delete.mockResolvedValue({ id: "community-id" });
-    await service.remove("community-id");
+
+    await service.remove("user-id", "community-id");
     expect(prisma.community.delete).toHaveBeenCalledWith({
       where: { id: "community-id" },
     });
