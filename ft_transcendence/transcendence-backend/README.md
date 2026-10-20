@@ -7,7 +7,9 @@ Built with NestJS, PostgreSQL, Prisma, JWT authentication, Socket.IO, Multer, an
 ## Features
 
 - JWT authentication
-- User profiles
+- User profiles, bios and skills
+- Friend requests and friendships
+- Community invitations by username
 - Communities and memberships
 - Roles and permissions
 - Channels
@@ -140,10 +142,37 @@ Registration requirements:
     GET    /api/users/me
     PATCH  /api/users/me
     GET    /api/users/blocked
+    GET    /api/users/:username
     POST   /api/users/:userId/block
     DELETE /api/users/:userId/block
 
-Blocking is respected by applicable chat, typing, read-receipt, and message-history flows.
+Own profiles include email; public profiles omit email and password hashes. PATCH /api/users/me accepts displayName (max 50), bio (max 300), and skills (max 10, each 1–30 characters). Sending skills: [] clears the list. Empty displayName/bio clears the field. Usernames `me` and `blocked` are reserved at registration and profile update.
+
+Blocking is respected by applicable chat, typing, read-receipt, and message-history flows. Blocking also removes friendships and pending friend requests.
+
+## Friends
+
+    GET    /api/friends
+    GET    /api/friends/requests
+    POST   /api/friends/requests
+    POST   /api/friends/requests/:requestId/accept
+    DELETE /api/friends/requests/:requestId
+    DELETE /api/friends/:userId
+
+Send a request with { "userId": "TARGET_UUID" }. Only the receiver may accept. Sending a request back to someone who already requested you accepts their request. Blocked pairs cannot send or accept requests.
+
+## Invitations
+
+    POST   /api/communities/:communityId/invitations
+    GET    /api/communities/:communityId/invitations
+    DELETE /api/communities/:communityId/invitations/:invitationId
+    GET    /api/invitations
+    POST   /api/invitations/:invitationId/accept
+    POST   /api/invitations/:invitationId/decline
+
+Invite with { "username": "hiba", "role": "MEMBER" }. Roles may be MEMBER, MODERATOR or ADMIN. Managing community invitations requires MEMBER_ADD; inviting an ADMIN requires OWNER. Only the invitee may accept/decline. Acceptance rechecks blocking and the inviter's current permission to grant the role. Private communities can be joined through an invitation.
+
+The existing add-by-email members endpoint remains available with its existing permissions.
 
 ## Communities
 
@@ -376,6 +405,7 @@ Supported search types:
 
 - all
 - users
+- skills
 - communities
 - posts
 
@@ -530,3 +560,81 @@ Latest automated result at the Week 6 checkpoint:
 The backend listens on the configured HTTP port.
 
 TLS/HTTPS termination should be handled by the final project deployment or reverse-proxy layer when required.
+
+## Friends / Profiles / Invitations Integration Verification
+
+Base: worod at bc3299c. Includes the six partner commits plus acceptance permission/block checks, reserved-username validation, and regression tests.
+
+Verified in this integration:
+
+- 15 Jest suites, 86 tests pass.
+- Production build passes.
+- Prisma schema validates.
+- The supplied migration SQL matches the Prisma schema diff from the base.
+- All 13 migrations apply in an isolated PGlite PostgreSQL-compatible engine; new tables/columns and community-post deletion cascade verified.
+
+The live frontend and a running PostgreSQL server were not exercised in this environment. Before pushing, apply migrations to your development PostgreSQL database and check Friends, profile editing, invitations and notification links with the team's frontend. The PGlite check does not replace testing your real database.
+
+Keep the supplied migration unchanged if it has already been applied elsewhere. No additional database migration is needed for the acceptance/validation fixes.
+
+## Site Administration, Guest Access and Swagger
+
+Site roles are separate from community roles:
+
+| Site role | Access |
+| --- | --- |
+| ADMIN | Normal account features plus `/api/admin/users` management |
+| USER | Existing account features, subject to community roles |
+| GUEST | Authenticated read-only access, still subject to community membership/privacy |
+
+The migration `20261017170000_add_site_roles` defaults every account to USER. Registration does not accept `siteRole`, and profile updates cannot change it. HTTP mutation requests use the current database role, not a role cached in a JWT. Chat message/read/typing writes also enforce guest restrictions. Login/register remain public. Guests are authenticated accounts, not anonymous visitors.
+
+### First administrator
+
+Register normally, then a local database operator can promote that existing account:
+
+```bash
+npm run admin:promote -- YOUR_USERNAME
+```
+
+This is an operator script; there is no public bootstrap/admin-registration endpoint. API role changes take effect on the next request, including requests with an existing JWT.
+
+### Admin endpoints
+
+All require a JWT belonging to a site ADMIN:
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| GET | /api/admin/users?q=hiba&page=1&limit=20 | Search/paginate users (limit 1–100) |
+| GET | /api/admin/users/:id | Read one user |
+| POST | /api/admin/users | Create with email, username, password and optional siteRole |
+| PATCH | /api/admin/users/:id | Edit email, username, displayName, bio or siteRole |
+| DELETE | /api/admin/users/:id | Permanently delete the account and owned/authored content |
+
+Passwords are hashed on creation and never returned. Administrators cannot delete/demote themselves. Serializable transactions protect against concurrent changes removing the final administrator; a conflict returns 409 and can be retried.
+
+Deletion is permanent: owned communities, authored channels/projects/tasks/posts/comments and dependent records are removed. This may remove other users' content within those owned communities. The future frontend confirmation must explain this effect. Other accounts themselves remain. Existing sockets for a deleted account are disconnected; old REST tokens no longer authenticate. Physical uploaded files may remain for a separate storage cleanup policy.
+
+### API documentation and avatars
+
+Swagger UI: `/api/docs`. OpenAPI JSON: `/api/docs-json`. Use Authorize with a login JWT. This is API documentation; it does not implement the optional API-key/rate-limiting public API module.
+
+Profiles without an upload return `avatarUrl: /api/default-avatar`. That public endpoint serves a cacheable SVG placeholder image. Avatar URLs still need the frontend's existing API-origin resolution when frontend/backend run on different origins.
+
+### Verification and frontend handoff
+
+Backend checks for this change: 17 suites / 110 unit tests; build; Prisma schema validation; 14 HTTP/runtime checks with a mocked Prisma provider; all 14 migrations apply in an isolated PGlite engine. A mocked-provider runtime check does not test real PostgreSQL behavior.
+
+To test against the running development backend and its matching DATABASE_URL:
+
+```bash
+API_BASE_URL=http://localhost:3001/api npm run test:admin-api
+```
+
+That script creates temporary test accounts, promotes one through local DB access, exercises admin/guest API behavior (including deletion of a test user with owned content), and cleans up those accounts. It is intended for local development, not production. It has not been executed against your Mac/database yet.
+
+Maram's remaining frontend work: an ADMIN-only user-management page, create/edit/delete controls with clear deletion confirmation, and read-only controls for GUEST accounts. Always enforce access server-side regardless of hidden buttons. Read `siteRole` from login or GET /api/users/me. Community role controls remain separate.
+
+Swagger/default-avatar/backend permissions do not complete Docker/HTTPS, the final root README, the moderation UI, or other teammates' modules. OAuth and API-key public APIs are optional module choices and are not part of this change.
+
+AI assistance was used to implement and review these backend additions and tests. Hiba still needs to review the code, validate it locally with the team frontend, and explain the authorization boundaries and deletion policy at evaluation.

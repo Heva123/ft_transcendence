@@ -5,6 +5,17 @@ import {
 import { PrismaService } from "../prisma/prisma.service";
 import { ChatGateway } from "../messages/chat.gateway";
 
+const NOTIFICATION_SELECT = {
+  id: true,
+  type: true,
+  title: true,
+  message: true,
+  link: true,
+  isRead: true,
+  readAt: true,
+  createdAt: true,
+} as const;
+
 @Injectable()
 export class NotificationsService {
   constructor(
@@ -17,15 +28,7 @@ export class NotificationsService {
       this.prisma.notification.findMany({
         where: { userId },
         orderBy: { createdAt: "desc" },
-        select: {
-          id: true,
-          type: true,
-          title: true,
-          message: true,
-          isRead: true,
-          readAt: true,
-          createdAt: true,
-        },
+        select: NOTIFICATION_SELECT,
       }),
       this.prisma.notification.count({
         where: {
@@ -47,6 +50,8 @@ export class NotificationsService {
       type: string;
       title: string;
       message: string;
+      /** App path the "View" button opens, e.g. /profile/heba. */
+      link?: string;
     },
   ) {
     const notification = await this.prisma.notification.create({
@@ -55,16 +60,9 @@ export class NotificationsService {
         type: data.type,
         title: data.title,
         message: data.message,
+        link: data.link ?? null,
       },
-      select: {
-        id: true,
-        type: true,
-        title: true,
-        message: true,
-        isRead: true,
-        readAt: true,
-        createdAt: true,
-      },
+      select: NOTIFICATION_SELECT,
     });
 
     this.chatGateway.emitNotification(userId, notification);
@@ -79,15 +77,7 @@ export class NotificationsService {
           id: notificationId,
           userId,
         },
-        select: {
-          id: true,
-          type: true,
-          title: true,
-          message: true,
-          isRead: true,
-          readAt: true,
-          createdAt: true,
-        },
+        select: NOTIFICATION_SELECT,
       });
 
     if (!notification) {
@@ -106,15 +96,7 @@ export class NotificationsService {
         isRead: true,
         readAt: new Date(),
       },
-      select: {
-        id: true,
-        type: true,
-        title: true,
-        message: true,
-        isRead: true,
-        readAt: true,
-        createdAt: true,
-      },
+      select: NOTIFICATION_SELECT,
     });
   }
 }

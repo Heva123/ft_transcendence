@@ -9,6 +9,10 @@ export class RealtimeEventsService {
     this.server = server;
   }
 
+  disconnectUser(userId: string) {
+    this.server?.in(`user:${userId}`).disconnectSockets(true);
+  }
+
   emitUserUnblocked(
     userId: string,
     blockerId: string,

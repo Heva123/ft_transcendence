@@ -13,26 +13,39 @@ describe("UsersService", () => {
     service = new UsersService(prisma as unknown as PrismaService);
   });
 
-  it("returns only safe user fields when updating a profile", async () => {
+  it("never returns the password hash when updating a profile", async () => {
     prisma.user.findFirst.mockResolvedValue(null);
-    prisma.user.update.mockResolvedValue({
+    prisma.user.update.mockResolvedValue({ id: "user-id" });
+    prisma.user.findUnique.mockResolvedValue({
       id: "user-id",
       email: "new@example.com",
       username: "new_name",
+      displayName: null,
+      bio: null,
+      avatarPath: null,
+      lastSeenAt: null,
+      createdAt: new Date(),
+      skills: [],
     });
-    await service.update("user-id", {
+    const result = await service.update("user-id", {
       email: "new@example.com",
       username: "new_name",
     });
-    const updateArguments = prisma.user.update.mock.calls[0][0];
-    expect(updateArguments.select).toEqual({
-      id: true,
-      email: true,
-      username: true,
-      createdAt: true,
-      updatedAt: true,
+    const readArguments = prisma.user.findUnique.mock.calls[0][0];
+    expect(readArguments.select).not.toHaveProperty("passwordHash");
+    expect(result).not.toHaveProperty("passwordHash");
+    expect(result).toMatchObject({ username: "new_name", avatarUrl: "/api/default-avatar", skills: [] });
+  });
+
+  it("clears display name and bio when sent as empty strings", async () => {
+    prisma.user.findFirst.mockResolvedValue(null);
+    prisma.user.update.mockResolvedValue({ id: "user-id" });
+    prisma.user.findUnique.mockResolvedValue({
+      id: "user-id", email: "e@example.com", username: "u", displayName: null, bio: null,
+      avatarPath: null, lastSeenAt: null, createdAt: new Date(), skills: [],
     });
-    expect(updateArguments.select).not.toHaveProperty("passwordHash");
+    await service.update("user-id", { displayName: "", bio: "" });
+    expect(prisma.user.update.mock.calls[0][0].data).toEqual({ displayName: null, bio: null });
   });
 
   it("rejects an email used by another account", async () => {

@@ -1,3 +1,4 @@
+import { AdminModule } from "./admin/admin.module";
 import { Module } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { AppController } from "./app.controller";
@@ -18,6 +19,8 @@ import { NotificationsModule } from "./notifications/notifications.module";
 import { SearchModule } from "./search/search.module";
 import { UploadsModule } from "./uploads/uploads.module";
 import { RealtimeModule } from "./realtime/realtime.module";
+import { FriendsModule } from "./friends/friends.module";
+import { InvitationsModule } from "./invitations/invitations.module";
 
 @Module({
   imports: [
@@ -39,9 +42,12 @@ import { RealtimeModule } from "./realtime/realtime.module";
     PostsModule,
     ReportsModule,
     NotificationsModule,
-      SearchModule,
+    SearchModule,
     UploadsModule,
-],
+    AdminModule,
+    FriendsModule,
+    InvitationsModule,
+  ],
   controllers: [AppController],
 })
 export class AppModule {}
