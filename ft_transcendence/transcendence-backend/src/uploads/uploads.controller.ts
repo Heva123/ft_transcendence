@@ -71,6 +71,38 @@ function imageFileFilter(
   callback(null, true);
 }
 
+function postFileFilter(
+  _request: unknown,
+  file: Express.Multer.File,
+  callback: (
+    error: Error | null,
+    acceptFile: boolean,
+  ) => void,
+) {
+  const allowed: Record<string, string[]> = {
+    "image/jpeg": [".jpg", ".jpeg"],
+    "image/png": [".png"],
+    "image/webp": [".webp"],
+    "application/pdf": [".pdf"],
+  };
+
+  const extension = extname(
+    file.originalname,
+  ).toLowerCase();
+
+  if (!allowed[file.mimetype]?.includes(extension)) {
+    callback(
+      new BadRequestException(
+        "Only JPG, PNG, WEBP images and PDF documents are allowed",
+      ),
+      false,
+    );
+    return;
+  }
+
+  callback(null, true);
+}
+
 function chatFileFilter(
   _request: unknown,
   file: Express.Multer.File,
@@ -304,7 +336,7 @@ export class UploadsController {
         fileSize: 5 * 1024 * 1024,
       },
 
-      fileFilter: imageFileFilter,
+      fileFilter: postFileFilter,
     }),
   )
   uploadPostImage(
@@ -315,7 +347,7 @@ export class UploadsController {
   ) {
     if (!file) {
       throw new BadRequestException(
-        "Post image file is required",
+        "Post attachment file is required",
       );
     }
 
