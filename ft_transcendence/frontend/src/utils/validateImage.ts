@@ -25,6 +25,15 @@ export function validateImage(file: File) {
   return ''
 }
 
+/** Post attachments: images or PDF documents up to 5 MB. */
+export function validatePostAttachment(file: File) {
+  if (!ATTACHMENT_TYPES.includes(file.type))
+    return "Unsupported file. You can attach PNG, JPEG, WEBP images or PDF documents."
+  if (file.size > MAX_IMAGE_BYTES)
+    return "That attachment is too large. Please choose one under 5 MB."
+  return ""
+}
+
 /** Chat attachments: images up to 5 MB, PDF documents up to 10 MB. */
 export function validateAttachment(file: File) {
   if (!ATTACHMENT_TYPES.includes(file.type))

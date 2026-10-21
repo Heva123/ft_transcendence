@@ -1,6 +1,6 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import { ApiError } from '../../../api/apiClient'
-import { IMAGE_TYPES, validateImage } from '../../../utils/validateImage'
+import { ATTACHMENT_TYPES, validatePostAttachment } from '../../../utils/validateImage'
 
 type Props = {
   hasImage: boolean
@@ -19,7 +19,7 @@ function PostImageEditor({ hasImage, onRemove, onAdd }: Props) {
     event.target.value = ''
     if (!file)
       return
-    const validation = validateImage(file)
+    const validation = validatePostAttachment(file)
     if (validation) {
       setState({ progress: 0, uploading: false, error: validation })
       return
@@ -33,8 +33,8 @@ function PostImageEditor({ hasImage, onRemove, onAdd }: Props) {
         progress: 0,
         uploading: false,
         error: err instanceof ApiError && err.status === 413
-          ? 'That image is too large.'
-          : 'The image could not be uploaded.',
+          ? 'That attachment is too large.'
+          : 'The attachment could not be uploaded.',
       })
     }
   }
@@ -42,14 +42,14 @@ function PostImageEditor({ hasImage, onRemove, onAdd }: Props) {
   return (
     <div className="post-image-editor">
       {hasImage
-        ? <button type="button" onClick={onRemove}>Remove image</button>
+        ? <button type="button" onClick={onRemove}>Remove attachment</button>
         : <>
           <button type="button" disabled={state.uploading}
             onClick={() => inputRef.current?.click()}>
-            {state.uploading ? `Uploading… ${state.progress}%` : '+ Add image'}
+            {state.uploading ? `Uploading… ${state.progress}%` : '+ Add attachment'}
           </button>
-          <input ref={inputRef} type="file" hidden aria-label="Add an image to this post"
-            accept={IMAGE_TYPES.join(',')} onChange={handleChange} />
+          <input ref={inputRef} type="file" hidden aria-label="Add an attachment to this post"
+            accept={ATTACHMENT_TYPES.join(',')} onChange={handleChange} />
         </>}
       {state.uploading && <progress max="100" value={state.progress} />}
       {state.error && <p className="post-card__error" role="alert">{state.error}</p>}

@@ -108,7 +108,7 @@ function PostCard({ post, commentsCount, currentUserId, canWrite = true }: Props
       setDialog('none')
     } catch {
       setDialog('none')
-      setView((current) => ({ ...current, error: 'Unable to remove the image.' }))
+      setView((current) => ({ ...current, error: 'Unable to remove the attachment.' }))
     } finally { setDeleting(false) }
   }
 
@@ -138,9 +138,9 @@ function PostCard({ post, commentsCount, currentUserId, canWrite = true }: Props
       message="Your post and its comments will be removed. This action cannot be undone."
       confirmLabel="Delete post" busy={deleting}
       onCancel={() => setDialog('none')} onConfirm={handleDelete} />}
-    {dialog === 'removeImage' && <ConfirmDialog title="Remove this image?"
-      message="The image will be deleted from this post. Your text stays."
-      confirmLabel="Remove image" busy={deleting}
+    {dialog === 'removeImage' && <ConfirmDialog title="Remove this attachment?"
+      message="The attachment will be deleted from this post. Your text stays."
+      confirmLabel="Remove attachment" busy={deleting}
       onCancel={() => setDialog('none')} onConfirm={handleRemoveImage} />}
     {dialog === 'report' && post.community && <ReportDialog communityId={post.community.id}
       targetType="POST" targetId={post.id} onClose={() => setDialog('none')} />}
