@@ -6,7 +6,7 @@ import { ApiError } from '../api/apiClient'
 import { getMyCommunities, type ApiCommunity } from '../features/chat/api/chatApi'
 import { createPost, deletePost, uploadPostImage } from '../features/feed/api/feedApi'
 import PostImageField from '../features/feed/components/PostImageField'
-import { validateImage } from '../utils/validateImage'
+import { validatePostAttachment } from '../utils/validateImage'
 import './CreatePostPage.css'
 
 type View = {
@@ -17,11 +17,11 @@ type View = {
   publishing: boolean
 }
 
-class ImageUploadError extends Error {}
+class AttachmentUploadError extends Error {}
 
 /*
-  The post is created first, because the image endpoint needs the post id.
-  If the image then fails, the post is deleted again so no half post is left.
+  The post is created first, because the attachment endpoint needs the post id.
+  If the attachment then fails, the post is deleted again so no half post is left.
 */
 async function publish(
   content: string,
@@ -42,9 +42,9 @@ async function publish(
   } catch (err) {
     await deletePost(post.id).catch(() => undefined)
     const reason = err instanceof ApiError && err.status === 413
-      ? 'The image is too large.'
-      : 'The image could not be uploaded.'
-    throw new ImageUploadError(`${reason} Your post was not published.`)
+      ? 'The attachment is too large.'
+      : 'The attachment could not be uploaded.'
+    throw new AttachmentUploadError(`${reason} Your post was not published.`)
   }
 }
 
@@ -70,7 +70,7 @@ function CreatePostPage() {
       setView((state) => ({ ...state, error: 'Write something before publishing.' }))
       return
     }
-    const fileError = view.file ? validateImage(view.file) : ''
+    const fileError = view.file ? validatePostAttachment(view.file) : ''
     if (fileError) {
       setView((state) => ({ ...state, error: fileError }))
       return
@@ -88,7 +88,7 @@ function CreatePostPage() {
         uploading: false,
         progress: 0,
         // Show the server reason, for example "Guest accounts have read-only access".
-        error: err instanceof ImageUploadError || err instanceof ApiError
+        error: err instanceof AttachmentUploadError || err instanceof ApiError
           ? err.message
           : 'Unable to publish post.',
       }))
