@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by ashaheen, <maram_login>, hinajib, <worod_login>.*
+*This project has been created as part of the 42 curriculum by ashaheen, maabdulr, hinajib, <worod_login>.*
 
 <!--
   HOW TO USE THIS FILE (delete this comment before submission)
@@ -124,7 +124,7 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 | Member | Login | Role(s) |
 |---|---|---|
 | Afnan Shaheen | ashaheen | Frontend Monitor, Developer (Frontend) |
-| Maram [TODO surname] | [TODO] | Project Manager (PM), Developer (Frontend) |
+| Maram Abdulrashed | maabdulr | Project Manager (PM), Developer (Frontend) |
 | Heba [TODO surname] | hinajib | Tech Lead, Developer (Backend) |
 | Worod [TODO surname] | [TODO] | Product Owner (PO), Developer (Backend) |
 
@@ -134,12 +134,11 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 - Tested frontend features with the team backend and fixed integration issues.
 - Monitored frontend structure, shared components, and API integration.
 
-<!-- MARAM: START (Team Information) -->
-**Maram [TODO]** — Project Manager (PM), Developer (Frontend)
-- [TODO responsibility]
-- [TODO responsibility]
-- [TODO responsibility]
-<!-- MARAM: END -->
+**Maram Abdulrashed** — Project Manager (PM), Developer (Frontend)
+- Managed task planning, frontend responsibilities, and integration work across the team.
+- Built core frontend pages for communities, members, profiles, and site administration.
+- Reviewed shared frontend changes and tested builds before integration.
+- Coordinated frontend work through member branches and the shared `frontend-merge` branch.
 
 <!-- HEBA: START (Team Information) -->
 **Heba [TODO]** — Tech Lead, Developer (Backend)
@@ -159,22 +158,24 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 
 ## Project Management
 
-<!-- Maram (PM) writes this section for the whole team. Use "we". -->
-
 ### How we organized the work
 
-- [TODO: how tasks were split (frontend core, frontend interactive, backend core, backend realtime).]
-- [TODO: weekly plan and meetings (when, how often, what we decided in them).]
-- [TODO: how we reviewed and merged work (branches per member, then `frontend-merge` and `main`).]
+- We split development between frontend core, frontend interactive features, backend core, and real-time backend features.
+- We used weekly task plans and team check-ins to review progress, blockers, integration, and remaining work.
+- Each member worked on a personal branch before shared integration.
+- Frontend work was combined in `frontend-merge` before the final merge into `main`.
+- We tested integrated features before moving completed work into the final branch.
 
 ### Tools
 
 | Purpose | Tool |
 |---|---|
 | Code and version control | GitHub (`Heva123/ft_transcendence`) |
-| Task tracking | [TODO: GitHub Issues / Trello / Notion] |
-| Design | [TODO: Figma or other] — the UI/UX design file "PXL_LAB ft_transcendence UI/UX" |
-| Communication | [TODO: WhatsApp / Discord / Slack] |
+| Task tracking | Weekly team task plan |
+| Design | Sigma |
+| Communication | WhatsApp |
+
+
 
 ---
 
@@ -291,11 +292,9 @@ erDiagram
 
 <!-- One writer per module (marked below). The others check it. -->
 
-<!-- MARAM: START (Module) -->
 ### Frameworks (Major, 2 pts)
-- **Why we chose it:** [TODO]
-- **How it works:** [TODO]
-<!-- MARAM: END -->
+- **Why we chose it:** React gives the frontend reusable components and clear state management. NestJS gives the backend a structured module system. TypeScript is used on both sides and helps detect errors before runtime.
+- **How it works:** The frontend uses React 19, TypeScript, React Router, and Vite. NestJS 11 structures the backend using modules, controllers, and services. The frontend communicates with the backend through API requests.
 
 <!-- WOROD: START (Module) -->
 ### Real-time features (Major, 2 pts)
@@ -314,11 +313,10 @@ erDiagram
 - **How it works:** [TODO]
 <!-- HEBA: END -->
 
-<!-- MARAM: START (Module) -->
 ### Organization system (Major, 2 pts)
-- **Why we chose it:** [TODO]
-- **How it works:** [TODO]
-<!-- MARAM: END -->
+- **Why we chose it:** Communities give students dedicated spaces for shared interests and discussions. Member roles control how each student manages a community.
+- **How it works:** Users can discover, create, join, and leave communities. `CommunitiesPage.tsx` and `DiscoverCommunitiesPage.tsx` display community information. `CommunityMembersPage.tsx` manages members and member roles. Communities support owner, admin, moderator, and member roles.
+
 
 <!-- HEBA: START (Module) -->
 ### Advanced permissions (Major, 2 pts)
@@ -371,18 +369,26 @@ erDiagram
 - **Chat reconnection.** Chat stopped receiving messages after the backend restarted. She updated the frontend to join the channel again after reconnecting.
 - **Frontend and backend integration.** Some frontend features needed changes to match backend data and endpoints. She updated frontend ID handling, prepared API integration, and tested the changes with the team backend.
 
-<!-- MARAM: START (Individual Contributions) -->
-### Maram [TODO]
 
-**Summary.** [TODO: 2 sentences.]
+### Maram Abdulrashed
+
+**Summary.** Maram developed core frontend pages and community management features using React and TypeScript. She also managed project planning and frontend integration.
 
 **What she built**
-- [TODO]
+- **Authentication interface.** Maram worked on login and sign-up screens, validation, and frontend authentication integration.
+- **Communities.** Users can view their communities and discover available communities. Main files include `CommunitiesPage.tsx` and `DiscoverCommunitiesPage.tsx`.
+- **Community details and members.** Maram built community details and member management interfaces. Main files include `CommunityDetailsPage.tsx` and `CommunityMembersPage.tsx`.
+- **Site administration.** Site admins can view users and manage site roles. Maram worked on `AdminUsersPage.tsx` and `userApi.ts`.
+- **Profiles and avatars.** Maram worked on profile views and default avatar handling. Main files include `ProfilePage.tsx` and `PublicProfilePage.tsx`.
+- **Guest access.** Guest users receive a read-only interface without create, join, or edit actions. She worked on `GuestBanner.tsx` and `useCanWrite.ts`.
+- **Responsive frontend.** Maram fixed layouts that stretched outside the page on tablet screens. She updated `AppShell.tsx` and `layout.css`.
+- **Accessibility.** She added labels for member search and member role controls in `CommunityMembersPage.tsx`.
 
 **Challenges**
-- **[TODO challenge title].** [TODO] [TODO]
+- **Admin user loading.** The API returned a paged object instead of a user array. Maram changed the frontend to read the `items` array.
+- **Default avatar requests.** Profiles requested a missing avatar file when users had no uploaded image. She corrected the default avatar handling.
+- **Guest and tablet behaviour.** Guest controls remained visible and some pages overflowed on tablets. She added write checks and responsive layout fixes.
 
-<!-- MARAM: END -->
 
 <!-- HEBA: START (Individual Contributions) -->
 ### Heba [TODO]
@@ -438,9 +444,11 @@ We used AI tools as assistants. Every result was read, tested and changed by us 
 
 - **Afnan** — ChatGPT helped explain React and TypeScript concepts and review frontend integration problems. She used it while working on components, API requests, chat, and notifications. She reviewed the suggested changes, tested the frontend with the team backend, and checked the results in the browser.
 - 
-<!-- MARAM: START (AI) -->
-- **Maram** — [TODO]
-<!-- MARAM: END -->
+
+- **Maram** — ChatGPT helped explain React, TypeScript, API integration, Git workflows, and frontend bugs. She used it while reviewing code and planning fixes. She checked changes with the team backend, browser testing, `npm run build`, and `npm run lint`.
+
+
+
 <!-- HEBA: START (AI) -->
 - **Heba** — [TODO]
 <!-- HEBA: END -->
@@ -452,10 +460,11 @@ We used AI tools as assistants. Every result was read, tested and changed by us 
 
 ## Known Limitations
 
-- Tested in Google Chrome. [TODO: other browsers tested, or "Other browsers are not officially supported."]
+- The application was tested in Google Chrome.
+- Other browsers are not officially supported because they were not fully tested.
 - Reports can be sent and reviewed through the API, but there is no moderation screen yet.
-- [TODO]
+
 
 ## License and credits
 
-Made by the PXL_LAB team at 42 Abu Dhabi for the ft_transcendence project. [TODO: license, or "All rights reserved."]
+Made by the PXL_LAB team at 42 Abu Dhabi for the ft_transcendence project. All rights reserved.
