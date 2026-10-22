@@ -128,12 +128,11 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 | Heba [TODO surname] | hinajib | Tech Lead, Developer (Backend) |
 | Worod [TODO surname] | [TODO] | Product Owner (PO), Developer (Backend) |
 
-<!-- AFNAN: START (Team Information) -->
 **Afnan Shaheen** — Frontend Monitor, Developer (Frontend)
-- [TODO responsibility]
-- [TODO responsibility]
-- [TODO responsibility]
-<!-- AFNAN: END -->
+- Built interactive frontend features for the feed, chat, notifications, and search.
+- Connected frontend components to backend API endpoints and WebSocket (Socket.IO) events.
+- Tested frontend features with the team backend and fixed integration issues.
+- Monitored frontend structure, shared components, and API integration.
 
 <!-- MARAM: START (Team Information) -->
 **Maram [TODO]** — Project Manager (PM), Developer (Frontend)
@@ -304,11 +303,10 @@ erDiagram
 - **How it works:** [TODO]
 <!-- WOROD: END -->
 
-<!-- AFNAN: START (Module) -->
 ### User interaction (Major, 2 pts)
-- **Why we chose it:** [TODO]
-- **How it works:** [TODO]
-<!-- AFNAN: END -->
+- **Why we chose it:** We wanted 42 students to connect and communicate inside PXL_LAB. Users can build profiles, add friends, and chat in real time. This helps students interact and stay connected within their communities.
+
+- **How it works:** Users create profiles with an avatar, bio, and skills. They can send, accept, and remove friend requests. The frontend displays friends and their online status. `ChatArea.tsx` and `useChatSocket.ts` handle messages, typing indicators, and read receipts through WebSocket (Socket.IO).
 
 <!-- HEBA: START (Module) -->
 ### Standard user management (Major, 2 pts)
@@ -334,17 +332,13 @@ erDiagram
 - **How it works:** [TODO]
 <!-- WOROD: END -->
 
-<!-- AFNAN: START (Module) -->
 ### Notification system (Minor, 1 pt)
-- **Why we chose it:** [TODO]
-- **How it works:** [TODO]
-<!-- AFNAN: END -->
+ **Why we chose it:** We wanted students to know when something important happens. Notifications help users follow friend requests, replies, likes, and community activity.
+- **How it works:** The backend creates notification records for supported actions. WebSocket (Socket.IO) sends notification updates in real time. The frontend uses `useNotifications.ts` and `notificationSocket.ts` to receive updates. The interface displays pop-ups, unread counts, and notification lists.
 
-<!-- AFNAN: START (Module) -->
 ### Advanced search (Minor, 1 pt)
-- **Why we chose it:** [TODO]
-- **How it works:** [TODO]
-<!-- AFNAN: END -->
+ **Why we chose it:** We wanted students to find people and content without checking every page. Filters, sorting, and pagination make search results easier to explore.
+- **How it works:** `SearchPage.tsx` provides search interfaces for people, communities, posts, and skills. Users enter search terms and select available filters or sorting options. `usePagedSearch.ts` manages requests and paginated results. The backend API returns matching records from the database.
 
 <!-- WOROD: START (Module) -->
 ### File upload and management (Minor, 1 pt)
@@ -358,18 +352,24 @@ erDiagram
 
 <!-- Same structure for everyone. See the PXL_LAB README guide. -->
 
-<!-- AFNAN: START (Individual Contributions) -->
 ### Afnan Shaheen
 
-**Summary.** [TODO: 2 sentences.]
+**Summary.** Afnan developed interactive frontend features for PXL_LAB using React and TypeScript. She connected the feed, chat, notifications, and search to the team backend.
 
 **What she built**
-- [TODO]
+- **Feed and posts.** Users view global and community posts, add likes, and write replies. Afnan built `Feed.tsx`, `PostCard.tsx`, and `feedApi.ts`.
+- **Nested replies.** Users reply to posts and other replies. Afnan developed the reply interface using `ReplyItem.tsx`.
+- **Real-time chat.** The channel interface shows messages, typing indicators, read receipts, and online members. She worked on `ChatArea.tsx` and `useChatSocket.ts`.
+- **Chat file attachments.** Users send images and PDF files through chat. She added file selection and upload handling using `ImageAttachmentPicker.tsx` and `uploadRequest()`.
+- **Notifications.** The frontend shows notification pop-ups, unread counts, and notification lists. She worked on `useNotifications.ts` and `notificationSocket.ts`.
+- **Advanced search.** Users search for people, communities, posts, and skills. She implemented frontend search and pagination using `SearchPage.tsx` and `usePagedSearch.ts`.
+- **Frontend API integration.** Afnan prepared feed API integration and configured the frontend API proxy. She also changed frontend code to handle string IDs consistently.
+- **Shared application layout.** Afnan built reusable layout components, including `AppShell.tsx`, `Sidebar.tsx`, and `TopBar.tsx`.
 
 **Challenges**
-- **[TODO challenge title].** [TODO: the problem in one sentence.] [TODO: how it was solved in one or two sentences.]
-
-<!-- AFNAN: END -->
+- **Unexpected logouts.** Some page loads ended with a session error during multi-user testing. Afnan traced the issue to an early `auth:error` event. She changed the flow to check the login through the API before logging out.
+- **Chat reconnection.** Chat stopped receiving messages after the backend restarted. She updated the frontend to join the channel again after reconnecting.
+- **Frontend and backend integration.** Some frontend features needed changes to match backend data and endpoints. She updated frontend ID handling, prepared API integration, and tested the changes with the team backend.
 
 <!-- MARAM: START (Individual Contributions) -->
 ### Maram [TODO]
@@ -436,9 +436,8 @@ erDiagram
 
 We used AI tools as assistants. Every result was read, tested and changed by us before it went into the project.
 
-<!-- AFNAN: START (AI) -->
-- **Afnan** — [TODO: tool], for [TODO: tasks], in [TODO: parts of the project]. [TODO: how she checked it.]
-<!-- AFNAN: END -->
+- **Afnan** — ChatGPT helped explain React and TypeScript concepts and review frontend integration problems. She used it while working on components, API requests, chat, and notifications. She reviewed the suggested changes, tested the frontend with the team backend, and checked the results in the browser.
+- 
 <!-- MARAM: START (AI) -->
 - **Maram** — [TODO]
 <!-- MARAM: END -->
