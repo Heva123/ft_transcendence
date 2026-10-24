@@ -24,6 +24,7 @@ import {
 } from "../features/chat/api/chatApi";
 
 import { canCreateChannel } from "../features/chat/channelRoles";
+import { canModerate } from "../features/reports/api/reportsApi";
 
 import ChannelFormModal from "../features/chat/components/ChannelFormModal";
 
@@ -195,6 +196,16 @@ function CommunityView({
         >
           Roles & permissions
         </Link>
+
+        {/* Owners, admins and moderators review reports here. */}
+        {canModerate(data.role) && (
+          <Link
+            className="community-tab-link"
+            to={`/communities/${data.community.id}/reports`}
+          >
+            Reports
+          </Link>
+        )}
       </nav>
 
       <div className="community-layout">
