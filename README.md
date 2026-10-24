@@ -140,12 +140,12 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 - Reviewed shared frontend changes and tested builds before integration.
 - Coordinated frontend work through member branches and the shared `frontend-merge` branch.
 
-<!-- HEBA: START (Team Information) -->
-**Heba [TODO]** — Tech Lead, Developer (Backend)
-- [TODO responsibility]
-- [TODO responsibility]
-- [TODO responsibility]
-<!-- HEBA: END -->
+<!-- HIBA: START (Team Information) -->
+**Hiba Najib** — Tech Lead + Developer
+- Developed the core backend using NestJS, PostgreSQL and Prisma.
+- Implemented authentication, community permissions and site administration.
+- Integrated backend additions and verified migrations, API behaviour and production builds.
+<!-- HIBA: END -->
 
 <!-- WOROD: START (Team Information) -->
 **Worod [TODO]** — Product Owner (PO), Developer (Backend)
@@ -307,22 +307,21 @@ erDiagram
 
 - **How it works:** Users create profiles with an avatar, bio, and skills. They can send, accept, and remove friend requests. The frontend displays friends and their online status. `ChatArea.tsx` and `useChatSocket.ts` handle messages, typing indicators, and read receipts through WebSocket (Socket.IO).
 
-<!-- HEBA: START (Module) -->
+
 ### Standard user management (Major, 2 pts)
-- **Why we chose it:** [TODO]
-- **How it works:** [TODO]
-<!-- HEBA: END -->
+- **Why we chose it:** [CHECK: confirm the team's reason for choosing this module.] Student accounts support profiles and authenticated access.
+- **How it works:** Students sign up and log in through `auth.controller.ts`. Passwords are hashed with bcrypt, and JWT authentication protects account endpoints. Users edit their profiles through `PATCH /api/users/me`. Profiles include avatars, bios and skills, with a default image when no avatar is uploaded.
+
 
 ### Organization system (Major, 2 pts)
 - **Why we chose it:** Communities give students dedicated spaces for shared interests and discussions. Member roles control how each student manages a community.
 - **How it works:** Users can discover, create, join, and leave communities. `CommunitiesPage.tsx` and `DiscoverCommunitiesPage.tsx` display community information. `CommunityMembersPage.tsx` manages members and member roles. Communities support owner, admin, moderator, and member roles.
 
 
-<!-- HEBA: START (Module) -->
 ### Advanced permissions (Major, 2 pts)
-- **Why we chose it:** [TODO]
-- **How it works:** [TODO]
-<!-- HEBA: END -->
+- **Why we chose it:** [CHECK: confirm the team's reason for choosing this module.] Site roles separate account administration from community permissions.
+- **How it works:** Prisma stores each account's site role as admin, user or guest. `SiteAdminGuard` restricts `/api/admin/users` to site administrators. Administrators can list, create, edit and delete accounts. Guest write restrictions apply to HTTP endpoints and WebSocket (Socket.IO) chat events.
+
 
 <!-- WOROD: START (Module) -->
 ### ORM (Minor, 1 pt)
@@ -389,19 +388,25 @@ erDiagram
 - **Default avatar requests.** Profiles requested a missing avatar file when users had no uploaded image. She corrected the default avatar handling.
 - **Guest and tablet behaviour.** Guest controls remained visible and some pages overflowed on tablets. She added write checks and responsive layout fixes.
 
+### Hiba Najib
 
-<!-- HEBA: START (Individual Contributions) -->
-### Heba [TODO]
-
-**Summary.** [TODO: 2 sentences.]
+**Summary.** Hiba developed the core backend and integrated additional account features. Her work supports authentication, community management and site administration.
 
 **What she built**
-- [TODO]
+- **Authentication.** Students sign up and log in through JWT authentication with bcrypt password hashing. Main file: `auth.service.ts`.
+- **Community permissions.** She implemented community membership and member roles: owner, admin, moderator and member. Main file: `community-members.service.ts`.
+- **Channels, projects and tasks.** She developed APIs for managing these resources. Main files: `channels.service.ts`, `projects.service.ts` and `tasks.service.ts`.
+- **Profiles and skills.** She integrated teammate changes for display names, bios, skills and public profiles. Main endpoints: `PATCH /api/users/me` and `GET /api/users/:username`.
+- **Friends and invitations.** She integrated friend requests and community invitations. She added blocking and permission checks during acceptance.
+- **Site administration.** She added site roles: admin, user and guest. Administrators manage accounts through `admin-users.controller.ts` and `admin-users.service.ts`.
+- **Guest restrictions.** Guest accounts have read-only access. Main files: `guest-readonly.guard.ts`, `messages.service.ts` and `chat.gateway.ts`.
+- **Documentation and default avatar.** She added Swagger documentation at `/api/docs`. Profiles without uploaded avatars use `/api/default-avatar`.
 
 **Challenges**
-- **[TODO challenge title].** [TODO] [TODO]
+- **Missing upload source.** A copy command excluded `src/uploads`, although `app.module.ts` still imported it. She restored the existing source files and verified the build.
+- **Outdated invitation permissions.** An invitation could remain usable after blocking or inviter demotion. She added acceptance checks and verified rejection through API tests.
+- **Database configuration.** Missing `DATABASE_URL` settings prevented migrations. She configured the local environment and applied migrations without resetting the database.
 
-<!-- HEBA: END -->
 
 <!-- WOROD: START (Individual Contributions) -->
 ### Worod [TODO]
