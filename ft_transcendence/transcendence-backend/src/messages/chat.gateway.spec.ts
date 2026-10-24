@@ -110,6 +110,32 @@ describe("ChatGateway", () => {
     expect(client.disconnect).toHaveBeenCalled();
   });
 
+  it("lets an early event wait for the token check (no false auth:error)", async () => {
+    const client = createSocket();
+    client.handshake.auth = { token: "valid-token" };
+    let finishCheck: (value: unknown) => void = () => undefined;
+    jwtService.verifyAsync.mockReturnValue(
+      new Promise((resolve) => {
+        finishCheck = resolve;
+      }),
+    );
+
+    const connected = gateway.handleConnection(client as never);
+    // presence:get arrives before the token check is done.
+    const middleware = client.use.mock.calls[0][0];
+    const next = jest.fn();
+    const early = middleware(["presence:get"], next);
+    expect(next).not.toHaveBeenCalled();
+
+    finishCheck({ sub: "user-1", username: "worod" });
+    await connected;
+    await early;
+
+    expect(next).toHaveBeenCalled();
+    expect(client.data.userId).toBe("user-1");
+    expect(client.emit).not.toHaveBeenCalledWith("auth:error", expect.anything());
+  });
+
   it("authenticates a socket and announces online presence", async () => {
     const client = createSocket();
 

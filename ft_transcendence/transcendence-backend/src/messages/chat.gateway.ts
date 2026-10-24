@@ -40,7 +40,50 @@ export class ChatGateway
     this.realtimeEvents.attachServer(server);
   }
 
-  async handleConnection(client: Socket) {
+  // Events can arrive while the token is still being checked. Every event
+  // first waits for that check, so a handler never sees a signed-in user as
+  // anonymous (that caused random "session expired" logouts).
+  handleConnection(client: Socket) {
+    const ready = this.authenticate(client);
+    client.use(async ([event], next) => {
+      await ready;
+      const userId = client.data.userId as string | undefined;
+      // Not signed in: the handler answers "Authentication required".
+      if (!userId) return next();
+      try {
+        const current = await this.prisma.user.findUnique({
+          where: { id: userId },
+          select: { siteRole: true },
+        });
+        if (!current) {
+          client.emit("auth:error", { message: "User no longer exists" });
+          client.disconnect();
+          return;
+        }
+        if (
+          current.siteRole === "GUEST" &&
+          [
+            "message:send",
+            "message:read",
+            "typing:start",
+            "typing:stop",
+          ].includes(event)
+        ) {
+          client.emit(
+            event.startsWith("typing:") ? "typing:error" : "message:error",
+            { message: "Guest accounts have read-only access" },
+          );
+          return;
+        }
+        next();
+      } catch {
+        client.emit("auth:error", { message: "Unable to validate account" });
+      }
+    });
+    return ready;
+  }
+
+  private async authenticate(client: Socket) {
     try {
       const authToken = client.handshake.auth?.token;
       const authorization = client.handshake.headers.authorization;
@@ -72,37 +115,6 @@ export class ChatGateway
       client.data.userId = payload.sub;
       client.data.username = payload.username;
 
-      client.use(async ([event], next) => {
-        try {
-          const current = await this.prisma.user.findUnique({
-            where: { id: payload.sub },
-            select: { siteRole: true },
-          });
-          if (!current) {
-            client.emit("auth:error", { message: "User no longer exists" });
-            client.disconnect();
-            return;
-          }
-          if (
-            current.siteRole === "GUEST" &&
-            [
-              "message:send",
-              "message:read",
-              "typing:start",
-              "typing:stop",
-            ].includes(event)
-          ) {
-            client.emit(
-              event.startsWith("typing:") ? "typing:error" : "message:error",
-              { message: "Guest accounts have read-only access" },
-            );
-            return;
-          }
-          next();
-        } catch {
-          client.emit("auth:error", { message: "Unable to validate account" });
-        }
-      });
       await client.join(`user:${payload.sub}`);
 
       const sockets = this.userSockets.get(payload.sub) ?? new Set<string>();
