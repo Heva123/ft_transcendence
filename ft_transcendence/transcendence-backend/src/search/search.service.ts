@@ -228,7 +228,7 @@ export class SearchService {
       totalPages: Math.ceil(total / safeLimit),
       hasNextPage:
         safePage * safeLimit < total,
-      hasPreviousPage: safePage > 1,
+      hasPreviousPage: total > 0 && safePage > 1,
     });
 
     return {

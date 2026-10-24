@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import type { KeyboardEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
-function SearchBox() {
-  const [query, setQuery] = useState('')
+function SearchBoxInput({ initialQuery }: { initialQuery: string }) {
+  const [query, setQuery] = useState(initialQuery)
   const navigate = useNavigate()
 
   function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
@@ -26,6 +26,12 @@ function SearchBox() {
       onKeyDown={handleKeyDown}
     />
   )
+}
+
+function SearchBox() {
+  const location = useLocation()
+  const urlQuery = location.pathname === "/search" ? new URLSearchParams(location.search).get("q") ?? "" : ""
+  return <SearchBoxInput key={urlQuery} initialQuery={urlQuery} />
 }
 
 export default SearchBox
