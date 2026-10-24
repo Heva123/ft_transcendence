@@ -149,9 +149,10 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 
 <!-- WOROD: START (Team Information) -->
 **Worod [TODO]** — Product Owner (PO), Developer (Backend)
-- [TODO responsibility]
-- [TODO responsibility]
-- [TODO responsibility]
+- Defined and reviewed PXL_LAB feature requirements and user workflows.
+- Developed backend features for chat, social interactions, uploads, and search.
+- Integrated backend functionality with the shared team application.
+- Investigated bugs, added regression tests, and verified builds before integration.
 <!-- WOROD: END -->
 
 ---
@@ -298,8 +299,8 @@ erDiagram
 
 <!-- WOROD: START (Module) -->
 ### Real-time features (Major, 2 pts)
-- **Why we chose it:** [TODO]
-- **How it works:** [TODO]
+- **Why we chose it:** Students need immediate communication without refreshing the page. WebSockets support live chat, typing indicators, read receipts, and online presence.
+- **How it works:** NestJS uses Socket.IO through `chat.gateway.ts`. Clients authenticate using JWT, join authorized channel rooms, exchange messages, and receive presence and typing events. Messages and read states are persisted through Prisma. The gateway also waits for authentication before processing early events.
 <!-- WOROD: END -->
 
 ### User interaction (Major, 2 pts)
@@ -325,8 +326,8 @@ erDiagram
 
 <!-- WOROD: START (Module) -->
 ### ORM (Minor, 1 pt)
-- **Why we chose it:** [TODO]
-- **How it works:** [TODO]
+- **Why we chose it:** Prisma provides a typed and structured way to interact with PostgreSQL, manage relationships, and maintain the database schema.
+- **How it works:** Database models and relationships are defined in `prisma/schema.prisma`. NestJS services use `PrismaService` to query and update users, communities, posts, messages, notifications, and other records. Prisma migrations manage schema changes.
 <!-- WOROD: END -->
 
 ### Notification system (Minor, 1 pt)
@@ -339,8 +340,8 @@ erDiagram
 
 <!-- WOROD: START (Module) -->
 ### File upload and management (Minor, 1 pt)
-- **Why we chose it:** [TODO]
-- **How it works:** [TODO]
+- **Why we chose it:** Students need to share avatars, post images, and chat attachments securely within the application.
+- **How it works:** `uploads.controller.ts` and `uploads.service.ts` manage uploading, retrieving, and deleting files. Upload validation checks allowed file types, extensions, and size limits. JWT authentication and resource access checks protect supported upload operations.
 <!-- WOROD: END -->
 
 ---
@@ -409,15 +410,21 @@ erDiagram
 
 
 <!-- WOROD: START (Individual Contributions) -->
-### Worod [TODO]
+### Worod
 
-**Summary.** [TODO: 2 sentences.]
+**Summary.** Worod developed and integrated backend features for PXL_LAB, including real-time communication, social interactions, file uploads, and advanced search. She also worked on integration fixes, regression testing, and verifying the shared application before merging changes.
 
 **What she built**
-- [TODO]
+- **Real-time communication.** Implemented Socket.IO chat functionality including authenticated connections, channel rooms, messages, typing indicators, read receipts, and online presence. Main file: `chat.gateway.ts`.
+- **Posts, comments, and likes.** Developed REST APIs for global and community feeds, post management, nested comments, and likes, and adapted the features to the integrated backend.
+- **File uploads.** Implemented API functionality for profile avatars, chat attachments, and post images, including file validation and access checks. Main files: `uploads.controller.ts` and `uploads.service.ts`.
+- **Advanced search.** Implemented backend search for users, skills, communities, and posts, including filtering, pagination, and authorization-aware results. Main file: `search.service.ts`.
+- **Integration and testing.** Worked on notifications and shared backend integration, added regression tests, and verified the backend test suite and production build.
 
 **Challenges**
-- **[TODO challenge title].** [TODO] [TODO]
+- **Early Socket.IO events.** Events could arrive before JWT authentication completed, causing incorrect authentication errors. She updated the gateway to wait for authentication and added a regression test.
+- **Search pagination.** Empty search results could report an incorrect previous-page state. She corrected the pagination logic and added a regression test.
+- **Shared backend integration.** The original social backend used a separate database structure. She adapted social features to the shared Prisma schema and application architecture.
 
 <!-- WOROD: END -->
 
@@ -458,7 +465,7 @@ We used AI tools as assistants. Every result was read, tested and changed by us 
 - **Heba** — [TODO]
 <!-- HEBA: END -->
 <!-- WOROD: START (AI) -->
-- **Worod** — [TODO]
+- **Worod** — Used ChatGPT to understand NestJS, Socket.IO, JWT authentication, and backend integration concepts. It also assisted with debugging early WebSocket authentication events, reviewing search pagination, planning regression tests, checking Git integration steps, and drafting documentation. Suggested changes were reviewed against the project code and verified using Jest tests and the NestJS build.
 <!-- WOROD: END -->
 
 ---
