@@ -37,6 +37,19 @@ describe("SearchService", () => {
     );
   });
 
+  it("does not report previous page for empty results", async () => {
+    const result = await service.search("user-1", "test", "all", 2, 1);
+    for (const type of ["users", "skills", "communities", "posts"] as const) {
+      expect(result.pagination[type]).toMatchObject({
+        total: 0,
+        page: 2,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+      });
+    }
+  });
+
   it("rejects an empty search query", async () => {
     await expect(
       service.search("user-1", "   "),
