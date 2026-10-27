@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by ashaheen, maabdulr, hinajib, <worod_login>.*
+*This project has been created as part of the 42 curriculum by ashaheen, maabdulr, hinajib, wuabdull.*
 
 # PXL_LAB
 
@@ -124,7 +124,7 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 | Afnan Shaheen | ashaheen | Frontend Monitor, Developer (Frontend) |
 | Maram Abdulrashed | maabdulr | Project Manager (PM), Developer (Frontend) |
 | Hiba Najib | hinajib | Tech Lead, Developer (Backend) |
-| Worod [TODO surname] | [TODO] | Product Owner (PO), Developer (Backend) |
+| Wurood Abdullah | wuabdull | Product Owner (PO), Developer (Backend) |
 
 **Afnan Shaheen** — Frontend Monitor, Developer (Frontend)
 - Built interactive frontend features for the feed, chat, notifications, and search.
@@ -144,7 +144,7 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 - Integrated backend additions and verified migrations, API behaviour and production builds.
 
 <!-- WOROD: START (Team Information) -->
-**Worod [TODO]** — Product Owner (PO), Developer (Backend)
+**Wurood Abdullah** — Product Owner (PO), Developer (Backend)
 - Defined and reviewed PXL_LAB feature requirements and user workflows.
 - Developed backend features for chat, social interactions, uploads, and search.
 - Integrated backend functionality with the shared team application.
@@ -189,7 +189,7 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 | Authentication | JWT (passport-jwt), bcrypt password hashing | Stateless login tokens. Passwords are salted and hashed, never stored in plain text. |
 | Validation | class-validator (backend), form checks (frontend) | Every input is checked on both sides. |
 | API documentation | Swagger (OpenAPI) at `/api/docs` | Every endpoint is documented and can be tried in the browser. |
-| Testing | Jest (backend unit tests), ESLint and TypeScript checks (frontend) | [TODO: number] unit tests run with `npm test`. |
+| Testing | Jest (backend unit tests), ESLint and TypeScript checks (frontend) | 117 backend tests passed across 18 Jest suites (verified October 27, 2026). |
 | Deployment | Docker, Docker Compose, [TODO: nginx/Caddy] with HTTPS | One command starts the whole project. |
 
 ---
@@ -266,7 +266,6 @@ The `projects` and `tasks` tables support existing backend APIs.
 | Search | People, communities, posts and skills, filters, sorting, pagination | Afnan (UI), Worod (API) |
 | Site administration | Admin page, site roles, guest read-only access | Maram (UI), Heba (API) |
 | Privacy Policy and Terms | Public legal pages linked from the app | Afnan, Maram |
-| [TODO] | [TODO] | [TODO] |
 
 ---
 
@@ -408,21 +407,25 @@ The `projects` and `tasks` tables support existing backend APIs.
 
 
 <!-- WOROD: START (Individual Contributions) -->
-### Worod
 
-**Summary.** Worod developed and integrated backend features for PXL_LAB, including real-time communication, social interactions, file uploads, and advanced search. She also worked on integration fixes, regression testing, and verifying the shared application before merging changes.
+### Wurood Abdullah
+
+**Summary.** Wurood worked as Product Owner and Backend Developer for PXL_LAB. She contributed to feature requirements, real-time communication, social APIs, file management, advanced search, backend integration, debugging, and regression testing.
 
 **What she built**
-- **Real-time communication.** Implemented Socket.IO chat functionality including authenticated connections, channel rooms, messages, typing indicators, read receipts, and online presence. Main file: `chat.gateway.ts`.
-- **Posts, comments, and likes.** Developed REST APIs for global and community feeds, post management, nested comments, and likes, and adapted the features to the integrated backend.
-- **File uploads.** Implemented API functionality for profile avatars, chat attachments, and post images, including file validation and access checks. Main files: `uploads.controller.ts` and `uploads.service.ts`.
-- **Advanced search.** Implemented backend search for users, skills, communities, and posts, including filtering, pagination, and authorization-aware results. Main file: `search.service.ts`.
-- **Integration and testing.** Worked on notifications and shared backend integration, added regression tests, and verified the backend test suite and production build.
+- **Real-time communication.** Developed Socket.IO backend functionality for JWT-authenticated connections, channel rooms, messages, typing indicators, read receipts, online presence, and disconnect handling. Main file: `chat.gateway.ts`.
+- **Chat authorization and privacy.** Worked on channel membership checks and message delivery restrictions, including blocked-user filtering. Collaborated on integration with shared account permissions.
+- **Posts, comments, and likes.** Developed backend APIs for global and community feeds, post creation and management, nested comments, and likes. Adapted the functionality to the team's shared Prisma schema.
+- **File uploads.** Implemented backend functionality for avatars, chat attachments, and post images, including upload validation, file retrieval, image deletion, and resource access checks. Main files: `uploads.controller.ts` and `uploads.service.ts`.
+- **Advanced search.** Implemented backend search for users, skills, communities, and posts, including sorting, filtering, pagination, and access-aware results. Main file: `search.service.ts`.
+- **Notifications and moderation integration.** Contributed to integrating notification and reporting functionality with the shared backend, coordinating with teammates on related API behaviour.
+- **Integration and testing.** Helped integrate backend features into the shared NestJS application, added regression tests, verified Jest tests and production builds, and coordinated Git branch integration before merging into `main`.
 
 **Challenges**
-- **Early Socket.IO events.** Events could arrive before JWT authentication completed, causing incorrect authentication errors. She updated the gateway to wait for authentication and added a regression test.
-- **Search pagination.** Empty search results could report an incorrect previous-page state. She corrected the pagination logic and added a regression test.
-- **Shared backend integration.** The original social backend used a separate database structure. She adapted social features to the shared Prisma schema and application architecture.
+- **Socket.IO authentication timing.** Early socket events could arrive before JWT authentication completed. Updated the gateway to wait for authentication and added a regression test.
+- **Search pagination.** Empty result sets could incorrectly indicate a previous page. Fixed the pagination behaviour and added tests.
+- **Shared database integration.** Adapted social APIs from a separate prototype to the integrated PostgreSQL and Prisma data model.
+- **Cross-feature integration.** Checked how chat, search, social features, uploads, and shared authorization worked together while coordinating fixes and testing with the team.
 
 <!-- WOROD: END -->
 
@@ -457,7 +460,6 @@ We used AI tools as assistants. Every result was read, tested and changed by us 
 - **Maram** — ChatGPT helped explain React, TypeScript, API integration, Git workflows, and frontend debugging. She used it while reviewing code, planning fixes, and understanding integration issues. Claude assisted with drafting the moderation queue page patch. Maram reviewed the changes, applied the patch under her own name, and verified the integration before pushing it to main.
 
 - **Hiba** — ChatGPT helped explain NestJS, Prisma, JWT authentication, Docker and Git workflows. She used it to help develop and integrate backend features, troubleshoot configuration errors, and prepare the Docker setup. Claude helped draft the moderation backend patch. Hiba reviewed the changes and checked them with backend tests, API checks, builds and browser testing.
-- 
 <!-- WOROD: START (AI) -->
 - **Worod** — Used ChatGPT to understand NestJS, Socket.IO, JWT authentication, and backend integration concepts. It also assisted with debugging early WebSocket authentication events, reviewing search pagination, planning regression tests, checking Git integration steps, and drafting documentation. Suggested changes were reviewed against the project code and verified using Jest tests and the NestJS build.
 <!-- WOROD: END -->
@@ -468,7 +470,6 @@ We used AI tools as assistants. Every result was read, tested and changed by us 
 
 - The application was tested in Google Chrome.
 - Other browsers are not officially supported because they were not fully tested.
-- Reports can be sent and reviewed through the API, but there is no moderation screen yet.
 
 
 ## License and credits
