@@ -1,4 +1,4 @@
-*This project has been created as part of the 42 curriculum by ashaheen, maabdulr, hinajib, <worod_login>.*
+*This project has been created as part of the 42 curriculum by ashaheen, maabdulr, hinajib, wuabdull.*
 
 <!--
   HOW TO USE THIS FILE (delete this comment before submission)
@@ -126,7 +126,7 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 | Afnan Shaheen | ashaheen | Frontend Monitor, Developer (Frontend) |
 | Maram Abdulrashed | maabdulr | Project Manager (PM), Developer (Frontend) |
 | Heba [TODO surname] | hinajib | Tech Lead, Developer (Backend) |
-| Worod [TODO surname] | [TODO] | Product Owner (PO), Developer (Backend) |
+| Wurood Abdullah | wuabdull | Product Owner (PO), Developer (Backend) |
 
 **Afnan Shaheen** — Frontend Monitor, Developer (Frontend)
 - Built interactive frontend features for the feed, chat, notifications, and search.
@@ -148,7 +148,7 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 <!-- HIBA: END -->
 
 <!-- WOROD: START (Team Information) -->
-**Worod [TODO]** — Product Owner (PO), Developer (Backend)
+**Wurood Abdullah** — Product Owner (PO), Developer (Backend)
 - Defined and reviewed PXL_LAB feature requirements and user workflows.
 - Developed backend features for chat, social interactions, uploads, and search.
 - Integrated backend functionality with the shared team application.
@@ -410,21 +410,25 @@ erDiagram
 
 
 <!-- WOROD: START (Individual Contributions) -->
-### Worod
 
-**Summary.** Worod developed and integrated backend features for PXL_LAB, including real-time communication, social interactions, file uploads, and advanced search. She also worked on integration fixes, regression testing, and verifying the shared application before merging changes.
+### Wurood Abdullah
+
+**Summary.** Wurood worked as Product Owner and Backend Developer for PXL_LAB. She contributed to feature requirements, real-time communication, social APIs, file management, advanced search, backend integration, debugging, and regression testing.
 
 **What she built**
-- **Real-time communication.** Implemented Socket.IO chat functionality including authenticated connections, channel rooms, messages, typing indicators, read receipts, and online presence. Main file: `chat.gateway.ts`.
-- **Posts, comments, and likes.** Developed REST APIs for global and community feeds, post management, nested comments, and likes, and adapted the features to the integrated backend.
-- **File uploads.** Implemented API functionality for profile avatars, chat attachments, and post images, including file validation and access checks. Main files: `uploads.controller.ts` and `uploads.service.ts`.
-- **Advanced search.** Implemented backend search for users, skills, communities, and posts, including filtering, pagination, and authorization-aware results. Main file: `search.service.ts`.
-- **Integration and testing.** Worked on notifications and shared backend integration, added regression tests, and verified the backend test suite and production build.
+- **Real-time communication.** Developed Socket.IO backend functionality for JWT-authenticated connections, channel rooms, messages, typing indicators, read receipts, online presence, and disconnect handling. Main file: `chat.gateway.ts`.
+- **Chat authorization and privacy.** Worked on channel membership checks and message delivery restrictions, including blocked-user filtering. Collaborated on integration with shared account permissions.
+- **Posts, comments, and likes.** Developed backend APIs for global and community feeds, post creation and management, nested comments, and likes. Adapted the functionality to the team's shared Prisma schema.
+- **File uploads.** Implemented backend functionality for avatars, chat attachments, and post images, including upload validation, file retrieval, image deletion, and resource access checks. Main files: `uploads.controller.ts` and `uploads.service.ts`.
+- **Advanced search.** Implemented backend search for users, skills, communities, and posts, including sorting, filtering, pagination, and access-aware results. Main file: `search.service.ts`.
+- **Notifications and moderation integration.** Contributed to integrating notification and reporting functionality with the shared backend, coordinating with teammates on related API behaviour.
+- **Integration and testing.** Helped integrate backend features into the shared NestJS application, added regression tests, verified Jest tests and production builds, and coordinated Git branch integration before merging into `main`.
 
 **Challenges**
-- **Early Socket.IO events.** Events could arrive before JWT authentication completed, causing incorrect authentication errors. She updated the gateway to wait for authentication and added a regression test.
-- **Search pagination.** Empty search results could report an incorrect previous-page state. She corrected the pagination logic and added a regression test.
-- **Shared backend integration.** The original social backend used a separate database structure. She adapted social features to the shared Prisma schema and application architecture.
+- **Socket.IO authentication timing.** Early socket events could arrive before JWT authentication completed. Updated the gateway to wait for authentication and added a regression test.
+- **Search pagination.** Empty result sets could incorrectly indicate a previous page. Fixed the pagination behaviour and added tests.
+- **Shared database integration.** Adapted social APIs from a separate prototype to the integrated PostgreSQL and Prisma data model.
+- **Cross-feature integration.** Checked how chat, search, social features, uploads, and shared authorization worked together while coordinating fixes and testing with the team.
 
 <!-- WOROD: END -->
 
