@@ -1,14 +1,5 @@
 *This project has been created as part of the 42 curriculum by ashaheen, maabdulr, hinajib, wuabdull.*
 
-<!--
-  HOW TO USE THIS FILE (delete this comment before submission)
-  - Shared sections are already written. Do not rewrite them alone. Suggest changes to the team.
-  - Fill ONLY the blocks marked with your name, between START and END.
-  - Follow the PXL_LAB README guide (PXL_LAB_README_Guide.docx in this folder). Use the same prompt (CHATGPT_PROMPT.txt).
-  - This file lives in readme/ while we write it. At the end it moves to the repository root.
-  - Lines marked [TODO] must be replaced. Search the file for [TODO] before the final merge.
--->
-
 # PXL_LAB
 
 **Big ideas. Small pixels.** PXL_LAB is a campus community web app for 42 students. Students join communities, chat in real time, share posts, add friends and find people by their skills.
@@ -90,24 +81,31 @@ cp ft_transcendence/frontend/.env.example ft_transcendence/frontend/.env
 | `VITE_API_URL` | frontend | Public URL of the API |
 | `VITE_SOCKET_URL` | frontend | Public URL of the chat server |
 
+
 ### Run the project
 
-[TODO Heba (Tech Lead): replace with the final single command and the real URL.]
+From the repository root, run:
 
 ```bash
-make            # or: docker compose up --build
+make
 ```
 
-Then open **https://localhost:[TODO port]** in Chrome.
+This builds the frontend and backend, starts PostgreSQL, applies database migrations, and starts nginx.
+
+Open **https://localhost:8443** in Chrome. HTTP requests to `http://localhost:8080` redirect to HTTPS.
+
+The local certificate is self-signed. Chrome may show a warning until you trust it. See `ft_transcendence/DOCKER.md` for instructions.
 
 ### First site administrator
 
-Public sign-up never creates an admin. To make an existing account an admin:
+Public sign-up does not create an administrator. First, sign up for an account. Then run:
 
 ```bash
-[TODO Heba (Tech Lead): the docker command that runs] npm run admin:promote -- <username>
+cd ft_transcendence
+docker compose --env-file .env -f compose.yml exec backend node scripts/set-site-admin.cjs <username>
 ```
 
+Replace `<username>` with the username of the account you want to promote.
 ### Tests
 
 ```bash
@@ -125,7 +123,7 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 |---|---|---|
 | Afnan Shaheen | ashaheen | Frontend Monitor, Developer (Frontend) |
 | Maram Abdulrashed | maabdulr | Project Manager (PM), Developer (Frontend) |
-| Heba [TODO surname] | hinajib | Tech Lead, Developer (Backend) |
+| Hiba Najib | hinajib | Tech Lead, Developer (Backend) |
 | Wurood Abdullah | wuabdull | Product Owner (PO), Developer (Backend) |
 
 **Afnan Shaheen** — Frontend Monitor, Developer (Frontend)
@@ -140,12 +138,10 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 - Reviewed shared frontend changes and tested builds before integration.
 - Coordinated frontend work through member branches and the shared `frontend-merge` branch.
 
-<!-- HIBA: START (Team Information) -->
 **Hiba Najib** — Tech Lead + Developer
 - Developed the core backend using NestJS, PostgreSQL and Prisma.
 - Implemented authentication, community permissions and site administration.
 - Integrated backend additions and verified migrations, API behaviour and production builds.
-<!-- HIBA: END -->
 
 <!-- WOROD: START (Team Information) -->
 **Wurood Abdullah** — Product Owner (PO), Developer (Backend)
@@ -226,26 +222,27 @@ erDiagram
 
 | Table | Key fields | Purpose |
 |---|---|---|
-| `users` | `id` (UUID), `email` (unique), `username` (unique), `passwordHash`, `siteRole` (ADMIN, USER, GUEST), `displayName`, `bio`, `avatarPath`, `lastSeenAt` | Accounts and profiles |
+| `users` | `id`, `email`, `username`, `passwordHash`, `siteRole`, `displayName`, `bio`, `avatarPath`, `lastSeenAt` | Accounts and profiles. Email and username are unique. |
 | `groups` | `id`, `name`, `description`, `isPublic`, `createdById` | Communities |
-| `members` | `userId`, `communityId`, `role` (OWNER, ADMIN, MODERATOR, MEMBER) | Who belongs to which community, with which role |
-| `channels` | `id`, `communityId`, `name` (unique per community), `description` | Chat channels inside a community |
+| `members` | `userId`, `groupId`, `role` | Community membership and member roles |
+| `channels` | `id`, `communityId`, `name`, `description` | Chat channels inside a community. Names are unique within each community. |
+| `projects` | `id`, `name`, `description`, `groupId`, `createdById` | Projects associated with a community |
+| `tasks` | `id`, `title`, `status`, `priority`, `projectId`, `createdById`, `assigneeId` | Tasks associated with a project |
 | `Message` | `id`, `channelId`, `authorId`, `content`, `createdAt` | Chat messages |
-| `message_attachments` | `id`, `messageId`, `mimeType`, `size`, `path` | Images and PDF files sent in chat |
+| `message_attachments` | `id`, `messageId`, `mimeType`, `size`, `path` | Files attached to chat messages |
 | `message_reads` | `messageId`, `userId`, `readAt` | Read receipts |
-| `posts` | `id`, `authorId`, `communityId` (empty for the global feed), `content`, `imagePath` | Feed posts |
+| `posts` | `id`, `authorId`, `communityId`, `content`, `imagePath` | Feed posts. `communityId` is empty for global posts. |
 | `comments` | `id`, `postId`, `authorId`, `parentId`, `content` | Replies, including replies to replies |
 | `likes` | `postId`, `userId` | One like per user per post |
-| `friendships` | `requesterId`, `addresseeId`, `status` (PENDING, ACCEPTED) | Friend requests and friends |
+| `friendships` | `requesterId`, `addresseeId`, `status` | Friend requests and accepted friendships |
 | `blocks` | `blockerId`, `blockedId` | Blocked users |
-| `community_invitations` | `communityId`, `inviterId`, `inviteeId`, `role`, `status` | Invitations by username |
+| `community_invitations` | `communityId`, `inviterId`, `inviteeId`, `role`, `status` | Community invitations |
 | `reports` | `communityId`, `reporterId`, `targetType`, `reason`, `status` | Reports of posts or replies |
 | `notifications` | `userId`, `type`, `title`, `message`, `link`, `isRead` | Notifications shown in the app |
-| `skills`, `user_skills` | `name`, `userId`, `skillId` | Skills on profiles, used by search |
+| `skills` | `id`, `name` | Shared skill names |
+| `user_skills` | `userId`, `skillId` | Links users to skills |
 
-[TODO Heba: check field names against `prisma/schema.prisma` and remove the `projects` and `tasks` tables from the schema, or add them here with a reason.]
-
----
+The `projects` and `tasks` tables support existing backend APIs.
 
 ## Features List
 
@@ -264,7 +261,7 @@ erDiagram
 | Files in chat | Images and PDF with preview, download, type and size checks, access control | Afnan (UI), Worod (API) |
 | Blocking | Block and unblock users, hidden messages | Afnan (UI), Worod, Heba (API) |
 | Feed and posts | Global and community feed, images, likes, nested replies, edit, delete, paging | Afnan (UI), Worod (API) |
-| Reports | Report posts and replies, reviewers are notified | Afnan (UI), Worod (API) |
+| Reports | Report posts and replies. Owners, admins and moderators review them in the moderation queue, keep or remove the content, and resolve or dismiss the report. | Afnan (report form), Maram (queue), Worod, Heba (API) |
 | Notifications | Live pop-ups, badge, unread filter, a notification for every create, update and delete | Afnan (UI), Worod, Heba (API) |
 | Search | People, communities, posts and skills, filters, sorting, pagination | Afnan (UI), Worod (API) |
 | Site administration | Admin page, site roles, guest read-only access | Maram (UI), Heba (API) |
@@ -378,6 +375,7 @@ erDiagram
 - **Authentication interface.** Maram worked on login and sign-up screens, validation, and frontend authentication integration.
 - **Communities.** Users can view their communities and discover available communities. Main files include `CommunitiesPage.tsx` and `DiscoverCommunitiesPage.tsx`.
 - **Community details and members.** Maram built community details and member management interfaces. Main files include `CommunityDetailsPage.tsx` and `CommunityMembersPage.tsx`.
+-  **Moderation queue.** Community owners, admins and moderators can review reported posts and replies. Maram added the Reports page with actions to keep or remove content and resolve or dismiss reports.
 - **Site administration.** Site admins can view users and manage site roles. Maram worked on `AdminUsersPage.tsx` and `userApi.ts`.
 - **Profiles and avatars.** Maram worked on profile views and default avatar handling. Main files include `ProfilePage.tsx` and `PublicProfilePage.tsx`.
 - **Guest access.** Guest users receive a read-only interface without create, join, or edit actions. She worked on `GuestBanner.tsx` and `useCanWrite.ts`.
@@ -459,15 +457,10 @@ erDiagram
 We used AI tools as assistants. Every result was read, tested and changed by us before it went into the project.
 
 - **Afnan** — ChatGPT helped explain React and TypeScript concepts and review frontend integration problems. She used it while working on components, API requests, chat, and notifications. She reviewed the suggested changes, tested the frontend with the team backend, and checked the results in the browser.
-- 
 
-- **Maram** — ChatGPT helped explain React, TypeScript, API integration, Git workflows, and frontend bugs. She used it while reviewing code and planning fixes. She checked changes with the team backend, browser testing, `npm run build`, and `npm run lint`.
+- **Maram** — ChatGPT helped explain React, TypeScript, API integration, Git workflows, and frontend debugging. She used it while reviewing code, planning fixes, and understanding integration issues. Claude assisted with drafting the moderation queue page patch. Maram reviewed the changes, applied the patch under her own name, and verified the integration before pushing it to main.
 
-
-
-<!-- HEBA: START (AI) -->
-- **Heba** — [TODO]
-<!-- HEBA: END -->
+- **Hiba** — ChatGPT helped explain NestJS, Prisma, JWT authentication, Docker and Git workflows. She used it to help develop and integrate backend features, troubleshoot configuration errors, and prepare the Docker setup. Claude helped draft the moderation backend patch. Hiba reviewed the changes and checked them with backend tests, API checks, builds and browser testing.
 <!-- WOROD: START (AI) -->
 - **Worod** — Used ChatGPT to understand NestJS, Socket.IO, JWT authentication, and backend integration concepts. It also assisted with debugging early WebSocket authentication events, reviewing search pagination, planning regression tests, checking Git integration steps, and drafting documentation. Suggested changes were reviewed against the project code and verified using Jest tests and the NestJS build.
 <!-- WOROD: END -->

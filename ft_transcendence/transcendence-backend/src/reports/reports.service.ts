@@ -131,7 +131,7 @@ export class ReportsService {
           type: "REPORT_CREATED",
           title: "New report",
           message: `${reporter.username} submitted a new report.`,
-          link: `/communities/${communityId}`,
+          link: `/communities/${communityId}/reports`,
         }),
       ),
     );
@@ -163,6 +163,9 @@ export class ReportsService {
         id: true,
         status: true,
         reporterId: true,
+        targetType: true,
+        postId: true,
+        commentId: true,
       },
     });
 
@@ -174,13 +177,31 @@ export class ReportsService {
       throw new BadRequestException("Report has already been reviewed");
     }
 
+    if (dto.removeContent && dto.status !== ReportStatus.RESOLVED) {
+      throw new BadRequestException(
+        "Content can only be removed when the report is resolved",
+      );
+    }
+
+    const reviewed = {
+      status: dto.status,
+      reviewedById: reviewerId,
+      reviewedAt: new Date(),
+    };
+
+    let removedAuthorId: string | null = null;
+
+    if (dto.removeContent) {
+      removedAuthorId = await this.removeReportedContent(
+        communityId,
+        report,
+        reviewed,
+      );
+    }
+
     const updatedReport = await this.prisma.report.update({
       where: { id: reportId },
-      data: {
-        status: dto.status,
-        reviewedById: reviewerId,
-        reviewedAt: new Date(),
-      },
+      data: reviewed,
       include: this.includeRelations(),
     });
 
@@ -194,7 +215,81 @@ export class ReportsService {
       },
     );
 
+    if (removedAuthorId && removedAuthorId !== reviewerId) {
+      const what =
+        report.targetType === ReportTargetType.POST ? "post" : "reply";
+      await this.notificationsService.create(removedAuthorId, {
+        type: "REPORT_CONTENT_REMOVED",
+        title: "Content removed",
+        message: `A moderator removed your ${what} after a report.`,
+        link: `/communities/${communityId}`,
+      });
+    }
+
     return updatedReport;
+  }
+
+  // Deletes the reported post or reply and closes the other open reports
+  // about it. Returns the author of the removed content, or null.
+  private async removeReportedContent(
+    communityId: string,
+    report: {
+      id: string;
+      targetType: ReportTargetType;
+      postId: string | null;
+      commentId: string | null;
+    },
+    reviewed: {
+      status: ReportStatus;
+      reviewedById: string;
+      reviewedAt: Date;
+    },
+  ): Promise<string | null> {
+    if (report.targetType === ReportTargetType.POST && report.postId) {
+      const post = await this.prisma.post.findUnique({
+        where: { id: report.postId },
+        select: { authorId: true },
+      });
+      if (!post) return null;
+
+      await this.prisma.$transaction([
+        this.prisma.report.updateMany({
+          where: {
+            communityId,
+            postId: report.postId,
+            status: ReportStatus.OPEN,
+            id: { not: report.id },
+          },
+          data: reviewed,
+        }),
+        this.prisma.post.delete({ where: { id: report.postId } }),
+      ]);
+      return post.authorId;
+    }
+
+    if (report.targetType === ReportTargetType.COMMENT && report.commentId) {
+      const comment = await this.prisma.comment.findUnique({
+        where: { id: report.commentId },
+        select: { authorId: true },
+      });
+      if (!comment) return null;
+
+      await this.prisma.$transaction([
+        this.prisma.report.updateMany({
+          where: {
+            communityId,
+            commentId: report.commentId,
+            status: ReportStatus.OPEN,
+            id: { not: report.id },
+          },
+          data: reviewed,
+        }),
+        this.prisma.comment.delete({ where: { id: report.commentId } }),
+      ]);
+      return comment.authorId;
+    }
+
+    return null;
   }
 
   private includeRelations() {

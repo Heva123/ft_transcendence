@@ -11,6 +11,7 @@ import AdminUsersPage from "./pages/AdminUsersPage";
 import ChannelPage from "./pages/ChannelPage";
 import ChannelsPage from "./pages/ChannelsPage";
 import CommunityPage from "./pages/CommunityPage";
+import CommunityReportsPage from "./pages/CommunityReportsPage";
 import CreatePostPage from "./pages/CreatePostPage";
 import FriendsPage from "./pages/FriendsPage";
 import HomePage from "./pages/HomePage";
@@ -82,6 +83,11 @@ function AppRoutes() {
         element={
           <RolesPermissionsRoute />
         }
+      />
+
+      <Route
+        path="/communities/:communityId/reports"
+        element={<CommunityReportsPage />}
       />
 
       <Route
