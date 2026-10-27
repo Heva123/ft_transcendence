@@ -1,14 +1,5 @@
 *This project has been created as part of the 42 curriculum by ashaheen, maabdulr, hinajib, <worod_login>.*
 
-<!--
-  HOW TO USE THIS FILE (delete this comment before submission)
-  - Shared sections are already written. Do not rewrite them alone. Suggest changes to the team.
-  - Fill ONLY the blocks marked with your name, between START and END.
-  - Follow the PXL_LAB README guide (PXL_LAB_README_Guide.docx in this folder). Use the same prompt (CHATGPT_PROMPT.txt).
-  - This file lives in readme/ while we write it. At the end it moves to the repository root.
-  - Lines marked [TODO] must be replaced. Search the file for [TODO] before the final merge.
--->
-
 # PXL_LAB
 
 **Big ideas. Small pixels.** PXL_LAB is a campus community web app for 42 students. Students join communities, chat in real time, share posts, add friends and find people by their skills.
@@ -264,7 +255,7 @@ erDiagram
 | Files in chat | Images and PDF with preview, download, type and size checks, access control | Afnan (UI), Worod (API) |
 | Blocking | Block and unblock users, hidden messages | Afnan (UI), Worod, Heba (API) |
 | Feed and posts | Global and community feed, images, likes, nested replies, edit, delete, paging | Afnan (UI), Worod (API) |
-| Reports | Report posts and replies, reviewers are notified | Afnan (UI), Worod (API) |
+| Reports | Report posts and replies. Owners, admins and moderators review them in the moderation queue, keep or remove the content, and resolve or dismiss the report. | Afnan (report form), Maram (queue), Worod, Heba (API) |
 | Notifications | Live pop-ups, badge, unread filter, a notification for every create, update and delete | Afnan (UI), Worod, Heba (API) |
 | Search | People, communities, posts and skills, filters, sorting, pagination | Afnan (UI), Worod (API) |
 | Site administration | Admin page, site roles, guest read-only access | Maram (UI), Heba (API) |
@@ -378,6 +369,7 @@ erDiagram
 - **Authentication interface.** Maram worked on login and sign-up screens, validation, and frontend authentication integration.
 - **Communities.** Users can view their communities and discover available communities. Main files include `CommunitiesPage.tsx` and `DiscoverCommunitiesPage.tsx`.
 - **Community details and members.** Maram built community details and member management interfaces. Main files include `CommunityDetailsPage.tsx` and `CommunityMembersPage.tsx`.
+-  **Moderation queue.** Community owners, admins and moderators can review reported posts and replies. Maram added the Reports page with actions to keep or remove content and resolve or dismiss reports.
 - **Site administration.** Site admins can view users and manage site roles. Maram worked on `AdminUsersPage.tsx` and `userApi.ts`.
 - **Profiles and avatars.** Maram worked on profile views and default avatar handling. Main files include `ProfilePage.tsx` and `PublicProfilePage.tsx`.
 - **Guest access.** Guest users receive a read-only interface without create, join, or edit actions. She worked on `GuestBanner.tsx` and `useCanWrite.ts`.
@@ -455,11 +447,8 @@ erDiagram
 We used AI tools as assistants. Every result was read, tested and changed by us before it went into the project.
 
 - **Afnan** — ChatGPT helped explain React and TypeScript concepts and review frontend integration problems. She used it while working on components, API requests, chat, and notifications. She reviewed the suggested changes, tested the frontend with the team backend, and checked the results in the browser.
-- 
 
-- **Maram** — ChatGPT helped explain React, TypeScript, API integration, Git workflows, and frontend bugs. She used it while reviewing code and planning fixes. She checked changes with the team backend, browser testing, `npm run build`, and `npm run lint`.
-
-
+- **Maram** — ChatGPT helped explain React, TypeScript, API integration, Git workflows, and frontend debugging. She used it while reviewing code, planning fixes, and understanding integration issues. Claude assisted with drafting the moderation queue page patch. Maram reviewed the changes, applied the patch under her own name, and verified the integration before pushing it to main.
 
 <!-- HEBA: START (AI) -->
 - **Heba** — [TODO]
