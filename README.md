@@ -189,7 +189,7 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 | Authentication | JWT (passport-jwt), bcrypt password hashing | Stateless login tokens. Passwords are salted and hashed, never stored in plain text. |
 | Validation | class-validator (backend), form checks (frontend) | Every input is checked on both sides. |
 | API documentation | Swagger (OpenAPI) at `/api/docs` | Every endpoint is documented and can be tried in the browser. |
-| Testing | Jest (backend unit tests), ESLint and TypeScript checks (frontend) | [TODO: number] unit tests run with `npm test`. |
+| Testing | Jest (backend unit tests), ESLint and TypeScript checks (frontend) | 117 backend tests passed across 18 Jest suites (verified October 27, 2026). |
 | Deployment | Docker, Docker Compose, [TODO: nginx/Caddy] with HTTPS | One command starts the whole project. |
 
 ---
@@ -266,7 +266,6 @@ The `projects` and `tasks` tables support existing backend APIs.
 | Search | People, communities, posts and skills, filters, sorting, pagination | Afnan (UI), Worod (API) |
 | Site administration | Admin page, site roles, guest read-only access | Maram (UI), Heba (API) |
 | Privacy Policy and Terms | Public legal pages linked from the app | Afnan, Maram |
-| [TODO] | [TODO] | [TODO] |
 
 ---
 
@@ -471,7 +470,6 @@ We used AI tools as assistants. Every result was read, tested and changed by us 
 
 - The application was tested in Google Chrome.
 - Other browsers are not officially supported because they were not fully tested.
-- Reports can be sent and reviewed through the API, but there is no moderation screen yet.
 
 
 ## License and credits
