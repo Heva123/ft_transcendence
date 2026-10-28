@@ -56,31 +56,21 @@
 
 | Tool | Version |
 |---|---|
-| Docker Engine | [TODO: version] |
-| Docker Compose | [TODO: version] |
+| Docker Engine | Any recent version (tested on the 42 Abu Dhabi lab computers) |
+| Docker Compose | v2 with `--wait` (check with `docker compose version`) |
 | Make | any |
 | A modern browser | Latest Google Chrome |
 
-[TODO Heba (Tech Lead): confirm the list once the Docker setup is final.]
-
 ### Environment variables
 
-Copy the example files and fill in the secrets. The real `.env` files are ignored by Git.
+The first `make` creates `ft_transcendence/.env` with a random database password and a random JWT secret. This file is ignored by Git. The template is `ft_transcendence/.env.example`.
 
-```bash
-cp ft_transcendence/transcendence-backend/.env.example ft_transcendence/transcendence-backend/.env
-cp ft_transcendence/frontend/.env.example ft_transcendence/frontend/.env
-```
-
-| Variable | Where | Meaning |
-|---|---|---|
-| `DATABASE_URL` | backend | PostgreSQL connection string |
-| `JWT_SECRET` | backend | Long random secret used to sign login tokens |
-| `JWT_EXPIRES_IN_SECONDS` | backend | Login token lifetime (default 900) |
-| `PORT` | backend | API port inside the container (default 3000) |
-| `VITE_API_URL` | frontend | Public URL of the API |
-| `VITE_SOCKET_URL` | frontend | Public URL of the chat server |
-
+| Variable | Meaning |
+|---|---|
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | Database login and name |
+| `JWT_SECRET` | Long random secret used to sign login tokens |
+| `JWT_EXPIRES_IN_SECONDS` | Login token lifetime (default 900) |
+| `HTTP_PORT`, `HTTPS_PORT` | Ports on your computer (default 8080 and 8443) |
 
 ### Run the project
 
@@ -106,12 +96,15 @@ docker compose --env-file .env -f compose.yml exec backend node scripts/set-site
 ```
 
 Replace `<username>` with the username of the account you want to promote.
+
 ### Tests
 
 ```bash
-cd ft_transcendence/transcendence-backend && npm test     # backend unit tests
+cd ft_transcendence/transcendence-backend && npm test    # 117 backend unit tests
 cd ft_transcendence/frontend && npm run lint             # frontend lint and type check
 ```
+
+Before submission, the team also ran end-to-end tests on the Docker version with Playwright: four users at the same time in Chromium, Firefox and WebKit. All 205 end-to-end checks passed.
 
 ---
 
@@ -131,6 +124,7 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 - Connected frontend components to backend API endpoints and WebSocket (Socket.IO) events.
 - Tested frontend features with the team backend and fixed integration issues.
 - Monitored frontend structure, shared components, and API integration.
+- Planned and ran the end-to-end tests with four users, and reported each failure to its owner.
 
 **Maram Abdulrashed** — Project Manager (PM), Developer (Frontend)
 - Managed task planning, frontend responsibilities, and integration work across the team.
@@ -189,8 +183,8 @@ cd ft_transcendence/frontend && npm run lint             # frontend lint and typ
 | Authentication | JWT (passport-jwt), bcrypt password hashing | Stateless login tokens. Passwords are salted and hashed, never stored in plain text. |
 | Validation | class-validator (backend), form checks (frontend) | Every input is checked on both sides. |
 | API documentation | Swagger (OpenAPI) at `/api/docs` | Every endpoint is documented and can be tried in the browser. |
-| Testing | Jest (backend unit tests), ESLint and TypeScript checks (frontend) | 117 backend tests passed across 18 Jest suites (verified October 27, 2026). |
-| Deployment | Docker, Docker Compose, [TODO: nginx/Caddy] with HTTPS | One command starts the whole project. |
+| Testing | Jest (backend unit tests), Playwright (end-to-end tests), ESLint and TypeScript checks (frontend) | 117 backend tests passed across 18 Jest suites (verified October 27, 2026). 205 end-to-end checks with four users passed on the Docker version. |
+| Deployment | Docker, Docker Compose, nginx 1.28 with HTTPS | One command starts the whole project. Only nginx is open to the host. |
 
 ---
 
@@ -250,41 +244,41 @@ The `projects` and `tasks` tables support existing backend APIs.
 
 | Feature | What it does | Who |
 |---|---|---|
-| Sign up and log in | Email and password accounts, validation on both sides, hashed passwords, JWT sessions | Maram (UI), Heba (API) |
-| Profiles | Display name, bio, skills, avatar with a default image, public profile page | Maram, Afnan (UI), Heba (API), Worod (uploads) |
+| Sign up and log in | Email and password accounts, validation on both sides, hashed passwords, JWT sessions | Maram (UI), Hiba (API) |
+| Profiles | Display name, bio, skills, avatar with a default image, public profile page | Maram, Afnan (UI), Hiba (API), Wurood (uploads) |
 | Settings | Edit account details, blocked users | Maram |
-| Friends | Friend requests, accept, remove, friends list with online status | Afnan (UI), Heba (API) |
-| Communities | Create, edit, delete, discover, join, leave | Maram (UI), Heba (API) |
-| Members and roles | Invite by username, change roles, remove members, roles page | Maram, Afnan (UI), Heba (API) |
-| Channels | Create, edit and delete channels by role | Afnan (UI), Heba (API) |
-| Real-time chat | Messages, typing, read receipts, presence, unread counters, reconnect | Afnan (UI), Worod (server) |
-| Files in chat | Images and PDF with preview, download, type and size checks, access control | Afnan (UI), Worod (API) |
-| Blocking | Block and unblock users, hidden messages | Afnan (UI), Worod, Heba (API) |
-| Feed and posts | Global and community feed, images, likes, nested replies, edit, delete, paging | Afnan (UI), Worod (API) |
-| Reports | Report posts and replies. Owners, admins and moderators review them in the moderation queue, keep or remove the content, and resolve or dismiss the report. | Afnan (report form), Maram (queue), Worod, Heba (API) |
-| Notifications | Live pop-ups, badge, unread filter, a notification for every create, update and delete | Afnan (UI), Worod, Heba (API) |
-| Search | People, communities, posts and skills, filters, sorting, pagination | Afnan (UI), Worod (API) |
-| Site administration | Admin page, site roles, guest read-only access | Maram (UI), Heba (API) |
+| Friends | Friend requests, accept, remove, friends list with online status | Afnan (UI), Hiba (API) |
+| Communities | Create, edit, delete, discover, join, leave | Maram (UI), Hiba (API) |
+| Members and roles | Invite by username, change roles, remove members, roles page | Maram, Afnan (UI), Hiba (API) |
+| Channels | Create, edit and delete channels by role | Afnan (UI), Hiba (API) |
+| Real-time chat | Messages, typing, read receipts, presence, unread counters, reconnect | Afnan (UI), Wurood (server) |
+| Files in chat | Images and PDF with preview, download, type and size checks, access control | Afnan (UI), Wurood (API) |
+| Blocking | Block and unblock users, hidden messages | Afnan (UI), Wurood, Hiba (API) |
+| Feed and posts | Global and community feed, images, likes, nested replies, edit, delete, paging | Afnan (UI), Wurood (API) |
+| Reports | Report posts and replies. Owners, admins and moderators review them in the moderation queue, keep or remove the content, and resolve or dismiss the report. | Afnan (report form), Maram (queue), Wurood, Hiba (API) |
+| Notifications | Live pop-ups, badge, unread filter, a notification for every create, update and delete | Afnan (UI), Wurood, Hiba (API) |
+| Search | People, communities, posts and skills, filters, sorting, pagination | Afnan (UI), Wurood (API) |
+| Site administration | Admin page, site roles, guest read-only access | Maram (UI), Hiba (API) |
 | Privacy Policy and Terms | Public legal pages linked from the app | Afnan, Maram |
 
 ---
 
 ## Modules
 
-**Total: 16 points** (14 required). [TODO: confirm the final list as a team.]
+**Total: 16 points** (14 required).
 
 | Module | Type | Points | Who |
 |---|---|---|---|
 | Use a framework for frontend and backend (React + NestJS) | Major | 2 | Everyone |
-| Real-time features with WebSockets | Major | 2 | Worod, Afnan |
-| User interaction: chat, profiles, friends | Major | 2 | Afnan, Worod, Heba |
-| Standard user management and authentication | Major | 2 | Heba, Maram |
-| Organization system (communities) | Major | 2 | Heba, Maram |
-| Advanced permissions system | Major | 2 | Heba, Maram |
-| Use an ORM (Prisma) | Minor | 1 | Heba, Worod |
-| Notification system for all create, update and delete actions | Minor | 1 | Worod, Heba, Afnan |
-| Advanced search with filters, sorting and pagination | Minor | 1 | Worod, Afnan |
-| File upload and management | Minor | 1 | Worod, Afnan |
+| Real-time features with WebSockets | Major | 2 | Wurood, Afnan |
+| User interaction: chat, profiles, friends | Major | 2 | Afnan, Wurood, Hiba |
+| Standard user management and authentication | Major | 2 | Hiba, Maram |
+| Organization system (communities) | Major | 2 | Hiba, Maram |
+| Advanced permissions system | Major | 2 | Hiba, Maram |
+| Use an ORM (Prisma) | Minor | 1 | Hiba, Wurood |
+| Notification system for all create, update and delete actions | Minor | 1 | Wurood, Hiba, Afnan |
+| Advanced search with filters, sorting and pagination | Minor | 1 | Wurood, Afnan |
+| File upload and management | Minor | 1 | Wurood, Afnan |
 | **Total** | | **16** | |
 
 <!-- One writer per module (marked below). The others check it. -->
@@ -306,7 +300,7 @@ The `projects` and `tasks` tables support existing backend APIs.
 
 
 ### Standard user management (Major, 2 pts)
-- **Why we chose it:** [CHECK: confirm the team's reason for choosing this module.] Student accounts support profiles and authenticated access.
+- **Why we chose it:** Every student needs a secure account, an editable profile, an avatar and an online status. Accounts are the base for every other feature.
 - **How it works:** Students sign up and log in through `auth.controller.ts`. Passwords are hashed with bcrypt, and JWT authentication protects account endpoints. Users edit their profiles through `PATCH /api/users/me`. Profiles include avatars, bios and skills, with a default image when no avatar is uploaded.
 
 
@@ -316,7 +310,7 @@ The `projects` and `tasks` tables support existing backend APIs.
 
 
 ### Advanced permissions (Major, 2 pts)
-- **Why we chose it:** [CHECK: confirm the team's reason for choosing this module.] Site roles separate account administration from community permissions.
+- **Why we chose it:** Communities need owners, admins and moderators, and the site needs administrators and read-only guests. Site roles keep account administration separate from community permissions.
 - **How it works:** Prisma stores each account's site role as admin, user or guest. `SiteAdminGuard` restricts `/api/admin/users` to site administrators. Administrators can list, create, edit and delete accounts. Guest write restrictions apply to HTTP endpoints and WebSocket (Socket.IO) chat events.
 
 
@@ -327,11 +321,11 @@ The `projects` and `tasks` tables support existing backend APIs.
 <!-- WOROD: END -->
 
 ### Notification system (Minor, 1 pt)
- **Why we chose it:** We wanted students to know when something important happens. Notifications help users follow friend requests, replies, likes, and community activity.
+- **Why we chose it:** We wanted students to know when something important happens. Notifications help users follow friend requests, replies, likes, and community activity.
 - **How it works:** The backend creates notification records for supported actions. WebSocket (Socket.IO) sends notification updates in real time. The frontend uses `useNotifications.ts` and `notificationSocket.ts` to receive updates. The interface displays pop-ups, unread counts, and notification lists.
 
 ### Advanced search (Minor, 1 pt)
- **Why we chose it:** We wanted students to find people and content without checking every page. Filters, sorting, and pagination make search results easier to explore.
+- **Why we chose it:** We wanted students to find people and content without checking every page. Filters, sorting, and pagination make search results easier to explore.
 - **How it works:** `SearchPage.tsx` provides search interfaces for people, communities, posts, and skills. Users enter search terms and select available filters or sorting options. `usePagedSearch.ts` manages requests and paginated results. The backend API returns matching records from the database.
 
 <!-- WOROD: START (Module) -->
@@ -354,11 +348,12 @@ The `projects` and `tasks` tables support existing backend APIs.
 - **Feed and posts.** Users view global and community posts, add likes, and write replies. Afnan built `Feed.tsx`, `PostCard.tsx`, and `feedApi.ts`.
 - **Nested replies.** Users reply to posts and other replies. Afnan developed the reply interface using `ReplyItem.tsx`.
 - **Real-time chat.** The channel interface shows messages, typing indicators, read receipts, and online members. She worked on `ChatArea.tsx` and `useChatSocket.ts`.
-- **Chat file attachments.** Users send images and PDF files through chat. She added file selection and upload handling using `ImageAttachmentPicker.tsx` and `uploadRequest()`.
+- **Chat file attachments.** Users send images and PDF files through chat. She added file selection, checks and upload progress using `AttachmentPicker.tsx` and `uploadRequest()`.
 - **Notifications.** The frontend shows notification pop-ups, unread counts, and notification lists. She worked on `useNotifications.ts` and `notificationSocket.ts`.
 - **Advanced search.** Users search for people, communities, posts, and skills. She implemented frontend search and pagination using `SearchPage.tsx` and `usePagedSearch.ts`.
 - **Frontend API integration.** Afnan prepared feed API integration and configured the frontend API proxy. She also changed frontend code to handle string IDs consistently.
 - **Shared application layout.** Afnan built reusable layout components, including `AppShell.tsx`, `Sidebar.tsx`, and `TopBar.tsx`.
+- **End-to-end tests.** As Frontend Monitor, she tested the whole app on the Docker version with a Playwright test script. It runs 205 end-to-end checks with four users at the same time, in Chromium, Firefox and WebKit, and writes a report with a screenshot of every failure.
 
 **Challenges**
 - **Unexpected logouts.** Some page loads ended with a session error during multi-user testing. Afnan traced the issue to an early `auth:error` event. She changed the flow to check the login through the API before logging out.
@@ -447,7 +442,9 @@ The `projects` and `tasks` tables support existing backend APIs.
 | JWT | https://jwt.io/introduction |
 | OWASP password storage | https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html |
 | WCAG 2.1 | https://www.w3.org/TR/WCAG21 |
-| [TODO: add the tutorials and articles you really used] | |
+| Playwright | https://playwright.dev |
+| Docker Compose | https://docs.docker.com/compose |
+| nginx | https://nginx.org/en/docs |
 
 ### How we used AI
 
@@ -455,21 +452,22 @@ The `projects` and `tasks` tables support existing backend APIs.
 
 We used AI tools as assistants. Every result was read, tested and changed by us before it went into the project.
 
-- **Afnan** — ChatGPT helped explain React and TypeScript concepts and review frontend integration problems. She used it while working on components, API requests, chat, and notifications. She reviewed the suggested changes, tested the frontend with the team backend, and checked the results in the browser.
+- **Afnan** — ChatGPT helped explain React and TypeScript concepts and review frontend integration problems. She used it while working on components, API requests, chat, and notifications. Claude helped her plan and write the end-to-end test script, find the causes of failed tests, and draft parts of the test report. She reviewed every change, ran the tests herself, and checked the results in the browser.
 
 - **Maram** — ChatGPT helped explain React, TypeScript, API integration, Git workflows, and frontend debugging. She used it while reviewing code, planning fixes, and understanding integration issues. Claude assisted with drafting the moderation queue page patch. Maram reviewed the changes, applied the patch under her own name, and verified the integration before pushing it to main.
 
 - **Hiba** — ChatGPT helped explain NestJS, Prisma, JWT authentication, Docker and Git workflows. She used it to help develop and integrate backend features, troubleshoot configuration errors, and prepare the Docker setup. Claude helped draft the moderation backend patch. Hiba reviewed the changes and checked them with backend tests, API checks, builds and browser testing.
 <!-- WOROD: START (AI) -->
-- **Worod** — Used ChatGPT to understand NestJS, Socket.IO, JWT authentication, and backend integration concepts. It also assisted with debugging early WebSocket authentication events, reviewing search pagination, planning regression tests, checking Git integration steps, and drafting documentation. Suggested changes were reviewed against the project code and verified using Jest tests and the NestJS build.
+- **Wurood** — Used ChatGPT to understand NestJS, Socket.IO, JWT authentication, and backend integration concepts. It also assisted with debugging early WebSocket authentication events, reviewing search pagination, planning regression tests, checking Git integration steps, and drafting documentation. Suggested changes were reviewed against the project code and verified using Jest tests and the NestJS build.
 <!-- WOROD: END -->
 
 ---
 
 ## Known Limitations
 
-- The application was tested in Google Chrome.
-- Other browsers are not officially supported because they were not fully tested.
+- The main target is the latest Google Chrome. The end-to-end tests also pass in Firefox and WebKit (the engine of Safari).
+- HTTPS uses a self-signed certificate for localhost. The browser shows a warning until the certificate is trusted (see `ft_transcendence/DOCKER.md`).
+- The app runs on one computer with Docker. A public deployment would need a real domain and certificate.
 
 
 ## License and credits
