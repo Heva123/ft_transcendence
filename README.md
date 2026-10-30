@@ -100,7 +100,7 @@ Replace `<username>` with the username of the account you want to promote.
 ### Tests
 
 ```bash
-cd ft_transcendence/transcendence-backend && npm test    # 117 backend unit tests
+cd ft_transcendence/backend && npm test    # 117 backend unit tests
 cd ft_transcendence/frontend && npm run lint             # frontend lint and type check
 ```
 
@@ -199,7 +199,7 @@ ft_transcendence/
 │       ├── admin/  auth/  chat/  communities/  feed/  friends/  invitations/
 │       └── legal/  notifications/  presence/  profile/  reports/  search/
 │           └── api/  components/  hooks/  pages/  types/  utils/   (same folders in every feature)
-└── transcendence-backend/
+└── backend/
     ├── prisma/                           database schema and migrations
     └── src/                              one NestJS module per feature (controller, service, DTOs, tests)
 ```

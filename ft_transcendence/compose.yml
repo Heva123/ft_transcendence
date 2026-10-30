@@ -18,7 +18,7 @@ services:
   migrate:
     profiles: ["tools"]
     build:
-      context: ./transcendence-backend
+      context: ./backend
       target: build
     environment:
       DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}?schema=public
@@ -30,7 +30,7 @@ services:
 
   backend:
     build:
-      context: ./transcendence-backend
+      context: ./backend
       target: runtime
     environment:
       NODE_ENV: production
