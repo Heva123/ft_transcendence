@@ -1,0 +1,42 @@
+/*
+  Tailwind CSS v4, set up with the PXL_LAB design tokens.
+
+  - No Preflight (Tailwind's CSS reset): the pages written with CSS files
+    keep exactly their look. Only the theme and the utility classes load.
+  - The theme below uses the same values as tokens.css, so a Tailwind class
+    such as bg-plum, border-ink, rounded-panel or font-heading gives the same
+    colour, border, radius or font as the rest of the app.
+  - Tailwind's spacing scale (p-4 = 16px) already follows our 4px grid.
+*/
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
+@theme {
+  --color-plum: #8a335d;
+  --color-yellow: #f2c255;
+  --color-pink: #f0afce;
+  --color-cyan: #a3e5f0;
+  --color-teal: #3a7f8a;
+  --color-background: #f5efe3;
+  --color-surface: #fffdf8;
+  --color-ink: #30232d;
+  --color-muted: #6f6268;
+  --color-lilac: #d9c7f0;
+  --color-mint: #c9ecd9;
+  --color-peach: #f6c9b8;
+
+  --font-heading: "Handjet", sans-serif;
+  --font-body: "IBM Plex Mono", monospace;
+
+  --radius-control: 4px;
+  --radius-panel: 8px;
+
+  --shadow-block: 4px 4px 0 #30232d;
+
+  --animate-toast-in: toast-in 180ms ease-out;
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+  }
+}

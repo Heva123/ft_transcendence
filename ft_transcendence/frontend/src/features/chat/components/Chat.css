@@ -71,18 +71,7 @@
   background: var(--color-surface);
 }
 
-.connection-status p {
-  margin: 0;
-  font-size: 11px;
-}
-
-.connection-status button {
-  padding: 8px 16px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  font: inherit;
-  font-size: 11px;
-}
+/* .connection-status: styled with Tailwind classes in ConnectionStatus.tsx */
 
 .message-send-error {
   margin: 10px 0 0;

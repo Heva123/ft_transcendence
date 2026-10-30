@@ -119,23 +119,7 @@
   background: var(--color-surface);
 }
 
-.search-pagination {
-  display: flex;
-  justify-content: center;
-  gap: var(--space-8);
-  margin-top: var(--space-24);
-}
-
-.search-pagination button {
-  min-width: 40px;
-  min-height: 40px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-}
-
-.search-pagination button:disabled {
-  opacity: 0.4;
-}
+/* .search-pagination: styled with Tailwind classes in SearchPager.tsx */
 
 @media (max-width: 900px) {
   .people-results {
@@ -143,10 +127,6 @@
   }
 }
 
-.search-pagination button.active {
-  background: var(--color-pink);
-  font-weight: 700;
-}
 
 .community-search-results {
   display: flex;
@@ -187,34 +167,7 @@
   gap: var(--space-16);
 }
 
-.search-empty {
-  max-width: 620px;
-  padding: var(--space-24);
-}
-
-.search-empty h2 {
-  margin: 0 0 var(--space-8);
-  font-family: var(--font-heading);
-  font-size: 32px;
-}
-
-.search-empty__subtitle {
-  margin-bottom: var(--space-24);
-}
-
-.search-empty strong {
-  display: block;
-  margin-bottom: var(--space-8);
-}
-
-.search-empty button {
-  margin-top: var(--space-12);
-  min-height: 44px;
-  padding: 0 var(--space-16);
-  border: 1px solid var(--color-border);
-  background: var(--color-plum);
-  color: white;
-}
+/* .search-empty: styled with Tailwind classes in SearchEmptyState.tsx */
 
 .search-filters {
   display: flex;
@@ -237,11 +190,6 @@
   font: inherit;
 }
 
-.search-page-count {
-  margin: 0 0 var(--space-16);
-  text-align: right;
-  font-size: 12px;
-}
 
 .person-result > a {
   display: block;

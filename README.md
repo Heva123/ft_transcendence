@@ -163,7 +163,7 @@ Before submission, the team also ran end-to-end tests on the Docker version with
 |---|---|
 | Code and version control | GitHub (`Heva123/ft_transcendence`) |
 | Task tracking | Weekly team task plan |
-| Design | Sigma |
+| Design | Figma |
 | Communication | WhatsApp |
 
 
@@ -175,7 +175,7 @@ Before submission, the team also ran end-to-end tests on the Docker version with
 | Layer | Technology | Why we chose it |
 |---|---|---|
 | Frontend | React 19, TypeScript, Vite, React Router 7 | React is a widely used framework with a large ecosystem. TypeScript catches errors before runtime. Vite gives fast builds. |
-| Styling | Plain CSS with design tokens (`styles/tokens.css`) | One shared palette, spacing and typography for every screen, following our UI/UX design. |
+| Styling | Tailwind CSS v4 with our design tokens (`styles/tailwind.css`, `styles/tokens.css`) | The Tailwind theme uses the same colours, fonts, radius and shadow as our Figma design, so utility classes and the per-screen CSS files look the same. Utility classes keep a component's style next to its markup. |
 | Real-time | Socket.IO (client and server) | Reliable WebSocket connection with automatic reconnection and rooms per channel. |
 | Backend | NestJS 11 (Node.js, TypeScript) | Clear structure with modules, guards and dependency injection. The same language as the frontend. |
 | Database | PostgreSQL 17 | Relational data (users, communities, members, messages) with strong consistency. |
@@ -353,6 +353,7 @@ The `projects` and `tasks` tables support existing backend APIs.
 - **Advanced search.** Users search for people, communities, posts, and skills. She implemented frontend search and pagination using `SearchPage.tsx` and `usePagedSearch.ts`.
 - **Frontend API integration.** Afnan prepared feed API integration and configured the frontend API proxy. She also changed frontend code to handle string IDs consistently.
 - **Shared application layout.** Afnan built reusable layout components, including `AppShell.tsx`, `Sidebar.tsx`, and `TopBar.tsx`.
+- **Tailwind CSS.** Afnan added Tailwind CSS v4 to the frontend. The theme in `tailwind.css` maps our design tokens, so `bg-plum` or `shadow-block` give the same result as the old CSS. Notification pop-ups, the chat connection status and the search pager and empty state use Tailwind classes.
 - **End-to-end tests.** As Frontend Monitor, she tested the whole app on the Docker version with a Playwright test script. It runs 205 end-to-end checks with four users at the same time, in Chromium, Firefox and WebKit, and writes a report with a screenshot of every failure.
 
 **Challenges**

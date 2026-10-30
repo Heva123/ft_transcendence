@@ -11,8 +11,9 @@ function ConnectionStatus({ status }: ConnectionStatusProps) {
 
   return (
     <div className="connection-status">
-      <p>Connection lost. Your draft is kept. Reconnecting…</p>
-      <button type="button" onClick={() => socket.connect()}>
+      <p className="m-0 text-[11px]">Connection lost. Your draft is kept. Reconnecting…</p>
+      <button type="button" className="border border-ink bg-surface px-4 py-2 text-[11px]"
+        onClick={() => socket.connect()}>
         Retry connection
       </button>
     </div>

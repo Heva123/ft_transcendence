@@ -1,3 +1,6 @@
+// Tailwind classes shared by every page button.
+const PAGE_BUTTON = 'min-h-10 min-w-10 border border-ink px-2 disabled:opacity-40'
+
 type Props = {
   page: number
   pages: number
@@ -11,7 +14,7 @@ export function PageSummary({ page, pages, total, limit }: Omit<Props, 'onChange
   const last = Math.min(total, page * limit)
 
   return (
-    <p className="search-page-count">
+    <p className="search-page-count mb-4 mt-0 text-right text-xs">
       Page {page} of {pages} · results {first}–{last} of {total}
     </p>
   )
@@ -21,18 +24,18 @@ function SearchPager({ page, pages, onChange }: Props) {
   if (pages <= 1)
     return null
   return (
-    <nav className="search-pagination" aria-label="Search pages">
-      <button type="button" disabled={page <= 1}
+    <nav className="search-pagination mt-6 flex justify-center gap-2" aria-label="Search pages">
+      <button type="button" disabled={page <= 1} className={`${PAGE_BUTTON} bg-surface`}
         onClick={() => onChange(page - 1)}>Previous</button>
       {Array.from({ length: pages }, (_, index) => (
         <button key={index + 1} type="button"
-          className={page === index + 1 ? 'active' : ''}
+          className={`${PAGE_BUTTON} ${page === index + 1 ? 'active bg-pink font-bold' : 'bg-surface'}`}
           aria-current={page === index + 1 ? 'page' : undefined}
           onClick={() => onChange(index + 1)}>
           {index + 1}
         </button>
       ))}
-      <button type="button" disabled={page >= pages}
+      <button type="button" disabled={page >= pages} className={`${PAGE_BUTTON} bg-surface`}
         onClick={() => onChange(page + 1)}>Next</button>
     </nav>
   )

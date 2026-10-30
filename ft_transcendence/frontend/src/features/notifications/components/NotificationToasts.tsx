@@ -8,10 +8,20 @@ import { toNotification } from '../api/notificationMapper'
 import { onNewNotification } from '../api/notificationSocket'
 import { categoryOf } from '../notificationTypes'
 import type { Notification } from '../types/Notification'
-import './NotificationToasts.css'
 
 const SHOW_MS = 6000
 const MAX_TOASTS = 3
+
+// Badge colour per notification category (Tailwind classes from our design tokens).
+const BADGE: Record<string, string> = {
+  post: 'bg-cyan',
+  like: 'bg-pink',
+  friend: 'bg-yellow',
+  community: 'bg-lilac',
+  channel: 'bg-mint',
+  report: 'bg-peach',
+  general: 'bg-surface',
+}
 
 // Small pop-up in the corner when a notification arrives live.
 function NotificationToasts() {
@@ -42,22 +52,29 @@ function NotificationToasts() {
   const visible = pathname === '/notifications' ? [] : toasts
 
   return (
-    <div className="notification-toasts" aria-live="polite" aria-relevant="additions">
+    <div
+      className="notification-toasts pointer-events-none fixed right-4 bottom-4 z-40 grid w-[min(360px,calc(100vw-32px))] gap-2 max-[720px]:bottom-[76px]"
+      aria-live="polite" aria-relevant="additions">
       {visible.map((toast) => {
         const category = categoryOf(toast.type)
 
         return (
-          <div key={toast.id} className="notification-toast" role="status">
-            <span className={`notification-toast__badge ${category.className}`}>{category.label}</span>
-            <div className="notification-toast__copy">
-              <strong>{toast.title}</strong>
-              <p>{toast.message}</p>
+          <div key={toast.id} role="status"
+            className="notification-toast pointer-events-auto grid animate-toast-in grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 rounded-panel border border-ink bg-surface p-3 shadow-block motion-reduce:animate-none">
+            <span className={`rounded-control border border-ink px-2 py-1 text-[10px] font-bold ${BADGE[category.className] ?? 'bg-surface'}`}>
+              {category.label}
+            </span>
+            <div>
+              <strong className="text-[13px]">{toast.title}</strong>
+              <p className="mt-1 mb-0 text-xs wrap-anywhere">{toast.message}</p>
             </div>
-            <div className="notification-toast__actions">
+            <div className="flex items-center gap-2 text-xs">
               {toast.targetUrl && (
-                <Link to={toast.targetUrl} onClick={() => open(toast.id)}>View</Link>
+                <Link to={toast.targetUrl} onClick={() => open(toast.id)}
+                  className="font-bold text-plum">View</Link>
               )}
               <button type="button" aria-label="Dismiss notification"
+                className="cursor-pointer border-0 bg-transparent text-lg leading-none"
                 onClick={() => dismiss(toast.id)}>×</button>
             </div>
           </div>
