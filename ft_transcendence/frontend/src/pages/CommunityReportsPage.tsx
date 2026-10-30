@@ -10,9 +10,14 @@ import {
   reviewReport,
   type CommunityReport,
 } from '../features/reports/api/reportsApi'
-import './CommunityReportsPage.css'
 
 type Filter = 'OPEN' | 'REVIEWED'
+
+// Tailwind classes reused on this page (colours and radius come from our design tokens).
+const MUTED = 'm-0 text-xs text-muted'
+const TAB = 'min-h-10 cursor-pointer rounded-control border border-ink px-3.5 py-2 text-xs'
+const BUTTON = 'min-h-10 cursor-pointer rounded-control border border-ink px-3.5 py-2 text-xs disabled:cursor-wait disabled:opacity-60'
+const BADGE: Record<string, string> = { OPEN: 'bg-pink', RESOLVED: 'bg-cyan', DISMISSED: 'bg-[#ece6dc]' }
 type Action = 'KEEP' | 'REMOVE'
 
 function timeAgo(iso: string) {
@@ -121,84 +126,85 @@ function CommunityReportsPage() {
       <p className="small-label">{name ? `${name} / ` : ''}MODERATION QUEUE</p>
       <h2>Keep this space kind.</h2>
 
-      {loading && <p className="reports-muted">Loading reports…</p>}
+      {loading && <p className={MUTED}>Loading reports…</p>}
       {error && <p className="form-error" role="alert">{error}</p>}
-      {notice && <p className="reports-notice" role="status">{notice}</p>}
+      {notice && <p className="rounded-control border border-ink bg-cyan px-4 py-3" role="status">{notice}</p>}
 
       {!loading && !error && !canModerate(role) && (
         <p className="form-error">Only owners, admins and moderators can see the reports of this community.</p>
       )}
 
       {!loading && canModerate(role) && (
-        <div className="reports-layout">
-          <section className="reports-main" aria-label="Reports">
-            <div className="reports-filter" role="tablist" aria-label="Report status">
-              <button type="button" role="tab" aria-selected={filter === 'OPEN'} className={filter === 'OPEN' ? 'active' : ''} onClick={() => setFilter('OPEN')}>
+        <div className="mt-4 grid grid-cols-1 items-start gap-6 min-[851px]:grid-cols-[minmax(0,1fr)_260px]">
+          <section aria-label="Reports">
+            <div className="mb-3 flex gap-2" role="tablist" aria-label="Report status">
+              <button type="button" role="tab" aria-selected={filter === 'OPEN'} className={`${TAB} ${filter === 'OPEN' ? 'bg-plum text-white' : 'bg-white'}`} onClick={() => setFilter('OPEN')}>
                 Open ({open.length})
               </button>
-              <button type="button" role="tab" aria-selected={filter === 'REVIEWED'} className={filter === 'REVIEWED' ? 'active' : ''} onClick={() => setFilter('REVIEWED')}>
+              <button type="button" role="tab" aria-selected={filter === 'REVIEWED'} className={`${TAB} ${filter === 'REVIEWED' ? 'bg-plum text-white' : 'bg-white'}`} onClick={() => setFilter('REVIEWED')}>
                 Reviewed ({reviewed.length})
               </button>
             </div>
 
-            <p className="reports-count">
+            <p className="my-3 text-xs tracking-wider text-teal">
               {filter === 'OPEN'
                 ? `${open.length} OPEN REPORT${open.length === 1 ? '' : 'S'}`
                 : `${reviewed.length} REVIEWED`}
             </p>
 
             {shown.length === 0 && (
-              <p className="reports-muted">
+              <p className={MUTED}>
                 {filter === 'OPEN' ? 'No open reports. Everything is calm here.' : 'No reviewed reports yet.'}
               </p>
             )}
 
-            <ul className="reports-list">
+            <ul className="m-0 flex list-none flex-col gap-3 p-0">
               {shown.map((report) => {
                 const t = target(report)
                 return (
-                  <li key={report.id} className="report-card">
-                    <div className="report-card__head">
-                      <span className={`report-badge ${report.status.toLowerCase()}`}>
+                  <li key={report.id} className="report-card flex flex-col gap-3 rounded-panel border border-ink bg-white px-5 py-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className={`rounded-control px-2.5 py-1 text-[11px] font-bold ${BADGE[report.status]}`}>
                         {report.status === 'OPEN' ? `Reported ${what(report)}` : report.status === 'RESOLVED' ? 'Resolved' : 'Dismissed'}
                       </span>
-                      <span className="reports-muted">
+                      <span className={MUTED}>
                         {report.reason} · reported {timeAgo(report.createdAt)} by @{report.reporter.username}
                       </span>
                     </div>
 
                     {t ? (
-                      <blockquote className="report-quote">
+                      <blockquote className="m-0 border-l-4 border-plum bg-background px-4 py-3 wrap-anywhere">
                         “{t.content.length > 280 ? `${t.content.slice(0, 280)}…` : t.content}”
-                        <footer>{what(report) === 'post' ? 'Post' : 'Reply'} by @{t.author}</footer>
+                        <footer className="mt-2 text-xs text-muted">{what(report) === 'post' ? 'Post' : 'Reply'} by @{t.author}</footer>
                       </blockquote>
                     ) : (
-                      <p className="reports-muted">The reported {what(report)} was removed.</p>
+                      <p className={MUTED}>The reported {what(report)} was removed.</p>
                     )}
 
                     {report.status !== 'OPEN' && report.reviewedBy && (
-                      <p className="reports-muted">
+                      <p className={MUTED}>
                         Reviewed by @{report.reviewedBy.username}{report.reviewedAt ? ` · ${timeAgo(report.reviewedAt)}` : ''}
                       </p>
                     )}
 
                     {report.status === 'OPEN' && openId !== report.id && (
-                      <div className="report-actions">
-                        <button type="button" className="report-primary" onClick={() => startReview(report)}>Review report</button>
+                      <div className="flex flex-wrap items-center gap-3">
+                        <button type="button" className={`${BUTTON} bg-plum text-white`} onClick={() => startReview(report)}>Review report</button>
                         {t && <Link className="text-link" to={`/posts/${t.postId}`}>View {what(report) === 'post' ? 'post' : 'conversation'}</Link>}
                       </div>
                     )}
 
                     {report.status === 'OPEN' && openId === report.id && (
-                      <div className="report-review">
-                        <label htmlFor={`action-${report.id}`}>Action</label>
-                        <select id={`action-${report.id}`} value={action} onChange={(e) => setAction(e.target.value as Action)} disabled={busy}>
+                      <div className="flex flex-col gap-2 border-t border-ink/20 pt-3">
+                        <label htmlFor={`action-${report.id}`} className="text-xs font-bold">Action</label>
+                        <select id={`action-${report.id}`} value={action} onChange={(e) => setAction(e.target.value as Action)} disabled={busy}
+                          className="min-h-10 max-w-[320px] rounded-control border border-ink bg-white px-2.5 py-2 text-xs">
                           <option value="KEEP">Keep the {what(report)}</option>
                           {t && <option value="REMOVE">Remove the reported {what(report)}</option>}
                         </select>
-                        <div className="report-actions">
-                          <button type="button" className="report-primary" disabled={busy} onClick={() => resolve(report)}>Resolve report</button>
-                          <button type="button" className="report-secondary" disabled={busy} onClick={() => void finish(report, 'DISMISSED', false)}>Dismiss report</button>
+                        <div className="flex flex-wrap items-center gap-3">
+                          <button type="button" className={`${BUTTON} bg-plum text-white`} disabled={busy} onClick={() => resolve(report)}>Resolve report</button>
+                          <button type="button" className={`${BUTTON} bg-white text-plum`} disabled={busy} onClick={() => void finish(report, 'DISMISSED', false)}>Dismiss report</button>
                           <button type="button" className="text-link" disabled={busy} onClick={() => setOpenId('')}>Back to queue</button>
                         </div>
                       </div>
@@ -209,7 +215,7 @@ function CommunityReportsPage() {
             </ul>
           </section>
 
-          <aside className="reports-aside">
+          <aside className="rounded-panel border border-ink bg-yellow p-4 text-xs [&_p]:mt-2 [&_p]:mb-0">
             <strong>Keep decisions clear and fair.</strong>
             <p>Review context before removing content. Moderators can act on reports within their own community.</p>
             <p><b>Resolve</b>: the report was right. You can keep or remove the content.</p>
