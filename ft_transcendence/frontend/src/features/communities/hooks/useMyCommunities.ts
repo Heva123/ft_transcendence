@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getMyCommunities } from '../api/chatApi'
+import { getMyCommunities } from '../../chat/api/chatApi'
 import { toCommunity } from '../api/communityMapper'
 import type { Community } from '../types/Community'
 

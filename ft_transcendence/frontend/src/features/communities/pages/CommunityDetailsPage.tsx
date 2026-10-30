@@ -4,13 +4,13 @@ import {
   type FormEvent,
 } from "react";
 
-import AppLayout from "../components/AppLayout";
-import ConfirmDialog from "../components/ConfirmDialog";
+import AppLayout from "../../../components/AppLayout";
+import ConfirmDialog from "../../../components/ConfirmDialog";
 
 import {
   apiRequest,
   ApiError,
-} from "../api/apiClient";
+} from "../../../api/apiClient";
 
 type GroupDetails = {
   id: string;

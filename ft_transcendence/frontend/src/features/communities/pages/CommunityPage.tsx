@@ -3,8 +3,8 @@ import {
   useState,
 } from "react";
 
-import ConfirmDialog from "../components/ConfirmDialog";
-import { useCanWrite } from "../features/auth/hooks/useCanWrite";
+import ConfirmDialog from "../../../components/ConfirmDialog";
+import { useCanWrite } from "../../auth/hooks/useCanWrite";
 
 import {
   Link,
@@ -15,28 +15,28 @@ import {
 import {
   apiRequest,
   ApiError,
-} from "../api/apiClient";
+} from "../../../api/apiClient";
 
 import {
   createChannel,
   getChannels,
   getCommunity,
-} from "../features/chat/api/chatApi";
+} from "../../chat/api/chatApi";
 
-import { canCreateChannel } from "../features/chat/utils/channelRoles";
-import { canModerate } from "../features/reports/api/reportsApi";
+import { canCreateChannel } from "../../chat/utils/channelRoles";
+import { canModerate } from "../../reports/api/reportsApi";
 
-import ChannelFormModal from "../features/chat/components/ChannelFormModal";
+import ChannelFormModal from "../../chat/components/ChannelFormModal";
 
-import { toCommunity } from "../features/chat/api/communityMapper";
+import { toCommunity } from "../api/communityMapper";
 
-import CommunityHeader from "../features/chat/components/CommunityHeader";
+import CommunityHeader from "../../chat/components/CommunityHeader";
 
 
-import type { Channel } from "../features/chat/types/Channel";
-import type { Community } from "../features/chat/types/Community";
+import type { Channel } from "../../chat/types/Channel";
+import type { Community } from "../types/Community";
 
-import Feed from "../features/feed/components/Feed";
+import Feed from "../../feed/components/Feed";
 
 import "./CommunityPage.css";
 

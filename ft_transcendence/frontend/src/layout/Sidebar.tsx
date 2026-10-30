@@ -4,7 +4,7 @@ import {
 
 import {
   useMyCommunities,
-} from "../features/chat/hooks/useMyCommunities";
+} from "../features/communities/hooks/useMyCommunities";
 
 import {
   useCurrentUser,

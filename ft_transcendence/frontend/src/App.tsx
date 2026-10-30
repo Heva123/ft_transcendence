@@ -7,22 +7,22 @@ import {
 import AppShell from "./layout/AppShell";
 import SessionExpiredNotice from "./components/SessionExpiredNotice";
 
-import AdminUsersPage from "./pages/AdminUsersPage";
+import AdminUsersPage from "./features/admin/pages/AdminUsersPage";
 import ChannelPage from "./features/chat/pages/ChannelPage";
 import ChannelsPage from "./features/chat/pages/ChannelsPage";
-import CommunityPage from "./pages/CommunityPage";
-import CommunityReportsPage from "./pages/CommunityReportsPage";
+import CommunityPage from "./features/communities/pages/CommunityPage";
+import CommunityReportsPage from "./features/reports/pages/CommunityReportsPage";
 import CreatePostPage from "./features/feed/pages/CreatePostPage";
 import FriendsPage from "./features/friends/pages/FriendsPage";
 import HomePage from "./features/feed/pages/HomePage";
-import LoginPage from "./pages/LoginPage";
+import LoginPage from "./features/auth/pages/LoginPage";
 import NotFoundPage from "./components/NotFoundPage";
 import NotificationsPage from "./features/notifications/pages/NotificationsPage";
 import PostPage from "./features/feed/pages/PostPage";
 import PublicProfilePage from "./features/profile/pages/PublicProfilePage";
-import RegisterPage from "./pages/RegisterPage";
+import RegisterPage from "./features/auth/pages/RegisterPage";
 import SearchPage from "./features/search/pages/SearchPage";
-import SettingsPage from "./pages/SettingsPage";
+import SettingsPage from "./features/auth/pages/SettingsPage";
 
 import {
   CommunitiesRoute,

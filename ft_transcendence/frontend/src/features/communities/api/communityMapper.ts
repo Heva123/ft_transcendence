@@ -1,4 +1,4 @@
-import type { ApiCommunity } from './chatApi'
+import type { ApiCommunity } from '../../chat/api/chatApi'
 import type { Community } from '../types/Community'
 
 export function toCommunity(item: ApiCommunity): Community {

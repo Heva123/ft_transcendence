@@ -3,12 +3,12 @@ import {
   useState,
 } from "react";
 
-import AppLayout from "../components/AppLayout";
+import AppLayout from "../../../components/AppLayout";
 
 import {
   apiRequest,
   ApiError,
-} from "../api/apiClient";
+} from "../../../api/apiClient";
 
 type RoleData = {
   role: string;

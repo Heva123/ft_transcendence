@@ -5,19 +5,19 @@ import {
   type FormEvent,
 } from "react";
 
-import AppLayout from "../components/AppLayout";
-import ConfirmDialog from "../components/ConfirmDialog";
-import PendingInvitesList from "../features/invitations/components/PendingInvitesList";
-import { inviteMember } from "../features/invitations/api/invitationsApi";
+import AppLayout from "../../../components/AppLayout";
+import ConfirmDialog from "../../../components/ConfirmDialog";
+import PendingInvitesList from "../../invitations/components/PendingInvitesList";
+import { inviteMember } from "../../invitations/api/invitationsApi";
 
 import {
   apiRequest,
   ApiError,
-} from "../api/apiClient";
+} from "../../../api/apiClient";
 
 import {
   usePresence,
-} from "../features/presence/hooks/usePresence";
+} from "../../presence/hooks/usePresence";
 
 type Role =
   | "OWNER"

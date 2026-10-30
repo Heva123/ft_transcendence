@@ -3,8 +3,8 @@ import {
   useState,
 } from "react";
 
-import AppLayout from "../components/AppLayout";
-import ConfirmDialog from "../components/ConfirmDialog";
+import AppLayout from "../../../components/AppLayout";
+import ConfirmDialog from "../../../components/ConfirmDialog";
 
 import {
   deleteAdminUser,
@@ -13,15 +13,15 @@ import {
   updateAdminUser,
   type AdminUser,
   type SiteRole,
-} from "../features/auth/api/userApi";
+} from "../../auth/api/userApi";
 
 import {
   isSiteAdmin,
-} from "../features/auth/utils/sitePermissions";
+} from "../../auth/utils/sitePermissions";
 
 import {
   ApiError,
-} from "../api/apiClient";
+} from "../../../api/apiClient";
 
 import "./AdminUsersPage.css";
 

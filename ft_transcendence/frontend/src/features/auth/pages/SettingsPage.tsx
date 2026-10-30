@@ -4,8 +4,8 @@ import {
 } from "react";
 import { Link } from "react-router-dom";
 
-import AppLayout from "../components/AppLayout";
-import AccountSettingsForm from "../features/auth/components/AccountSettingsForm";
+import AppLayout from "../../../components/AppLayout";
+import AccountSettingsForm from "../components/AccountSettingsForm";
 
 import {
   getBlockedUsers,
@@ -13,7 +13,7 @@ import {
   unblockUser,
   type BlockedUser,
   type CurrentUser,
-} from "../features/auth/api/userApi";
+} from "../api/userApi";
 
 type SettingsTab =
   | "account"

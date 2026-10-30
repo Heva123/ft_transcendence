@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ApiError } from '../api/apiClient'
-import AppLayout from '../components/AppLayout'
-import ConfirmDialog from '../components/ConfirmDialog'
-import { getCommunity } from '../features/chat/api/chatApi'
+import { ApiError } from '../../../api/apiClient'
+import AppLayout from '../../../components/AppLayout'
+import ConfirmDialog from '../../../components/ConfirmDialog'
+import { getCommunity } from '../../chat/api/chatApi'
 import {
   canModerate,
   getReports,
   reviewReport,
   type CommunityReport,
-} from '../features/reports/api/reportsApi'
+} from '../api/reportsApi'
 
 type Filter = 'OPEN' | 'REVIEWED'
 

@@ -4,14 +4,14 @@ import {
   type FormEvent,
 } from "react";
 
-import AppLayout from "../components/AppLayout";
-import MyInvitations from "../features/invitations/components/MyInvitations";
-import { useCanWrite } from "../features/auth/hooks/useCanWrite";
+import AppLayout from "../../../components/AppLayout";
+import MyInvitations from "../../invitations/components/MyInvitations";
+import { useCanWrite } from "../../auth/hooks/useCanWrite";
 
 import {
   apiRequest,
   ApiError,
-} from "../api/apiClient";
+} from "../../../api/apiClient";
 
 type Group = {
   id: string;

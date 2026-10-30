@@ -5,13 +5,13 @@ import {
 
 import { Link } from "react-router-dom";
 
-import Button from "../components/Button";
-import Input from "../components/Input";
+import Button from "../../../components/Button";
+import Input from "../../../components/Input";
 
 import {
   apiRequest,
   ApiError,
-} from "../api/apiClient";
+} from "../../../api/apiClient";
 
 type LoginResponse = {
   accessToken: string;

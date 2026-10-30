@@ -3,11 +3,11 @@ import {
   useParams,
 } from "react-router-dom";
 
-import CommunitiesPage from "../pages/CommunitiesPage";
-import CommunityDetailsPage from "../pages/CommunityDetailsPage";
-import CommunityMembersPage from "../pages/CommunityMembersPage";
-import DiscoverCommunitiesPage from "../pages/DiscoverCommunitiesPage";
-import RolesPermissionsPage from "../pages/RolesPermissionsPage";
+import CommunitiesPage from "../features/communities/pages/CommunitiesPage";
+import CommunityDetailsPage from "../features/communities/pages/CommunityDetailsPage";
+import CommunityMembersPage from "../features/communities/pages/CommunityMembersPage";
+import DiscoverCommunitiesPage from "../features/communities/pages/DiscoverCommunitiesPage";
+import RolesPermissionsPage from "../features/communities/pages/RolesPermissionsPage";
 
 function getToken() {
   return localStorage.getItem(
