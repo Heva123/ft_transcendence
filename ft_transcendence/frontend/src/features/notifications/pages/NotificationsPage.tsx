@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { categoryOf } from '../features/notifications/notificationTypes'
-import { useNotifications } from '../features/notifications/hooks/useNotifications'
-import type { Notification } from '../features/notifications/types/Notification'
+import { categoryOf } from '../utils/notificationTypes'
+import { useNotifications } from '../hooks/useNotifications'
+import type { Notification } from '../types/Notification'
 import './NotificationsPage.css'
 
 type RowProps = {

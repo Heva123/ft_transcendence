@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import AppLayout from "../components/AppLayout";
-import ConfirmDialog from "../components/ConfirmDialog";
+import AppLayout from "../../../components/AppLayout";
+import ConfirmDialog from "../../../components/ConfirmDialog";
 import {
   acceptFriendRequest,
   getFriendRequests,
@@ -11,11 +11,11 @@ import {
   removeFriendRequest,
   type Friend,
   type FriendRequests,
-} from "../features/friends/api/friendsApi";
-import PersonRow from "../features/friends/components/PersonRow";
-import { displayNameOf } from "../features/profile/api/profileApi";
-import { usePresence } from "../features/presence/hooks/usePresence";
-import { onNewNotification } from "../features/notifications/api/notificationSocket";
+} from "../api/friendsApi";
+import PersonRow from "../components/PersonRow";
+import { displayNameOf } from "../../profile/api/profileApi";
+import { usePresence } from "../../presence/hooks/usePresence";
+import { onNewNotification } from "../../notifications/api/notificationSocket";
 
 type State = {
   loaded: boolean;

@@ -1,24 +1,24 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
-import AppLayout from "../components/AppLayout";
-import ConfirmDialog from "../components/ConfirmDialog";
-import { useCanWrite } from "../features/auth/hooks/useCanWrite";
-import UserAvatar from "../components/UserAvatar";
-import { ApiError } from "../api/apiClient";
+import AppLayout from "../../../components/AppLayout";
+import ConfirmDialog from "../../../components/ConfirmDialog";
+import { useCanWrite } from "../../auth/hooks/useCanWrite";
+import UserAvatar from "../../../components/UserAvatar";
+import { ApiError } from "../../../api/apiClient";
 import {
   acceptFriendRequest,
   removeFriend,
   removeFriendRequest,
   sendFriendRequest,
-} from "../features/friends/api/friendsApi";
-import "../features/friends/components/Friends.css";
+} from "../../friends/api/friendsApi";
+import "../../friends/components/Friends.css";
 import {
   displayNameOf,
   getPublicProfile,
   type PublicProfile,
-} from "../features/profile/api/profileApi";
-import { usePresence } from "../features/presence/hooks/usePresence";
+} from "../api/profileApi";
+import { usePresence } from "../../presence/hooks/usePresence";
 
 type State = {
   username: string;

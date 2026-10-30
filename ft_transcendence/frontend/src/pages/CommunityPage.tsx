@@ -23,7 +23,7 @@ import {
   getCommunity,
 } from "../features/chat/api/chatApi";
 
-import { canCreateChannel } from "../features/chat/channelRoles";
+import { canCreateChannel } from "../features/chat/utils/channelRoles";
 import { canModerate } from "../features/reports/api/reportsApi";
 
 import ChannelFormModal from "../features/chat/components/ChannelFormModal";

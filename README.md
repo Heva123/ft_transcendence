@@ -186,6 +186,26 @@ Before submission, the team also ran end-to-end tests on the Docker version with
 | Testing | Jest (backend unit tests), Playwright (end-to-end tests), ESLint and TypeScript checks (frontend) | 117 backend tests passed across 18 Jest suites (verified October 27, 2026). 205 end-to-end checks with four users passed on the Docker version. |
 | Deployment | Docker, Docker Compose, nginx 1.28 with HTTPS | One command starts the whole project. Only nginx is open to the host. |
 
+### Project structure
+
+```
+ft_transcendence/
+├── compose.yml, Makefile, .env.example   one-command start
+├── docker/                               web image, nginx config, certificate and .env scripts
+├── frontend/src/
+│   ├── api/  components/  layout/        shared code used by every screen
+│   ├── routes/  styles/  utils/
+│   └── features/                         one folder per feature
+│       ├── admin/  auth/  chat/  communities/  feed/  friends/  invitations/
+│       └── legal/  notifications/  presence/  profile/  reports/  search/
+│           └── api/  components/  hooks/  pages/  types/  utils/   (same folders in every feature)
+└── transcendence-backend/
+    ├── prisma/                           database schema and migrations
+    └── src/                              one NestJS module per feature (controller, service, DTOs, tests)
+```
+
+Most frontend features have a backend module with the same name (admin, auth, communities, friends, invitations, notifications, reports, search), so a feature is easy to find on both sides.
+
 ---
 
 ## Database Schema

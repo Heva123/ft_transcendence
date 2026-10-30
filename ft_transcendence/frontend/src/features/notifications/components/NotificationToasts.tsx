@@ -6,7 +6,7 @@ import {
 } from '../api/notificationApi'
 import { toNotification } from '../api/notificationMapper'
 import { onNewNotification } from '../api/notificationSocket'
-import { categoryOf } from '../notificationTypes'
+import { categoryOf } from '../utils/notificationTypes'
 import type { Notification } from '../types/Notification'
 
 const SHOW_MS = 6000

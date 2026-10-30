@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import {
   getChannels,
   getMyCommunities,
-} from '../features/chat/api/chatApi'
+} from '../api/chatApi'
 
 type Result = { channelId: string; communities: number }
 

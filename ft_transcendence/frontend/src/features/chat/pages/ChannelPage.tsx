@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import ConfirmDialog from '../components/ConfirmDialog'
-import ChannelSidebar from '../features/chat/components/ChannelSidebar'
-import ChannelFormModal from '../features/chat/components/ChannelFormModal'
-import ChatArea from '../features/chat/components/ChatArea'
+import ConfirmDialog from '../../../components/ConfirmDialog'
+import ChannelSidebar from '../components/ChannelSidebar'
+import ChannelFormModal from '../components/ChannelFormModal'
+import ChatArea from '../components/ChatArea'
 import {
   createChannel,
   deleteChannel,
@@ -12,15 +12,15 @@ import {
   getCommunity,
   getMembers,
   updateChannel,
-} from '../features/chat/api/chatApi'
+} from '../api/chatApi'
 import {
   canCreateChannel,
   canDeleteChannel,
   canEditChannel,
-} from '../features/chat/channelRoles'
-import { usePresence } from '../features/presence/hooks/usePresence'
-import type { Channel } from '../features/chat/types/Channel'
-import type { ChannelMember } from '../features/chat/types/Message'
+} from '../utils/channelRoles'
+import { usePresence } from '../../presence/hooks/usePresence'
+import type { Channel } from '../types/Channel'
+import type { ChannelMember } from '../types/Message'
 import './ChannelPage.css'
 
 type ChannelData = {

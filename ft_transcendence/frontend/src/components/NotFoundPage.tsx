@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import '../components/Feedback.css'
+import './Feedback.css'
 
 // Unknown URLs inside the app (design p86).
 function NotFoundPage() {

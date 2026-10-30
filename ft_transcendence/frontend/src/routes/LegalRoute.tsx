@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import LegalPage from '../pages/LegalPage'
+import LegalPage from '../features/legal/pages/LegalPage'
 
 type LegalRouteProps = {
   title: string

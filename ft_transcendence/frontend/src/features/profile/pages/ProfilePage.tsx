@@ -5,20 +5,20 @@ import {
   type FormEvent,
 } from "react";
 
-import AppLayout from "../components/AppLayout";
-import ProtectedImage from "../components/ProtectedImage";
-import { useCanWrite } from "../features/auth/hooks/useCanWrite";
-import MyCornersCard from "../features/profile/components/MyCornersCard";
-import ProfileAboutCard from "../features/profile/components/ProfileAboutCard";
-import type { CurrentUser } from "../features/auth/api/userApi";
-import Button from "../components/Button";
-import Input from "../components/Input";
+import AppLayout from "../../../components/AppLayout";
+import ProtectedImage from "../../../components/ProtectedImage";
+import { useCanWrite } from "../../auth/hooks/useCanWrite";
+import MyCornersCard from "../components/MyCornersCard";
+import ProfileAboutCard from "../components/ProfileAboutCard";
+import type { CurrentUser } from "../../auth/api/userApi";
+import Button from "../../../components/Button";
+import Input from "../../../components/Input";
 import {
   apiBlob,
   apiRequest,
   ApiError,
   uploadRequest,
-} from "../api/apiClient";
+} from "../../../api/apiClient";
 
 type ProfileUser = CurrentUser;
 

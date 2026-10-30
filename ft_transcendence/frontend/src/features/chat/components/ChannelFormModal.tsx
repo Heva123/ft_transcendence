@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { ApiError } from '../../../api/apiClient'
-import { toChannelName } from '../channelRoles'
+import { toChannelName } from '../utils/channelRoles'
 import './Chat.css'
 import './ChannelFormModal.css'
 

@@ -2,7 +2,7 @@ import {
   LEGAL_UPDATED,
   PRIVACY_POLICY,
   TERMS_OF_SERVICE,
-} from "./legalContent";
+} from "../utils/legalContent";
 
 
 type LegalPageProps = {

@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import Feed from '../features/feed/components/Feed'
-import UserAvatar from "../components/UserAvatar";
-import { useCurrentUser } from '../features/auth/hooks/useCurrentUser'
-import { canWriteSite } from '../features/auth/utils/sitePermissions'
+import Feed from '../components/Feed'
+import UserAvatar from "../../../components/UserAvatar";
+import { useCurrentUser } from '../../auth/hooks/useCurrentUser'
+import { canWriteSite } from '../../auth/utils/sitePermissions'
 import './HomePage.css'
 
 function MomentumCard() {

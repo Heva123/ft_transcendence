@@ -8,20 +8,20 @@ import AppShell from "./layout/AppShell";
 import SessionExpiredNotice from "./components/SessionExpiredNotice";
 
 import AdminUsersPage from "./pages/AdminUsersPage";
-import ChannelPage from "./pages/ChannelPage";
-import ChannelsPage from "./pages/ChannelsPage";
+import ChannelPage from "./features/chat/pages/ChannelPage";
+import ChannelsPage from "./features/chat/pages/ChannelsPage";
 import CommunityPage from "./pages/CommunityPage";
 import CommunityReportsPage from "./pages/CommunityReportsPage";
-import CreatePostPage from "./pages/CreatePostPage";
-import FriendsPage from "./pages/FriendsPage";
-import HomePage from "./pages/HomePage";
+import CreatePostPage from "./features/feed/pages/CreatePostPage";
+import FriendsPage from "./features/friends/pages/FriendsPage";
+import HomePage from "./features/feed/pages/HomePage";
 import LoginPage from "./pages/LoginPage";
-import NotFoundPage from "./pages/NotFoundPage";
-import NotificationsPage from "./pages/NotificationsPage";
-import PostPage from "./pages/PostPage";
-import PublicProfilePage from "./pages/PublicProfilePage";
+import NotFoundPage from "./components/NotFoundPage";
+import NotificationsPage from "./features/notifications/pages/NotificationsPage";
+import PostPage from "./features/feed/pages/PostPage";
+import PublicProfilePage from "./features/profile/pages/PublicProfilePage";
 import RegisterPage from "./pages/RegisterPage";
-import SearchPage from "./pages/SearchPage";
+import SearchPage from "./features/search/pages/SearchPage";
 import SettingsPage from "./pages/SettingsPage";
 
 import {
