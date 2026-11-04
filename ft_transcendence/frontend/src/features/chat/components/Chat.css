@@ -71,7 +71,7 @@
   background: var(--color-surface);
 }
 
-/* .connection-status: styled with Tailwind classes in ConnectionStatus.tsx */
+
 
 .message-send-error {
   margin: 10px 0 0;
@@ -253,7 +253,7 @@
   background: var(--color-cyan);
 }
 
-/* Composer counter, empty + history notes */
+
 .message-counter {
   margin: var(--space-4) 0 0;
   color: var(--color-teal);

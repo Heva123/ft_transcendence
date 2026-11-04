@@ -12,7 +12,7 @@ import type { Notification } from '../types/Notification'
 const SHOW_MS = 6000
 const MAX_TOASTS = 3
 
-// Badge colour per notification category (Tailwind classes from our design tokens).
+
 const BADGE: Record<string, string> = {
   post: 'bg-cyan',
   like: 'bg-pink',
@@ -23,7 +23,7 @@ const BADGE: Record<string, string> = {
   general: 'bg-surface',
 }
 
-// Small pop-up in the corner when a notification arrives live.
+
 function NotificationToasts() {
   const [toasts, setToasts] = useState<Notification[]>([])
   const { pathname } = useLocation()
@@ -48,7 +48,7 @@ function NotificationToasts() {
       .catch(() => undefined)
   }
 
-  // The notifications page already shows new items live.
+
   const visible = pathname === '/notifications' ? [] : toasts
 
   return (

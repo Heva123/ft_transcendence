@@ -24,7 +24,7 @@ import MessageInput, { MAX_MESSAGE_LENGTH } from './MessageInput'
 import MessageList from './MessageList'
 import './Chat.css'
 
-// The live view shows the latest messages. "Earlier messages" shows everything.
+
 const LIVE_LIMIT = 50
 
 type ChatAreaProps = {
@@ -72,10 +72,10 @@ function ChatArea({ selectedChannelId, members, showHistory }: ChatAreaProps) {
     }
   }, [selectedChannelId])
 
-  /*
-    The server answers a refused message with message:error.
-    Put the text back in the box and say why.
-  */
+
+
+
+
   useEffect(() => onMessageError((data) => {
     if (pending.current === null)
       return

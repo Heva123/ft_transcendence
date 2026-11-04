@@ -78,15 +78,15 @@ function ProfilePage({
   const [avatarVersion, setAvatarVersion] =
     useState(0);
 
-  // Only request the image when the user has one, so there is no 404 in the console.
+
   const [hasAvatar, setHasAvatar] =
-    // The API sends /api/default-avatar when no photo was uploaded.
+
     useState(
       Boolean(user.avatarUrl) &&
         !user.avatarUrl?.endsWith("/default-avatar")
     );
 
-  // Load saved avatar from backend.
+
   useEffect(() => {
     let active = true;
     let objectUrl = "";

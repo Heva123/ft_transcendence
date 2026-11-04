@@ -8,7 +8,7 @@ function logout() {
   window.location.assign('/login')
 }
 
-// "See you soon?" confirmation before logging out (design p76).
+
 export function LogoutDialog({ onCancel }: { onCancel: () => void }) {
   return (
     <ConfirmDialog

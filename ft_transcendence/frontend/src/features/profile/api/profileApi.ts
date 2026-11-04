@@ -2,7 +2,7 @@ import { apiRequest } from '../../../api/apiClient'
 
 export type FriendshipStatus = 'self' | 'none' | 'friends' | 'outgoing' | 'incoming'
 
-/** Public fields of a member, as returned by GET /users/:username. */
+
 export type PublicUser = {
   id: string
   username: string

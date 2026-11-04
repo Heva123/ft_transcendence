@@ -10,7 +10,7 @@ import ReportDialog from './ReportDialog'
 import PostImageEditor from './PostImageEditor'
 import './PostImage.css'
 
-// canWrite is false for guests: the like button is disabled.
+
 type Props = { post: Post; commentsCount?: number; currentUserId?: string; canWrite?: boolean }
 type ViewState = { content: string; editing: boolean; deleted: boolean; error: string }
 type Dialog = 'none' | 'delete' | 'report' | 'removeImage'
@@ -59,10 +59,10 @@ function PostCard({ post, commentsCount, currentUserId, canWrite = true }: Props
   const [reaction, setReaction] = useState({ likes: post.likesCount, liked: post.likedByMe, busy: false })
   const [dialog, setDialog] = useState<Dialog>('none')
   const [deleting, setDeleting] = useState(false)
-  // Changes when the image is added or removed while editing.
+
   const [imageUrl, setImageUrl] = useState(post.imageUrl ?? null)
   const owner = Boolean(currentUserId) && currentUserId === post.author.id
-  // Reports are per community, so global posts cannot be reported.
+
   const canReport = !owner && Boolean(post.community)
 
   async function handleLike() {

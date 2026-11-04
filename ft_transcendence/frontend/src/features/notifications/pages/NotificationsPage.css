@@ -147,7 +147,7 @@ button.notification-view {
   background: var(--color-pink);
 }
 
-/* Type labels: the category shows instead of "42" (POST, FRIEND, …) */
+
 .notification-row {
   grid-template-columns: 96px minmax(0, 1fr) auto;
 }

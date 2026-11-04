@@ -8,7 +8,7 @@ type PostDetails = { post: Post; comments: Reply[] }
 type LikeResponse = { liked: boolean; likesCount: number }
 type DeleteResponse = { deleted: boolean; id: string }
 
-/** The backend returns 10 posts per page. */
+
 export const FEED_PAGE_SIZE = 10
 
 export function getFeed(page = 1) {

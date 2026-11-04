@@ -19,10 +19,10 @@ type View = {
 
 class AttachmentUploadError extends Error {}
 
-/*
-  The post is created first, because the attachment endpoint needs the post id.
-  If the attachment then fails, the post is deleted again so no half post is left.
-*/
+
+
+
+
 async function publish(
   content: string,
   target: string,

@@ -16,7 +16,7 @@ const TABS: { id: SearchTab; label: string; type: SearchType; heading: string }[
   { id: 'skills', label: 'Skills', type: 'skills', heading: 'Find the skills you need.' },
 ]
 
-// People sort by name. Communities and posts sort by date.
+
 function sortOptions(tab: SearchTab): { value: SortOrder; label: string }[] {
   if (tab === 'people' || tab === 'skills')
     return [{ value: 'asc', label: 'Name A–Z' }, { value: 'desc', label: 'Name Z–A' }]
@@ -63,7 +63,7 @@ function SearchPage() {
     getMyCommunities().then(setCommunities).catch(() => setCommunities([]))
   }, [])
 
-  // Changing any filter starts again from page 1.
+
   function update(changes: Record<string, string>) {
     const next = new URLSearchParams(params)
 

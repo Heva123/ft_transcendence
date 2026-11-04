@@ -214,7 +214,7 @@ function App() {
         }
       />
 
-      {/* Public legal pages */}
+      { }
       <Route
         path="/privacy"
         element={
@@ -233,7 +233,7 @@ function App() {
         }
       />
 
-      {/* Everything else needs login */}
+      { }
       <Route
         path="/*"
         element={<ProtectedApp />}

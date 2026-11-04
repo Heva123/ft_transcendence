@@ -7,7 +7,7 @@ import {
 
 type Result = { channelId: string; communities: number }
 
-// Open the first channel of the first community that has one.
+
 async function findFirstChannel(): Promise<Result> {
   const communities = await getMyCommunities()
 

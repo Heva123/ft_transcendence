@@ -11,7 +11,7 @@ import {
 import { toMessage } from '../api/messageMapper'
 import type { Message } from '../types/Message'
 
-// Someone who sent typing:start but nothing since is dropped after this long.
+
 const TYPING_EXPIRY_MS = 6000
 
 type Typist = {
@@ -35,10 +35,10 @@ export function useChatSocket(
   useEffect(() => {
     let connectedOnce = false
 
-    /*
-      The server forgets channel rooms when a socket reconnects.
-      Join again on every connect, then reload what was missed.
-    */
+
+
+
+
     function handleConnect() {
       joinChannel({ channelId })
       if (connectedOnce)

@@ -1,7 +1,7 @@
-// Same limits as the backend upload module.
+
 export const IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/webp']
 export const DOCUMENT_TYPES = ['application/pdf']
-/** Chat attachments: images and documents. */
+
 export const ATTACHMENT_TYPES = [...IMAGE_TYPES, ...DOCUMENT_TYPES]
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024
 export const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024

@@ -1,5 +1,5 @@
 :root {
-  /* Main PXL_LAB colors */
+
   --color-plum: #8a335d;
   --color-yellow: #f2c255;
   --color-pink: #f0afce;
@@ -11,17 +11,17 @@
   --color-ink: #30232d;
   --color-border: #30232d;
 
-  /* Typography */
+
   --font-heading: "Handjet", sans-serif;
   --font-subheading: "Handjet", sans-serif;
   --font-body: "IBM Plex Mono", monospace;
 
-  /* Radius */
+
   --radius-control: 4px;
   --radius-panel: 8px;
   --radius-mobile: 12px;
 
-  /* Spacing */
+
   --space-4: 4px;
   --space-6: 6px;
   --space-8: 8px;
@@ -37,10 +37,7 @@
   --space-48: 48px;
   --space-60: 60px;
 
-  /*
-    Compatibility names used by Maram's older pages.
-    This lets the merged frontend use both naming systems.
-  */
+
   --plum: var(--color-plum);
   --yellow: var(--color-yellow);
   --pink: var(--color-pink);

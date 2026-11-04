@@ -4,7 +4,7 @@ import type { SearchUser } from '../api/searchApi'
 
 type Props = {
   person: SearchUser
-  /** Skill to highlight, e.g. the one that matched a skills search. */
+
   highlight?: string
 }
 

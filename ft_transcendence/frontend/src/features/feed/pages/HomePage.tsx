@@ -27,7 +27,7 @@ function HomePage() {
   const [feedMode, setFeedMode] = useState<'global' | 'communities'>('global')
   const user = useCurrentUser()
   const username = user?.username ?? 'there'
-  // Guests (read-only) get no create buttons.
+
   const canWrite = canWriteSite(user)
 
   return <section className="home-page">

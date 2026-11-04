@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { getMyCommunities, type ApiCommunity } from '../../chat/api/chatApi'
 import '../../friends/components/Friends.css'
 
-// Communities I belong to, plus a link to friends (design p62 "My corners").
+
 function MyCornersCard() {
   const [communities, setCommunities] = useState<ApiCommunity[] | null>(null)
 

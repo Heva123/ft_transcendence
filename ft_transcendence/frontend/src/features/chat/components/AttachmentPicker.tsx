@@ -16,12 +16,12 @@ type Props = {
   onFileChange: (file: File | null) => void
 }
 
-// Attach an image or a PDF to a chat message, with preview and progress.
+
 function AttachmentPicker(props: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState('')
   const [picked, setPicked] = useState<{ file: File; url: string } | null>(null)
-  // The parent clears `file` after sending, which hides the preview.
+
   const current = picked && picked.file === props.file ? picked : null
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {

@@ -1,8 +1,8 @@
-/*
-  Privacy Policy and Terms of Service text.
-  It describes what the app really stores and does. Update it if a
-  feature changes what data is collected or where it is hosted.
-*/
+
+
+
+
+
 export type LegalSection = {
   heading: string
   paragraphs: string[]

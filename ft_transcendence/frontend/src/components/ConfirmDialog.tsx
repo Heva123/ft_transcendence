@@ -10,7 +10,7 @@ type Props = {
   onConfirm: () => void
 }
 
-// In-app confirmation overlay used instead of window.confirm (design p37, p50, p59).
+
 function ConfirmDialog(props: Props) {
   const { onCancel } = props
 

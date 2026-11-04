@@ -8,7 +8,7 @@ type Props = {
   onFileChange: (file: File | null) => void
 }
 
-// "+ Add attachment · optional" picker with preview, validation and progress (design p35, p89–91).
+
 function PostImageField(props: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState('')

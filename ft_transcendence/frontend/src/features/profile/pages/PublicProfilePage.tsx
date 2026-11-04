@@ -26,7 +26,7 @@ type State = {
   error: string;
 };
 
-// Another member's profile with friend actions (design p63, p64).
+
 function PublicProfilePage() {
   const { username = "" } = useParams();
   const [state, setState] = useState<State>({ username: "", profile: null, error: "" });

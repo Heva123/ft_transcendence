@@ -120,7 +120,7 @@
   text-decoration: none;
 }
 
-/* Page styles (e.g. .dashboard-main h2) must not restyle dialogs. */
+
 .confirm-backdrop .confirm-dialog h2 {
   margin: 0 0 var(--space-8);
   color: var(--color-ink);
@@ -134,7 +134,7 @@
   font-size: 13px;
 }
 
-/* Documents in chat and the PDF preview window */
+
 .file-attachment {
   display: flex;
   flex-wrap: wrap;

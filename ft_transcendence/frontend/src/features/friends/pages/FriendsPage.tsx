@@ -24,7 +24,7 @@ type State = {
   error: string;
 };
 
-// Friends list, incoming and sent requests (design p61, p67, p68).
+
 function FriendsPage() {
   const [state, setState] = useState<State>({
     loaded: false,
@@ -46,7 +46,7 @@ function FriendsPage() {
 
   useEffect(() => {
     load();
-    // A new request or an accepted one arrives as a notification.
+
     return onNewNotification((item) => {
       if (item.type.startsWith("FRIEND_"))
         load();

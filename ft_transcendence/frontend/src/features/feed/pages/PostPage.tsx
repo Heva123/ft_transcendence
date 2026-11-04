@@ -31,7 +31,7 @@ function groupReplies(replies: Reply[]) {
   return { roots, childrenOf }
 }
 
-// A reply and everything under it, for removing a deleted thread.
+
 function withDescendants(replies: Reply[], id: string) {
   const removed = new Set([id])
   let grew = true

@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import './Feedback.css'
 
-// Unknown URLs inside the app (design p86).
+
 function NotFoundPage() {
   return (
     <section className="not-found">

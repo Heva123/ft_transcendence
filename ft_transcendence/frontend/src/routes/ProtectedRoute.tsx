@@ -7,7 +7,7 @@ type ProtectedRouteProps = {
 }
 
 function ProtectedRoute({ children }: ProtectedRouteProps) {
-  // No token means we already know the answer, so start as invalid.
+
   const [status, setStatus] = useState(() =>
     localStorage.getItem('accessToken') ? 'checking' : 'invalid')
 

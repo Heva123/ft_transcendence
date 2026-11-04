@@ -119,7 +119,7 @@
   background: var(--color-surface);
 }
 
-/* .search-pagination: styled with Tailwind classes in SearchPager.tsx */
+
 
 @media (max-width: 900px) {
   .people-results {
@@ -167,7 +167,7 @@
   gap: var(--space-16);
 }
 
-/* .search-empty: styled with Tailwind classes in SearchEmptyState.tsx */
+
 
 .search-filters {
   display: flex;

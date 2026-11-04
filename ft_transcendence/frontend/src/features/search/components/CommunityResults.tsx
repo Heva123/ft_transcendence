@@ -19,7 +19,7 @@ type CardProps = { item: SearchCommunity; member: boolean }
 function CommunityResultCard({ item, member }: CardProps) {
   const navigate = useNavigate()
   const [status, setStatus] = useState({ joining: false, error: '' })
-  // Guests can look at communities but cannot join.
+
   const canJoin = canWriteSite(useCurrentUser())
 
   async function handleJoin() {

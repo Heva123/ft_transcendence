@@ -13,7 +13,7 @@ export function getFriendRequests() {
   return apiRequest<FriendRequests>('/friends/requests')
 }
 
-/** If they already asked you, this accepts their request. */
+
 export function sendFriendRequest(userId: string) {
   return apiRequest<{ id: string; status: 'PENDING' | 'ACCEPTED' }>('/friends/requests', {
     method: 'POST',

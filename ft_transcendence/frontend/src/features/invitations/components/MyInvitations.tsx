@@ -8,7 +8,7 @@ import {
 } from '../api/invitationsApi'
 import '../../friends/components/Friends.css'
 
-// "You're invited to …" cards with Accept and Decline.
+
 function MyInvitations() {
   const [items, setItems] = useState<Invitation[]>([])
   const [busyId, setBusyId] = useState('')
@@ -37,7 +37,7 @@ function MyInvitations() {
     setBusyId(item.id)
     try {
       await acceptInvitation(item.id)
-      // Full reload so the sidebar lists the new community too.
+
       window.location.assign(`/communities/${item.community.id}`)
     } catch {
       setError(`Could not join ${item.community.name}.`)

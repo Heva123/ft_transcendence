@@ -31,7 +31,7 @@
 
 .app-shell__body {
   display: grid;
-  /* minmax(0, 1fr) stops wide tables from stretching the page sideways. */
+
   grid-template-columns: 220px minmax(0, 1fr);
   min-height: calc(100vh - 72px);
 }
@@ -96,7 +96,7 @@
   margin-left: 0;
 }
 
-/* Latest UI/UX desktop shell */
+
 .app-shell__main {
   background: var(--color-surface);
 }
@@ -173,7 +173,7 @@
 .topbar__profile span:not(.topbar__avatar) {
   font-size: 13px;
 }
-/* Mobile PXL_LAB layout */
+
 
 .mobile-nav {
   display: none;
@@ -305,7 +305,7 @@
   }
 }
 
-/* Top bar profile dropdown */
+
 
 .topbar__profile-wrapper {
   position: relative;
@@ -414,7 +414,7 @@
 .topbar__logout {
   color: var(--color-plum);
 }
-/* Unread notifications badge on the bell */
+
 .topbar__notification {
   position: relative;
 }
@@ -462,5 +462,3 @@
 .sidebar__legal-links a:hover {
   text-decoration: underline;
 }
-
-/* .guest-banner: styled with Tailwind classes in GuestBanner.tsx */

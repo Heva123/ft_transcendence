@@ -1,7 +1,7 @@
 import { useSearchParams } from 'react-router-dom'
 import './Feedback.css'
 
-// Shown on /login after expireSession() redirects here (design p88).
+
 function SessionExpiredNotice() {
   const [params] = useSearchParams()
 

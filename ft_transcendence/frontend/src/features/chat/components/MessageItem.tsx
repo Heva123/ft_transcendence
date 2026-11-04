@@ -7,7 +7,7 @@ import type { Message } from '../types/Message'
 type MessageItemProps = {
   message: Message
   currentUserId?: string
-  /** userId → username, used to name readers. */
+
   names?: Map<string, string>
 }
 

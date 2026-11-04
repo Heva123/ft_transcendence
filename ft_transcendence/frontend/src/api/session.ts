@@ -1,7 +1,7 @@
-/*
-  One place that ends an expired session.
-  Called on any 401 from the API and on socket auth errors.
-*/
+
+
+
+
 let redirecting = false
 
 export function expireSession() {

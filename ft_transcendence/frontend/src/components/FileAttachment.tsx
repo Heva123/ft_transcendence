@@ -12,13 +12,13 @@ type Props = {
 
 type PreviewState = { status: 'closed' | 'loading' | 'open' | 'error'; url: string }
 
-// A document in chat: name, size, Preview (PDF in a window) and Download.
+
 function FileAttachment({ url, name, type, size }: Props) {
   const [preview, setPreview] = useState<PreviewState>({ status: 'closed', url: '' })
   const [error, setError] = useState('')
   const isPdf = type === 'application/pdf'
 
-  // Free the blob URL when the preview closes or the message unmounts.
+
   useEffect(() => () => {
     if (preview.url)
       URL.revokeObjectURL(preview.url)

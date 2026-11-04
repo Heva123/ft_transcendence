@@ -1,4 +1,4 @@
-/* Dashboard */
+
 
 .dashboard-page {
   min-height: 100vh;
@@ -45,7 +45,7 @@
   right: 20px;
   bottom: 20px;
 }
-/* Dashboard layout and Sidebar */
+
 
 .dashboard-page {
   min-height: 100vh;
@@ -139,7 +139,7 @@
   min-width: 0;
 }
 
-/* Mobile layout */
+
 
 @media (max-width: 700px) {
   .dashboard-layout {
@@ -171,7 +171,7 @@
     padding: 24px 16px;
   }
 }
-/* Responsive Login and Register */
+
 
 @media (max-width: 1100px) {
   .login-page {
@@ -206,7 +206,7 @@
     font-size: 42px;
   }
 }
-/* Legal pages */
+
 
 .legal-page h1 {
   font-family: "Handjet", sans-serif;
@@ -223,7 +223,7 @@
 .legal-text a:hover {
   color: var(--teal);
 }
-/* Sidebar navigation links */
+
 
 .sidebar-menu a.sidebar-item {
   text-decoration: none;
@@ -235,7 +235,7 @@ sidebar-menu a.sidebar-item:hover
   outline: 3px solid var(--teal);
   outline-offset: 2px;
 }
-/* Discover Communities */
+
 
 .discover-subtitle {
   margin-top: -4px;
@@ -346,7 +346,7 @@ sidebar-menu a.sidebar-item:hover
   }
 }
 
-/* Community Details */
+
 
 .community-hero {
   padding: 24px 28px;
@@ -455,7 +455,7 @@ sidebar-menu a.sidebar-item:hover
   }
 }
 
-/* Improve heading readability */
+
 
 .community-hero h2,
 .community-main-card h3,
@@ -470,7 +470,7 @@ sidebar-menu a.sidebar-item:hover
   font-size: 30px;
 }
 
-/* Community Members */
+
 
 .members-subtitle {
   margin-top: -6px;
@@ -713,7 +713,7 @@ sidebar-menu a.sidebar-item:hover
     flex-wrap: wrap;
   }
 }
-/* Roles & Permissions */
+
 
 .roles-subtitle {
   margin-top: -6px;
@@ -777,7 +777,7 @@ sidebar-menu a.sidebar-item:hover
   color: #6f6268;
   font-size: 11px;
 }
-/* Profile */
+
 
 .profile-subtitle {
   margin-top: -6px;
@@ -939,7 +939,7 @@ sidebar-menu a.sidebar-item:hover
     flex-direction: column;
   }
 }
-/* Settings */
+
 
 .settings-subtitle {
   margin-top: -6px;
@@ -1017,7 +1017,7 @@ sidebar-menu a.sidebar-item:hover
   color: var(--plum);
   font-size: 12px;
 }
-/* Legal Pages */
+
 
 .legal-subtitle {
   margin-top: -10px;
@@ -1060,7 +1060,7 @@ sidebar-menu a.sidebar-item:hover
   font-size: 13px;
 }
 
-/* Shared-shell integration: keep Discover action visible */
+
 .discover-toolbar .discover-create {
   display: inline-flex;
   align-items: center;
@@ -1074,7 +1074,7 @@ sidebar-menu a.sidebar-item:hover
   white-space: nowrap;
 }
 
-/* Profile button visibility fix */
+
 
 .profile-edit-button {
   padding: 12px 20px;
@@ -1107,7 +1107,7 @@ sidebar-menu a.sidebar-item:hover
   background-color: #3a7f8a;
   border-color: #3a7f8a;
 }
-/* Settings real data */
+
 
 .settings-blocked-list {
   display: flex;
@@ -1206,7 +1206,7 @@ sidebar-menu a.sidebar-item:hover
   outline: 2px solid var(--cyan);
   border-color: var(--teal);
 }
-/* Discover communities */
+
 
 .discover-grid {
   display: grid;
@@ -1386,7 +1386,7 @@ sidebar-menu a.sidebar-item:hover
       repeat(2, 1fr);
   }
 }
-/* Communities create / manage */
+
 
 .communities-heading-row {
   display: flex;
@@ -1556,7 +1556,7 @@ sidebar-menu a.sidebar-item:hover
     width: 100%;
   }
 }
-/* Public profile */
+
 
 .public-profile-header {
   display: flex;
@@ -1624,7 +1624,7 @@ sidebar-menu a.sidebar-item:hover
   margin-top: 20px;
 }
 
-/* Friends */
+
 
 .friends-subtitle {
   margin-bottom: 24px;
@@ -1664,7 +1664,7 @@ sidebar-menu a.sidebar-item:hover
     flex-direction: column;
   }
 }
-/* Editable account settings (design p70–71) */
+
 .settings-account-form {
   display: grid;
   gap: var(--space-12);

@@ -53,7 +53,7 @@ export function useReadReceipts(
     }
 
     markAll()
-    // Messages that arrived while offline are marked once we are back.
+
     return onSocketConnect(markAll)
   }, [channelId, messages, currentUserId])
 }

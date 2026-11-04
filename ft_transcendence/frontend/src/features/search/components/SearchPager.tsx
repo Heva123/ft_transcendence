@@ -1,4 +1,4 @@
-// Tailwind classes shared by every page button.
+
 const PAGE_BUTTON = 'min-h-10 min-w-10 border border-ink px-2 disabled:opacity-40'
 
 type Props = {

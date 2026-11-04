@@ -7,7 +7,7 @@ type Props = {
   names: Map<string, string>
 }
 
-// Full channel history, grouped by day (design p55).
+
 function MessageHistory(props: Props) {
   return (
     <section className="message-history">

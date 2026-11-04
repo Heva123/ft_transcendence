@@ -15,10 +15,10 @@ type BlockState = {
   error: string
 }
 
-/*
-  The blocked list comes from the backend, so it survives a reload
-  and several people can be blocked at once.
-*/
+
+
+
+
 export function useBlockFlow(
   members: BlockTarget[],
   currentUserId: string,

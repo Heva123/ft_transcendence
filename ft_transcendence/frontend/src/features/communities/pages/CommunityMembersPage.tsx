@@ -74,11 +74,11 @@ function CommunityMembersPage({
     setSearch,
   ] = useState("");
 
-  // Bumped after each invitation so the pending list reloads.
+
   const [inviteVersion, setInviteVersion] =
     useState(0);
 
-  // Member waiting for "Remove this member?" confirmation (design p44).
+
   const [
     pendingRemove,
     setPendingRemove,

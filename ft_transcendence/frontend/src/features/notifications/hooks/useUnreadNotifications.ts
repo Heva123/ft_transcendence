@@ -6,7 +6,7 @@ import {
 } from '../api/notificationApi'
 import { onNewNotification } from '../api/notificationSocket'
 
-/** Unread count for the bell. Live on notification:new, refreshed on navigation. */
+
 export function useUnreadNotifications() {
   const [count, setCount] = useState(0)
   const location = useLocation()

@@ -1,10 +1,10 @@
-/*
-  How the UI shows each notification type.
-  The backend sends `type` strings such as POST_CREATED or FRIEND_REQUEST.
-  Types are grouped by their first word, so a new type from the backend
-  (for example CHANNEL_DELETED) gets the right label without a code change.
-  The full list agreed with the backend is in the README / handover note.
-*/
+
+
+
+
+
+
+
 export type NotificationCategory = {
   label: string
   className: string

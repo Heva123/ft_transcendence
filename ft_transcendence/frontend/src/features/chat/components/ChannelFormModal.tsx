@@ -13,11 +13,11 @@ type Props = {
   initial?: Values
   onCancel: () => void
   onSubmit: (values: Values) => Promise<void>
-  // Shown only when the user is allowed to delete the channel.
+
   onDelete?: () => void
 }
 
-// Used to create a channel and to edit one (design p48, p49).
+
 function ChannelFormModal(props: Props) {
   const { onCancel } = props
   const [form, setForm] = useState<Values>(

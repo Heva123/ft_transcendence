@@ -18,7 +18,7 @@ type Props = {
   onClose: () => void
 }
 
-// Report form and thank-you state (design p38–39).
+
 function ReportDialog({ communityId, targetType, targetId, onClose }: Props) {
   const [reason, setReason] = useState(REASONS[0])
   const [context, setContext] = useState('')

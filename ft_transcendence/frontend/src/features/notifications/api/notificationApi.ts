@@ -7,10 +7,10 @@ export type ApiNotification = {
   message: string
   isRead: boolean
   createdAt: string
-  /*
-    Not sent by the backend yet. When it adds one of these,
-    "View" will open the related page automatically.
-  */
+
+
+
+
   link?: string | null
   url?: string | null
   entityType?: string | null

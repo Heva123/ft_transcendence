@@ -1,4 +1,4 @@
-/* Friends list, requests and person rows (design p61, p67) */
+
 .people-list {
   display: grid;
   margin: var(--space-16) 0;

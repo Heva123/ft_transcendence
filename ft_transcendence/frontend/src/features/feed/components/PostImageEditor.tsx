@@ -8,7 +8,7 @@ type Props = {
   onAdd: (file: File, onProgress: (value: number) => void) => Promise<void>
 }
 
-// While editing a post: remove its image, or add one with progress.
+
 function PostImageEditor({ hasImage, onRemove, onAdd }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [state, setState] = useState({ progress: 0, uploading: false, error: '' })

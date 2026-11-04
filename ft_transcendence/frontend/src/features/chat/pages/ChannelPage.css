@@ -120,7 +120,7 @@
   min-width: 0;
 }
 
-/* Phone and tablet: channel list on top, chat below. */
+
 @media (max-width: 900px) {
   .channel-page {
     grid-template-columns: minmax(0, 1fr);

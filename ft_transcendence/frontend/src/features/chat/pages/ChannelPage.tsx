@@ -61,7 +61,7 @@ function ChannelRoom({ data }: { data: ChannelData }) {
   const [channels, setChannels] = useState(data.channels)
   const [deleting, setDeleting] = useState(false)
   const [error, setError] = useState('')
-  // Only members of this community count as online here.
+
   const onlineIds = new Set(onlineUsers.map((user) => user.userId))
   const onlineMembers = data.members.filter((member) => onlineIds.has(member.id))
 

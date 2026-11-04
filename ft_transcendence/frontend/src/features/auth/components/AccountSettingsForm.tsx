@@ -8,7 +8,7 @@ type Props = {
   onSaved: (user: CurrentUser) => void
 }
 
-// Same rules as the backend UpdateUserDto.
+
 function validate(username: string, email: string) {
   if (username.length < 3 || username.length > 30)
     return 'Username must be 3 to 30 characters.'
@@ -19,7 +19,7 @@ function validate(username: string, email: string) {
   return ''
 }
 
-// Editable account details with Save (design p70–71).
+
 function AccountSettingsForm({ user, onSaved }: Props) {
   const [username, setUsername] = useState(user.username)
   const [email, setEmail] = useState(user.email)

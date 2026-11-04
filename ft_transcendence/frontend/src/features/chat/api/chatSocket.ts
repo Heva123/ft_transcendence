@@ -42,10 +42,10 @@ export function requestPresence() {
   socket.emit('presence:get')
 }
 
-/*
-  Every listener is removed with the same function it was added with.
-  Removing all listeners of an event would break other screens.
-*/
+
+
+
+
 function listen<T>(event: string, handler: Handler<T>) {
   socket.on(event, handler)
   return () => {

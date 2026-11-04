@@ -11,7 +11,7 @@ type Props = {
   childrenOf: Map<string, Reply[]>
   currentUserId?: string
   communityId: string | null
-  // False for guests: no reply button.
+
   canWrite?: boolean
   depth?: number
   onCreated: (reply: Reply) => void
@@ -27,7 +27,7 @@ type State = {
 
 type Dialog = 'none' | 'delete' | 'report' | 'reply'
 
-// Nested replies are indented up to this depth, then shown flat.
+
 const MAX_INDENT = 3
 
 export function ReplyForm({ postId, parentId, onCreated, onCancel, label = 'Your reply' }: {

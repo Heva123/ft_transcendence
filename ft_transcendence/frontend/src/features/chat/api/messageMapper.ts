@@ -1,10 +1,10 @@
 import type { ApiMessage } from './chatApi'
 import type { Message, MessageReader } from '../types/Message'
 
-/*
-  The history endpoint does not return readers yet.
-  When the backend adds `reads`, receipts will also show after a reload.
-*/
+
+
+
+
 function toReaders(item: ApiMessage): MessageReader[] | undefined {
   if (!item.reads?.length)
     return undefined
@@ -33,7 +33,7 @@ export function toMessage(item: ApiMessage): Message {
   }
 }
 
-/** "Today", "Yesterday" or "8 September" style label for a day group. */
+
 export function dayLabel(iso: string) {
   const date = new Date(iso)
   const today = new Date()

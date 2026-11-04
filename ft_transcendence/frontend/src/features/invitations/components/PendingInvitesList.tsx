@@ -4,11 +4,11 @@ import '../../friends/components/Friends.css'
 
 type Props = {
   communityId: string
-  /** Change this to reload, e.g. after sending an invitation. */
+
   refreshKey: number
 }
 
-// Invitations waiting for an answer, with Revoke (managers only).
+
 function PendingInvitesList({ communityId, refreshKey }: Props) {
   const [items, setItems] = useState<Invitation[]>([])
   const [error, setError] = useState('')

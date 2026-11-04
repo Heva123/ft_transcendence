@@ -7,7 +7,7 @@ import ProfilePage from '../features/profile/pages/ProfilePage'
 
 function ProfileRoute() {
   const currentUser = useCurrentUser()
-  // After an edit, the saved user wins over the one loaded at start.
+
   const [edited, setEdited] = useState<CurrentUser | null>(null)
   const user = edited ?? currentUser
   const token = localStorage.getItem('accessToken')

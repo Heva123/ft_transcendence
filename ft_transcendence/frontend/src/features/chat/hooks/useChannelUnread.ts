@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { getUnreadCount } from '../api/chatApi'
 
-// The socket only joins the open channel, so other channels are polled.
+
 const POLL_MS = 10000
 
-/** Unread message count per channel. The open channel always counts as read. */
+
 export function useChannelUnread(channelIds: string[], activeId: string) {
   const [counts, setCounts] = useState<Record<string, number>>({})
   const key = channelIds.join(',')

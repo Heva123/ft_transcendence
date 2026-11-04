@@ -12,7 +12,7 @@ type Props = {
 
 const SKILL_PATTERN = /^[\p{L}\p{N} +#./_-]{1,30}$/u
 
-// Display name, bio and skills (design p62 "Things I work with", p65).
+
 function ProfileAboutCard({ user, onSaved }: Props) {
   const [editing, setEditing] = useState(false)
   const [displayName, setDisplayName] = useState(user.displayName ?? '')

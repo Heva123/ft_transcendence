@@ -57,7 +57,7 @@ export type SearchRequest = {
 
 export const SEARCH_PAGE_SIZE = 5
 
-// Paging, sorting and the community filter all run on the server.
+
 export function searchBackend(request: SearchRequest) {
   const params = new URLSearchParams({
     q: request.query,

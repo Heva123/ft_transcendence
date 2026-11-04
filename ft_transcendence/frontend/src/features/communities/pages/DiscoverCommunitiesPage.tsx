@@ -26,7 +26,7 @@ type DiscoverGroup = {
   };
 };
 
-// Requests read the token through apiClient, so no props are needed.
+
 function DiscoverCommunitiesPage() {
   const canWrite = useCanWrite();
   const navigate = useNavigate();

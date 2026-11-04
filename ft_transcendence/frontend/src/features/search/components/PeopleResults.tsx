@@ -11,7 +11,7 @@ type Props = {
 }
 
 function PeopleResults({ request, onPage, onClear }: Props) {
-  // The same list shows people by name, or by skill on the Skills tab.
+
   const state = usePagedSearch(request, (data) =>
     request.type === 'skills' ? data.results.skills : data.results.users)
 
