@@ -39,8 +39,6 @@ function ChannelsPage() {
     return <p>Loading your channels...</p>
   if (state === 'error')
     return <h1>Unable to load channels.</h1>
-
-  // Channels belong to a community, so the next step is always a community.
   return (
     <section className="channels-empty">
       <h1>No channels yet.</h1>

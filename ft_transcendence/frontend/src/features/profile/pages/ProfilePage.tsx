@@ -130,7 +130,6 @@ function ProfilePage({
     };
   }, [user.id, avatarVersion, hasAvatar]);
 
-  // Clean temporary preview URLs.
   useEffect(() => {
     return () => {
       if (avatarPreview) {
@@ -251,7 +250,6 @@ function ProfilePage({
       setAvatarPreview(null);
       setHasAvatar(true);
 
-      // Reload saved avatar from backend.
       setAvatarVersion(
         (current) => current + 1
       );

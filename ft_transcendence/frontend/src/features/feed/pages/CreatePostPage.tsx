@@ -87,7 +87,6 @@ function CreatePostPage() {
         publishing: false,
         uploading: false,
         progress: 0,
-        // Show the server reason, for example "Guest accounts have read-only access".
         error: err instanceof AttachmentUploadError || err instanceof ApiError
           ? err.message
           : 'Unable to publish post.',

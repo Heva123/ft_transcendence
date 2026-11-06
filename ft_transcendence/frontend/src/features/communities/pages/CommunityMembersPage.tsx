@@ -217,8 +217,6 @@ function CommunityMembersPage({
     if (isAdding) {
       return;
     }
-
-    // The field now holds a username (design p42 "Invite a member").
     const cleanUsername =
       email.trim().replace(/^@/, "");
 
@@ -237,7 +235,6 @@ function CommunityMembersPage({
     setMessage("");
 
     try {
-      // The role picker never offers OWNER.
       await inviteMember(
         groupId,
         cleanUsername,

@@ -26,7 +26,6 @@ type DiscoverGroup = {
   };
 };
 
-
 function DiscoverCommunitiesPage() {
   const canWrite = useCanWrite();
   const navigate = useNavigate();
@@ -161,14 +160,6 @@ function DiscoverCommunitiesPage() {
     }
   }
 
-  /*
-    PREVIEW MODE
-
-    We use the data already returned
-    by /communities/discover because
-    the current backend does not allow
-    non-members to GET /communities/:id.
-  */
   if (selectedGroup) {
     return (
       <AppLayout>

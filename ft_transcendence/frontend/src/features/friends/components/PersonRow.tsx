@@ -16,8 +16,6 @@ function lastSeen(user: PublicUser) {
     return 'Offline'
   return `Last seen ${new Date(user.lastSeenAt).toLocaleDateString()}`
 }
-
-// One person: avatar, name, @username · status, first skill, actions.
 function PersonRow({ user, online, note, children }: Props) {
   return (
     <article className="person-row">

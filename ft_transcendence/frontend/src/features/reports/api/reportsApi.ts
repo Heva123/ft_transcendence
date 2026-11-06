@@ -17,7 +17,6 @@ export type CommunityReport = {
   comment: { id: string, postId: string, content: string, author: Person } | null
 }
 
-// Owners, admins and moderators only. The server checks the member role.
 export function getReports(communityId: string) {
   return apiRequest<CommunityReport[]>(`/communities/${communityId}/reports`)
 }

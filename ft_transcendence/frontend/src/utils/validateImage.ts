@@ -16,7 +16,6 @@ export function formatBytes(size: number) {
   return `${Math.max(1, Math.ceil(size / 1024))} KB`
 }
 
-/** Post images and avatars: PNG, JPEG or WEBP up to 5 MB. */
 export function validateImage(file: File) {
   if (!IMAGE_TYPES.includes(file.type))
     return 'Unsupported file. Please choose a PNG, JPEG or WEBP image.'
@@ -25,7 +24,6 @@ export function validateImage(file: File) {
   return ''
 }
 
-/** Post attachments: images or PDF documents up to 5 MB. */
 export function validatePostAttachment(file: File) {
   if (!ATTACHMENT_TYPES.includes(file.type))
     return "Unsupported file. You can attach PNG, JPEG, WEBP images or PDF documents."
@@ -34,7 +32,6 @@ export function validatePostAttachment(file: File) {
   return ""
 }
 
-/** Chat attachments: images up to 5 MB, PDF documents up to 10 MB. */
 export function validateAttachment(file: File) {
   if (!ATTACHMENT_TYPES.includes(file.type))
     return 'Unsupported file. You can attach PNG, JPEG, WEBP images or PDF documents.'

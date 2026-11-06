@@ -114,7 +114,6 @@ function PostCard({ post, commentsCount, currentUserId, canWrite = true }: Props
 
   async function handleAddImage(file: File, onProgress: (value: number) => void) {
     await uploadPostImage(post.id, file, onProgress)
-    // New query string so the image is fetched again.
     setImageUrl(`/api/uploads/post/${post.id}?v=${Date.now()}`)
   }
 

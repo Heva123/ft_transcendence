@@ -32,7 +32,6 @@ import { toCommunity } from "../api/communityMapper";
 
 import CommunityHeader from "../../chat/components/CommunityHeader";
 
-
 import type { Channel } from "../../chat/types/Channel";
 import type { Community } from "../types/Community";
 
@@ -122,7 +121,6 @@ function CommunityView({
     navigate(`/channels/${channel.id}`);
   }
 
-  // With no channels yet, the tab opens the form or points to the panel.
   function handleEmptyChannelsTab() {
     if (canCreate) {
       setShowCreate(true);
@@ -197,7 +195,6 @@ function CommunityView({
           Roles & permissions
         </Link>
 
-        {/* Owners, admins and moderators review reports here. */}
         {canModerate(data.role) && (
           <Link
             className="community-tab-link"
@@ -220,7 +217,6 @@ function CommunityView({
             </Link>
           )}
 
-          {/* Paged feed, so posts after the first 10 also show. */}
           <Feed
             mode={`community:${data.community.id}`}
             emptyText="Your community is ready. Share the first idea."
@@ -306,8 +302,6 @@ function CommunityPage() {
 
   const navigate =
     useNavigate();
-
-  // Results are stored with the id they belong to, so a new id shows "Loading".
   const [loaded, setLoaded] =
     useState<{
       id: string;

@@ -46,13 +46,6 @@ function resolveUrl(path: string) {
     return path
   }
 
-  /*
-    Backend sometimes returns URLs such as:
-    /api/uploads/avatar/USER_ID
-
-    VITE_API_URL already ends with /api,
-    so we remove the extra /api here.
-  */
   if (path.startsWith('/api/')) {
     return `${API_URL}${path.slice(4)}`
   }
@@ -80,7 +73,7 @@ async function getErrorMessage(
       return data.message.join(', ')
     }
   } catch {
-    // Response was not JSON.
+    return 'Request failed.'
   }
 
   return 'Request failed.'

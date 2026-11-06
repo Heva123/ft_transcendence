@@ -21,7 +21,6 @@ function NotificationRow({ item, onRead }: RowProps) {
         <strong>{item.title}</strong>
         <p>{item.message} · {item.createdAt} · {item.read ? 'Read' : 'Unread'}</p>
       </div>
-      {/* Only link when we know where the update points to. */}
       {item.targetUrl
         ? <Link className="notification-view" to={item.targetUrl}
           onClick={() => onRead(item.id)}>View</Link>

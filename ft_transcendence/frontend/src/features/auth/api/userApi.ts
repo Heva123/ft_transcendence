@@ -86,8 +86,6 @@ export function unblockUser(
     }
   );
 }
-
-// The API is paged: { items, total, page, limit, totalPages }.
 export function getAdminUsers() {
   return apiRequest<{ items: AdminUser[] }>(
     "/admin/users?limit=100"

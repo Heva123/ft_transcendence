@@ -83,8 +83,6 @@ function ChatArea({ selectedChannelId, members, showHistory }: ChatAreaProps) {
     pending.current = null
     setSendError(data.message ? `${data.message}.` : '')
   }), [])
-
-  // Our own message came back from the server, so the send worked.
   useEffect(() => {
     const last = messages[messages.length - 1]
 

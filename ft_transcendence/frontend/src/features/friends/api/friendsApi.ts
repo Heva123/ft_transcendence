@@ -13,7 +13,6 @@ export function getFriendRequests() {
   return apiRequest<FriendRequests>('/friends/requests')
 }
 
-
 export function sendFriendRequest(userId: string) {
   return apiRequest<{ id: string; status: 'PENDING' | 'ACCEPTED' }>('/friends/requests', {
     method: 'POST',
@@ -25,7 +24,6 @@ export function acceptFriendRequest(requestId: string) {
   return apiRequest(`/friends/requests/${requestId}/accept`, { method: 'POST' })
 }
 
-/** Decline an incoming request or cancel your own. */
 export function removeFriendRequest(requestId: string) {
   return apiRequest(`/friends/requests/${requestId}`, { method: 'DELETE' })
 }

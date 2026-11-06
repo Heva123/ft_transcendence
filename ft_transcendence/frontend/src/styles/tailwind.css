@@ -1,13 +1,3 @@
-/*
-  Tailwind CSS v4, set up with the PXL_LAB design tokens.
-
-  - No Preflight (Tailwind's CSS reset): the pages written with CSS files
-    keep exactly their look. Only the theme and the utility classes load.
-  - The theme below uses the same values as tokens.css, so a Tailwind class
-    such as bg-plum, border-ink, rounded-panel or font-heading gives the same
-    colour, border, radius or font as the rest of the app.
-  - Tailwind's spacing scale (p-4 = 16px) already follows our 4px grid.
-*/
 @layer theme, base, components, utilities;
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);

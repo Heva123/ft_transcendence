@@ -32,8 +32,6 @@ export function readNotification(id: string) {
     { method: 'PATCH' },
   )
 }
-
-// Lets the top bar badge refresh after notifications are read.
 export const NOTIFICATIONS_CHANGED = 'pxl:notifications-changed'
 
 export function announceNotificationsChanged() {

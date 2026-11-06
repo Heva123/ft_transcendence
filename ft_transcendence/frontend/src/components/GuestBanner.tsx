@@ -1,6 +1,4 @@
 import { useCanWrite } from '../features/auth/hooks/useCanWrite'
-
-// Shown on every page to site guests (role GUEST).
 function GuestBanner() {
   if (useCanWrite())
     return null

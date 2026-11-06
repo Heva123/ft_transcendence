@@ -18,8 +18,6 @@ function typingText(users: string[]) {
     return `${users[0]} and ${users[1]} are typing…`
   return `${users.length} people are typing…`
 }
-
-// Messages grouped under a date header per day (design p52, p55).
 function MessageList(props: Props) {
   const rows = props.messages.map((message, index) => {
     const day = dayLabel(message.sentAt)

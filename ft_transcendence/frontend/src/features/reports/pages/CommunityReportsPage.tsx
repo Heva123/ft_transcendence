@@ -12,8 +12,6 @@ import {
 } from '../api/reportsApi'
 
 type Filter = 'OPEN' | 'REVIEWED'
-
-// Tailwind classes reused on this page (colours and radius come from our design tokens).
 const MUTED = 'm-0 text-xs text-muted'
 const TAB = 'min-h-10 cursor-pointer rounded-control border border-ink px-3.5 py-2 text-xs'
 const BUTTON = 'min-h-10 cursor-pointer rounded-control border border-ink px-3.5 py-2 text-xs disabled:cursor-wait disabled:opacity-60'
@@ -44,7 +42,6 @@ async function loadQueue(communityId: string) {
   return { name: community.name, role, reports }
 }
 
-// Moderation queue (design: "Moderation queue" and "Review this report").
 function CommunityReportsPage() {
   const { communityId = '' } = useParams()
   const navigate = useNavigate()

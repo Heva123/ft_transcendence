@@ -8,7 +8,6 @@ type PostDetails = { post: Post; comments: Reply[] }
 type LikeResponse = { liked: boolean; likesCount: number }
 type DeleteResponse = { deleted: boolean; id: string }
 
-
 export const FEED_PAGE_SIZE = 10
 
 export function getFeed(page = 1) {
@@ -85,7 +84,6 @@ export function uploadPostImage(
 
 export type ReportTarget = 'POST' | 'COMMENT'
 
-/** Reports belong to a community, so only community posts can be reported. */
 export function reportContent(
   communityId: string,
   targetType: ReportTarget,
@@ -98,7 +96,6 @@ export function reportContent(
   })
 }
 
-/** Removes the image of a post. Only the author can do this. */
 export function deletePostImage(postId: string) {
   return apiRequest(`/uploads/post/${postId}`, { method: 'DELETE' })
 }
