@@ -110,7 +110,6 @@ Before submission, the team also ran end-to-end tests on the Docker version with
 
 ## Team Information
 
-<!-- Roles were agreed on the first day of the project. Each member writes 3 to 5 responsibilities for her role(s). Afnan explains the Frontend Monitor role, which the team added. -->
 
 | Member | Login | Role(s) |
 |---|---|---|
@@ -260,7 +259,6 @@ The `projects` and `tasks` tables support existing backend APIs.
 
 ## Features List
 
-<!-- Each member checks the rows with her name. Add a row if a feature is missing. Keep one line per description. -->
 
 | Feature | What it does | Who |
 |---|---|---|
@@ -301,7 +299,6 @@ The `projects` and `tasks` tables support existing backend APIs.
 | File upload and management | Minor | 1 | Wurood, Afnan |
 | **Total** | | **16** | |
 
-<!-- One writer per module (marked below). The others check it. -->
 
 ### Frameworks (Major, 2 pts)
 - **Why we chose it:** React gives the frontend reusable components and clear state management. NestJS gives the backend a structured module system. TypeScript is used on both sides and helps detect errors before runtime.
@@ -358,7 +355,6 @@ The `projects` and `tasks` tables support existing backend APIs.
 
 ## Individual Contributions
 
-<!-- Same structure for everyone. See the PXL_LAB README guide. -->
 
 ### Afnan Shaheen
 
@@ -469,7 +465,6 @@ The `projects` and `tasks` tables support existing backend APIs.
 
 ### How we used AI
 
-<!-- Be honest and specific. The subject requires which tasks and which parts. Each member adds her own bullets. -->
 
 We used AI tools as assistants. Every result was read, tested and changed by us before it went into the project.
 
