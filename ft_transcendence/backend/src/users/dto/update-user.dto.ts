@@ -34,21 +34,18 @@ export class UpdateUserDto {
   })
   username?: string;
 
-  /** Empty string clears the display name. */
   @IsOptional()
   @Transform(trim)
   @IsString()
   @MaxLength(50)
   displayName?: string;
 
-  /** Empty string clears the bio. */
   @IsOptional()
   @Transform(trim)
   @IsString()
   @MaxLength(300)
   bio?: string;
 
-  /** Replaces the whole skill list. Duplicates are removed. */
   @IsOptional()
   @Transform(({ value }: { value: unknown }) =>
     Array.isArray(value)

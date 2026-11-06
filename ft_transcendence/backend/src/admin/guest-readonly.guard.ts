@@ -38,7 +38,6 @@ export class GuestReadonlyGuard implements CanActivate {
       return true;
     const token =
       request.headers.authorization?.match(/^Bearer\s+(\S+)$/i)?.[1];
-    // Protected endpoints still run their existing JwtAuthGuard.
     if (!token) return true;
     let payload: JwtPayload;
     try {

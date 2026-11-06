@@ -229,8 +229,6 @@ export class ReportsService {
     return updatedReport;
   }
 
-  // Deletes the reported post or reply and closes the other open reports
-  // about it. Returns the author of the removed content, or null.
   private async removeReportedContent(
     communityId: string,
     report: {

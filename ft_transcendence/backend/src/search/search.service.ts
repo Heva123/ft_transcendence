@@ -81,7 +81,6 @@ export class SearchService {
       usersTotal = total;
     }
 
-    // People who list a matching skill, e.g. q=react finds React developers.
     if (type === "all" || type === "skills") {
       const skillWhere: Prisma.UserWhereInput = {
         skills: {

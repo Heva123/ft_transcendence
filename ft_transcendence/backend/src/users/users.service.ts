@@ -29,7 +29,6 @@ export class UsersService {
     });
   }
 
-  /** The signed-in user's own profile, including email. */
   async findMe(id: string) {
     const user = await this.prisma.user.findUnique({
       where: { id },
@@ -43,10 +42,6 @@ export class UsersService {
     return { ...toPublicUser(user), email: user.email, siteRole: user.siteRole };
   }
 
-  /**
-   * Another member's profile as seen by `viewerId`: public fields,
-   * friendship state, block state and communities the viewer may see.
-   */
   async findPublicProfile(viewerId: string, username: string) {
     const user = await this.prisma.user.findUnique({
       where: { username },
@@ -128,7 +123,6 @@ export class UsersService {
       throw new NotFoundException("User not found");
     }
 
-    // Blocking someone also ends any friendship or pending request.
     await this.prisma.friendship.deleteMany({
       where: {
         OR: [
@@ -245,12 +239,7 @@ export class UsersService {
     }
   }
 
-  /*
-    Skills are shared rows ("React" is stored once).
-    Names match without case, so "react" reuses "React".
-  */
   private async replaceSkills(userId: string, names: string[]) {
-    // Keep the first spelling when the same skill is sent twice.
     const byKey = new Map<string, string>();
 
     for (const name of names.map((item) => item.trim()).filter(Boolean)) {

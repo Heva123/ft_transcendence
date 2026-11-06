@@ -371,7 +371,6 @@ enum FriendshipStatus {
   ACCEPTED
 }
 
-/// One row per pair of users. The service checks both directions.
 model Friendship {
   id          String           @id @default(uuid())
   requesterId String

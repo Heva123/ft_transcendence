@@ -100,7 +100,6 @@ export class AdminUsersService {
         "Administrators cannot demote their own account",
       );
     }
-    // Account fields are required in the database. Optional means omitted, not null.
     if (dto.email === null || dto.username === null)
       throw new BadRequestException("Email and username cannot be null");
     try {
@@ -155,8 +154,6 @@ export class AdminUsersService {
           if (!target) throw new NotFoundException("User not found");
           if (target.siteRole === SiteRole.ADMIN)
             await this.requireOtherAdmin(tx);
-          // Remove authored/owned content before User foreign keys with RESTRICT.
-          // Other relations (memberships, friends, blocks, skills, messages) cascade.
           await tx.community.deleteMany({ where: { createdById: id } });
           await tx.channel.deleteMany({ where: { createdById: id } });
           await tx.project.deleteMany({ where: { createdById: id } });

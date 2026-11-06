@@ -1,9 +1,5 @@
 import { Prisma } from "@prisma/client";
 
-/*
-  Public fields of a user. Never add email or passwordHash here:
-  this shape is shown to other members.
-*/
 export const PUBLIC_USER_SELECT = {
   id: true,
   username: true,
@@ -22,7 +18,6 @@ export type PublicUserRow = Prisma.UserGetPayload<{
   select: typeof PUBLIC_USER_SELECT;
 }>;
 
-/** Turns internal fields (avatarPath, skill rows) into API fields. */
 export function toPublicUser(user: PublicUserRow) {
   return {
     id: user.id,

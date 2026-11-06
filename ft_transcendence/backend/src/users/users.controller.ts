@@ -65,7 +65,6 @@ export class UsersController {
     return this.usersService.update(user.id, dto);
   }
 
-  // Declared last so "me" and "blocked" are matched first.
   @Get(":username")
   findProfile(
     @CurrentUser() user: AuthUser,

@@ -136,13 +136,11 @@ Before submission, the team also ran end-to-end tests on the Docker version with
 - Implemented authentication, community permissions and site administration.
 - Integrated backend additions and verified migrations, API behaviour and production builds.
 
-<!-- WOROD: START (Team Information) -->
 **Wurood Abdullah** — Product Owner (PO), Developer (Backend)
 - Defined and reviewed PXL_LAB feature requirements and user workflows.
 - Developed backend features for chat, social interactions, uploads, and search.
 - Integrated backend functionality with the shared team application.
 - Investigated bugs, added regression tests, and verified builds before integration.
-<!-- WOROD: END -->
 
 ---
 
@@ -304,11 +302,9 @@ The `projects` and `tasks` tables support existing backend APIs.
 - **Why we chose it:** React gives the frontend reusable components and clear state management. NestJS gives the backend a structured module system. TypeScript is used on both sides and helps detect errors before runtime.
 - **How it works:** The frontend uses React 19, TypeScript, React Router, and Vite. NestJS 11 structures the backend using modules, controllers, and services. The frontend communicates with the backend through API requests.
 
-<!-- WOROD: START (Module) -->
 ### Real-time features (Major, 2 pts)
 - **Why we chose it:** Students need immediate communication without refreshing the page. WebSockets support live chat, typing indicators, read receipts, and online presence.
 - **How it works:** NestJS uses Socket.IO through `chat.gateway.ts`. Clients authenticate using JWT, join authorized channel rooms, exchange messages, and receive presence and typing events. Messages and read states are persisted through Prisma. The gateway also waits for authentication before processing early events.
-<!-- WOROD: END -->
 
 ### User interaction (Major, 2 pts)
 - **Why we chose it:** We wanted 42 students to connect and communicate inside PXL_LAB. Users can build profiles, add friends, and chat in real time. This helps students interact and stay connected within their communities.
@@ -331,11 +327,9 @@ The `projects` and `tasks` tables support existing backend APIs.
 - **How it works:** Prisma stores each account's site role as admin, user or guest. `SiteAdminGuard` restricts `/api/admin/users` to site administrators. Administrators can list, create, edit and delete accounts. Guest write restrictions apply to HTTP endpoints and WebSocket (Socket.IO) chat events.
 
 
-<!-- WOROD: START (Module) -->
 ### ORM (Minor, 1 pt)
 - **Why we chose it:** Prisma provides a typed and structured way to interact with PostgreSQL, manage relationships, and maintain the database schema.
 - **How it works:** Database models and relationships are defined in `prisma/schema.prisma`. NestJS services use `PrismaService` to query and update users, communities, posts, messages, notifications, and other records. Prisma migrations manage schema changes.
-<!-- WOROD: END -->
 
 ### Notification system (Minor, 1 pt)
 - **Why we chose it:** We wanted students to know when something important happens. Notifications help users follow friend requests, replies, likes, and community activity.
@@ -345,11 +339,9 @@ The `projects` and `tasks` tables support existing backend APIs.
 - **Why we chose it:** We wanted students to find people and content without checking every page. Filters, sorting, and pagination make search results easier to explore.
 - **How it works:** `SearchPage.tsx` provides search interfaces for people, communities, posts, and skills. Users enter search terms and select available filters or sorting options. `usePagedSearch.ts` manages requests and paginated results. The backend API returns matching records from the database.
 
-<!-- WOROD: START (Module) -->
 ### File upload and management (Minor, 1 pt)
 - **Why we chose it:** Students need to share avatars, post images, and chat attachments securely within the application.
 - **How it works:** `uploads.controller.ts` and `uploads.service.ts` manage uploading, retrieving, and deleting files. Upload validation checks allowed file types, extensions, and size limits. JWT authentication and resource access checks protect supported upload operations.
-<!-- WOROD: END -->
 
 ---
 
@@ -418,7 +410,6 @@ The `projects` and `tasks` tables support existing backend APIs.
 - **Database configuration.** Missing `DATABASE_URL` settings prevented migrations. She configured the local environment and applied migrations without resetting the database.
 
 
-<!-- WOROD: START (Individual Contributions) -->
 
 ### Wurood Abdullah
 
@@ -439,7 +430,6 @@ The `projects` and `tasks` tables support existing backend APIs.
 - **Shared database integration.** Adapted social APIs from a separate prototype to the integrated PostgreSQL and Prisma data model.
 - **Cross-feature integration.** Checked how chat, search, social features, uploads, and shared authorization worked together while coordinating fixes and testing with the team.
 
-<!-- WOROD: END -->
 
 ---
 
@@ -473,9 +463,7 @@ We used AI tools as assistants. Every result was read, tested and changed by us 
 - **Maram** — ChatGPT helped explain React, TypeScript, API integration, Git workflows, and frontend debugging. She used it while reviewing code, planning fixes, and understanding integration issues. Claude assisted with drafting the moderation queue page patch. Maram reviewed the changes, applied the patch under her own name, and verified the integration before pushing it to main.
 
 - **Hiba** — ChatGPT helped explain NestJS, Prisma, JWT authentication, Docker and Git workflows. She used it to help develop and integrate backend features, troubleshoot configuration errors, and prepare the Docker setup. Claude helped draft the moderation backend patch. Hiba reviewed the changes and checked them with backend tests, API checks, builds and browser testing.
-<!-- WOROD: START (AI) -->
 - **Wurood** — Used ChatGPT to understand NestJS, Socket.IO, JWT authentication, and backend integration concepts. It also assisted with debugging early WebSocket authentication events, reviewing search pagination, planning regression tests, checking Git integration steps, and drafting documentation. Suggested changes were reviewed against the project code and verified using Jest tests and the NestJS build.
-<!-- WOROD: END -->
 
 ---
 

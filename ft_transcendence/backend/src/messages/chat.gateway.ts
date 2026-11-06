@@ -40,15 +40,11 @@ export class ChatGateway
     this.realtimeEvents.attachServer(server);
   }
 
-  // Events can arrive while the token is still being checked. Every event
-  // first waits for that check, so a handler never sees a signed-in user as
-  // anonymous (that caused random "session expired" logouts).
   handleConnection(client: Socket) {
     const ready = this.authenticate(client);
     client.use(async ([event], next) => {
       await ready;
       const userId = client.data.userId as string | undefined;
-      // Not signed in: the handler answers "Authentication required".
       if (!userId) return next();
       try {
         const current = await this.prisma.user.findUnique({

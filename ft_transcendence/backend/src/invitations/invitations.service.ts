@@ -30,7 +30,6 @@ export class InvitationsService {
     private readonly notifications: NotificationsService,
   ) {}
 
-  /** Route guard already checked MEMBER_ADD. Only owners may invite admins. */
   async create(
     inviterId: string,
     communityId: string,
@@ -115,7 +114,6 @@ export class InvitationsService {
     return invitation;
   }
 
-  /** Pending invitations of one community (for members who can invite). */
   findForCommunity(communityId: string) {
     return this.prisma.communityInvitation.findMany({
       where: { communityId, status: "PENDING" },
@@ -124,7 +122,6 @@ export class InvitationsService {
     });
   }
 
-  /** Revoke a pending invitation. Route guard checked MEMBER_ADD. */
   async revoke(communityId: string, invitationId: string) {
     const result = await this.prisma.communityInvitation.deleteMany({
       where: { id: invitationId, communityId, status: "PENDING" },
@@ -135,7 +132,6 @@ export class InvitationsService {
     }
   }
 
-  /** My pending invitations. */
   findMine(userId: string) {
     return this.prisma.communityInvitation.findMany({
       where: { inviteeId: userId, status: "PENDING" },
@@ -167,11 +163,9 @@ export class InvitationsService {
     return invitation;
   }
 
-  /** Accept: the membership is created with the invited role. */
   async accept(userId: string, invitationId: string) {
     const invitation = await this.requirePendingFor(userId, invitationId);
 
-    // Invitations may outlive a block, removal or demotion of the inviter.
     const [block, inviterMembership] = await Promise.all([
       this.prisma.block.findFirst({
         where: {

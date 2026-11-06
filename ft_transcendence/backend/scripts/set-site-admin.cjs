@@ -1,4 +1,3 @@
-// Local operator tool only. Never accepts a role from public registration.
 const { PrismaClient } = require('@prisma/client');
 const { config } = require('dotenv');
 config();

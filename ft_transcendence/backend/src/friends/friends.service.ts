@@ -27,7 +27,6 @@ export class FriendsService {
     private readonly notifications: NotificationsService,
   ) {}
 
-  /** Accepted friends of a user, newest first. */
   async findFriends(userId: string) {
     const rows = await this.prisma.friendship.findMany({
       where: {
@@ -47,7 +46,6 @@ export class FriendsService {
     }));
   }
 
-  /** Pending requests sent to me (incoming) and by me (outgoing). */
   async findRequests(userId: string) {
     const rows = await this.prisma.friendship.findMany({
       where: {
@@ -76,10 +74,6 @@ export class FriendsService {
     };
   }
 
-  /*
-    Sends a request. If the other person already sent one to me,
-    this accepts theirs instead of creating a second row.
-  */
   async sendRequest(userId: string, targetId: string) {
     if (userId === targetId) {
       throw new BadRequestException("You cannot add yourself as a friend");
@@ -149,7 +143,6 @@ export class FriendsService {
     return { ...request, user: target };
   }
 
-  /** Only the person who received the request can accept it. */
   async accept(userId: string, requestId: string) {
     const request = await this.prisma.friendship.findUnique({
       where: { id: requestId },
@@ -197,7 +190,6 @@ export class FriendsService {
     };
   }
 
-  /** Decline an incoming request or cancel an outgoing one. */
   async removeRequest(userId: string, requestId: string) {
     const request = await this.prisma.friendship.findUnique({
       where: { id: requestId },
@@ -215,7 +207,6 @@ export class FriendsService {
     await this.prisma.friendship.delete({ where: { id: requestId } });
   }
 
-  /** Remove an accepted friend. Either side can do this. */
   async removeFriend(userId: string, friendId: string) {
     const result = await this.prisma.friendship.deleteMany({
       where: {

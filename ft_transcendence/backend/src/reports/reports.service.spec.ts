@@ -1,4 +1,3 @@
-// The real services pull in the socket gateway, which unit tests do not need.
 jest.mock("../notifications/notifications.service", () => ({
   NotificationsService: class NotificationsService {},
 }));

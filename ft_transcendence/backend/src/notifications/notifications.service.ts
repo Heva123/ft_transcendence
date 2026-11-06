@@ -50,7 +50,6 @@ export class NotificationsService {
       type: string;
       title: string;
       message: string;
-      /** App path the "View" button opens, e.g. /profile/heba. */
       link?: string;
     },
   ) {

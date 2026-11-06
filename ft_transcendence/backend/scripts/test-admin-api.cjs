@@ -1,5 +1,3 @@
-// Run against your local development API and its matching DATABASE_URL.
-// Creates isolated test accounts, promotes one using local DB access, then cleans up.
 require('dotenv').config({ quiet: true });
 const assert = require('node:assert/strict');
 const { randomUUID } = require('node:crypto');
@@ -28,7 +26,6 @@ async function account(label) {
     email: `${label}_${suffix}@example.com`, username: `${label}_${suffix}`, password: 'Testing12345',
   }, 201);
   created.push(result.user.id);
-  // Ensure the API and script use the same DB before granting any test roles.
   const row = await prisma.user.findUnique({ where: { id: result.user.id } });
   assert.ok(row, 'API_BASE_URL and DATABASE_URL must point to the same local backend/database');
   assert.equal(row.siteRole, 'USER');
@@ -65,7 +62,6 @@ async function account(label) {
   assert.ok(!('passwordHash' in newAccount));
   await request('GET', `/admin/users/${newAccount.id}`, a, null, 200);
   await request('PATCH', `/admin/users/${user.user.id}`, a, { displayName: 'Changed by administrator', siteRole: 'GUEST' }, 200);
-  // An old JWT must respect the new database role immediately.
   await request('PATCH', '/users/me', user.accessToken, { bio: 'should fail' }, 403);
   await request('PATCH', `/admin/users/${admin.user.id}`, a, { siteRole: 'USER' }, 403);
   await request('DELETE', `/admin/users/${admin.user.id}`, a, null, 403);
@@ -79,7 +75,6 @@ async function account(label) {
 })().catch(error => { console.error(error.message); process.exitCode = 1; })
 .finally(async () => {
   try {
-    // Explicit local cleanup, including the disposable administrator.
     await prisma.community.deleteMany({ where: { createdById: { in: created } } });
     await prisma.post.deleteMany({ where: { authorId: { in: created } } });
     await prisma.user.deleteMany({ where: { id: { in: created } } });

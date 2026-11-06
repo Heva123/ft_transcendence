@@ -19,7 +19,6 @@ import { Permission } from "../permissions/permission.enum";
 import { CreateInvitationDto } from "./dto/create-invitation.dto";
 import { InvitationsService } from "./invitations.service";
 
-/** Managing invitations inside a community (needs MEMBER_ADD). */
 @UseGuards(JwtAuthGuard, CommunityPermissionGuard)
 @Controller("communities/:communityId/invitations")
 export class CommunityInvitationsController {
@@ -52,7 +51,6 @@ export class CommunityInvitationsController {
   }
 }
 
-/** The invited person's side. */
 @UseGuards(JwtAuthGuard)
 @Controller("invitations")
 export class MyInvitationsController {

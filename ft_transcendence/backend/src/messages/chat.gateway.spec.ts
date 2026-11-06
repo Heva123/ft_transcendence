@@ -121,7 +121,6 @@ describe("ChatGateway", () => {
     );
 
     const connected = gateway.handleConnection(client as never);
-    // presence:get arrives before the token check is done.
     const middleware = client.use.mock.calls[0][0];
     const next = jest.fn();
     const early = middleware(["presence:get"], next);
